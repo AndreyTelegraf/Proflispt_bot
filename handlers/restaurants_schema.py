@@ -4,7 +4,7 @@ import html
 import logging
 
 from aiogram import Router, F
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -58,7 +58,18 @@ def _choice_keyboard(step, back_to: str = "restaurants:back") -> InlineKeyboardM
     return builder.as_markup()
 
 
+
+
+def _social_links_fast_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Ссылок нет", callback_data="restaurants:social_none"))
+    builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+    builder.adjust(1)
+    return builder.as_markup()
+
 def _step_reply_markup(step, *, back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
+    if getattr(step, "field_name", "") == "social_links":
+        return _social_links_fast_keyboard()
     if getattr(step, "kind", None) == "choice":
         return _choice_keyboard(step, back_to=back_to)
     return get_back_button(back_to)
@@ -244,7 +255,7 @@ async def restaurants_back(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.message(F.text)
+@router.message(F.text, StateFilter(STATE_GEO_CUSTOM))
 async def restaurants_geo_custom_input(message: Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state != STATE_GEO_CUSTOM:
@@ -368,6 +379,51 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
             reply_markup=get_back_button("restaurants:back")
         )
         await callback.answer()
+
+
+
+
+@router.callback_query(F.data == "restaurants:social_none")
+async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if not data.get("restaurants_schema_active"):
+        await callback.answer()
+        return
+
+    payload = data.get("restaurants_schema_payload", {})
+    step_index = int(data.get("restaurants_schema_step_index", 0))
+
+    schema = build_schema_registry().get_by_section("Рестораны")
+    ctx = _make_ctx(payload)
+    ctx.set_value("social_links", "нет")
+
+    next_index, next_prompt = _next_prompt(schema, step_index + 1)
+
+    await state.update_data(
+        restaurants_schema_payload=ctx.data,
+        restaurants_schema_step_index=next_index,
+    )
+
+    if next_index >= len(schema.steps):
+        builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+        builder.adjust(1)
+        await callback.message.edit_text(
+            _confirmation_text(ctx.data),
+            reply_markup=builder.as_markup()
+        )
+        await state.set_state(STATE_CONFIRM)
+        await callback.answer()
+        return
+
+    next_step = schema.steps[next_index]
+    await callback.message.edit_text(
+        next_prompt,
+        reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+    )
+    await state.set_state(STATE_INPUT)
+    await callback.answer()
 
 
 @router.message(F.text)
