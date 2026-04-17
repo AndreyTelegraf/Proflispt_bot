@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_restaurants_social_links_cta_20260416T100503Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_social_links_cta_20260416T100503Z
-CHANGED=handlers/restaurants_schema.py
-SCOPE=restaurants_social_links_cta
-FIX=social_links_optional_cta_and_normalization

@@ -1,6 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_predeploy_cleanup_partial_layer_c_20260415T195143Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/cleanup_partial_layer_c_and_audit_main_20260415T195143Z
-PARTIAL_LAYER_C_CLEANED=yes
-NEXT_STEP=main_router_anchor_based_patch

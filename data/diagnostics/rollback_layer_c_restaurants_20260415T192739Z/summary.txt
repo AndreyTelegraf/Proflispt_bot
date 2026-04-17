@@ -1,7 +1,0 @@
-STATUS=rolled_back
-BASE=/opt/bots/workinportugal_bot_staging
-RESTORED_FROM=/tmp/workinportugal_predeploy_layer_c_restaurants_20260415T192059Z.tar.gz
-PRE_FAIL_SNAPSHOT=/tmp/workinportugal_before_layer_c_rollback_20260415T192739Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/rollback_layer_c_restaurants_20260415T192739Z
-ROLLBACK_SCOPE=layer_c_restaurants_only
-ACTIVE_LAYERS=layer_a_plus_layer_b

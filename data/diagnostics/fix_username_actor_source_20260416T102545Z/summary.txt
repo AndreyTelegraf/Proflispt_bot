@@ -1,6 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_fix_username_actor_source_20260416T102545Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/fix_username_actor_source_20260416T102545Z
-CHANGED=handlers/restaurants_schema.py
-FIX=telegram_username_uses_actor_user_not_bot_message_author

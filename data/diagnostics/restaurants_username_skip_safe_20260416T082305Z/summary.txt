@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_restaurants_username_skip_safe_20260416T082305Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_username_skip_safe_20260416T082305Z
-CHANGED=handlers/restaurants_schema.py
-SCOPE=runtime_only
-FIX=telegram_username_autoskip_safe

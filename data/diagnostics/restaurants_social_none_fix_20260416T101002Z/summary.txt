@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_restaurants_social_none_fix_20260416T101002Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_social_none_fix_20260416T101002Z
-CHANGED=handlers/restaurants_schema.py
-SCOPE=restaurants_social_none_fix
-FIX=social_none_callback_registered_and_hardened

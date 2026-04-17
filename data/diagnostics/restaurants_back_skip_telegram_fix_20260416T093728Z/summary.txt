@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_restaurants_back_skip_telegram_fix_20260416T093728Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_back_skip_telegram_fix_20260416T093728Z
-CHANGED=handlers/restaurants_schema.py
-SCOPE=restaurants_back_skip_telegram_fix
-FIX=back_navigation_skips_hidden_telegram_step

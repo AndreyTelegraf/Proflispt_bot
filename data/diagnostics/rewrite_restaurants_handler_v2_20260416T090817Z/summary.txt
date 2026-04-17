@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_rewrite_restaurants_handler_v2_20260416T090817Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/rewrite_restaurants_handler_v2_20260416T090817Z
-CHANGED=handlers/restaurants_schema.py
-SCOPE=restaurants_phone_whatsapp_slice_full_rewrite
-FIX=strict_pt_mobile_validation_and_whatsapp_cta

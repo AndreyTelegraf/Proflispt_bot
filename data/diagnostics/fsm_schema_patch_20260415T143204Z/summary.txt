@@ -1,8 +1,0 @@
-STATUS=green
-STAGING_BASE=/opt/bots/workinportugal_bot_staging
-APP_ROOT=/opt/bots/workinportugal_bot_staging
-PY_BASE=app
-BACKUP=/tmp/workinportugal_predeploy_20260415T143204Z.tar.gz
-SERVICE=workinportugal_bot_staging.service
-TS=20260415T143204Z
-ARTIFACTS_CREATED=posting_context.py,fsm_schema_registry.py,schema_engine.py,schema_bootstrap.py,schema_flow_adapter.py,schema_smoke.py,restaurants.json,talk_to_me.json

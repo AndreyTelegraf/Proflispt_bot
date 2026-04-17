@@ -1,3 +1,0 @@
-STATUS=green
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/premium_contract_only_20260416T132740Z
-FILE=premium_contract_extract.txt

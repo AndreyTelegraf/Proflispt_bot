@@ -1,5 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_anchor_20260416T075640Z
-ANCHOR_FILES=restaurants_schema.py,restaurants.json,main.py
-PURPOSE=working_restaurants_anchor_before_runtime_only_username_patch

@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_restaurants_residency_then_geo_20260416T110854Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_residency_then_geo_20260416T110854Z
-CHANGED=handlers/restaurants_schema.py
-SCOPE=restaurants_residency_then_geo
-FIX=residency_gate_restored_before_geo_selector

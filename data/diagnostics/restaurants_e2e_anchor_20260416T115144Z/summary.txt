@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-ANCHOR_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_e2e_anchor_20260416T115144Z
-ANCHOR_NAME=restaurants_e2e_anchor
-FROZEN_LAYER=/sections + /restaurants working
-GUARANTEES=residency_buttons,geo_selector,custom_geo,back_navigation,telegram_autoskip,strict_phone_validation,whatsapp_cta,no_link_preview_in_preview,no_link_preview_in_publish
-NEXT_STEP=extract_reusable_runtime_without_touching_live_flow

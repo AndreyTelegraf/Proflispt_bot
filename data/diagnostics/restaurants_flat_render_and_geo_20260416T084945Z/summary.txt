@@ -1,7 +1,0 @@
-STATUS=green
-BASE=/opt/bots/workinportugal_bot_staging
-BACKUP=/tmp/workinportugal_restaurants_flat_render_and_geo_20260416T084945Z.tar.gz
-OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_flat_render_and_geo_20260416T084945Z
-CHANGED=config/fsm_schemas/restaurants.json,handlers/restaurants_schema.py
-SCOPE=restaurants_ux_slice
-FIX=geo_tags_restored_place_step_removed_flat_preview_and_publish
