@@ -1,0 +1,1189 @@
+### FILE TREE SNAPSHOT
+/opt/bots/workinportugal_bot_staging/._.
+/opt/bots/workinportugal_bot_staging/.env
+/opt/bots/workinportugal_bot_staging/.env.example
+/opt/bots/workinportugal_bot_staging/.gitignore
+/opt/bots/workinportugal_bot_staging/ADMIN_COMMANDS.md
+/opt/bots/workinportugal_bot_staging/BAN_INSTRUCTIONS.md
+/opt/bots/workinportugal_bot_staging/CHANGELOG.md
+/opt/bots/workinportugal_bot_staging/CLEANUP_REPORT.md
+/opt/bots/workinportugal_bot_staging/PREMIUM_POSTS.md
+/opt/bots/workinportugal_bot_staging/README.md
+/opt/bots/workinportugal_bot_staging/TECHNICAL_SPECIFICATION.md
+/opt/bots/workinportugal_bot_staging/__pycache__/config.cpython-312.pyc
+/opt/bots/workinportugal_bot_staging/__pycache__/database.cpython-312.pyc
+/opt/bots/workinportugal_bot_staging/__pycache__/main.cpython-312.pyc
+/opt/bots/workinportugal_bot_staging/__pycache__/utils.cpython-312.pyc
+/opt/bots/workinportugal_bot_staging/ban_users.py
+/opt/bots/workinportugal_bot_staging/bot.lock
+/opt/bots/workinportugal_bot_staging/bot.log
+/opt/bots/workinportugal_bot_staging/bot_backup.tar.gz
+/opt/bots/workinportugal_bot_staging/bot_database.db
+/opt/bots/workinportugal_bot_staging/bot_utils.py
+/opt/bots/workinportugal_bot_staging/config.py
+/opt/bots/workinportugal_bot_staging/database.py
+/opt/bots/workinportugal_bot_staging/deploy_workinportugal.sh
+/opt/bots/workinportugal_bot_staging/deploy_workinportugal_staging.sh
+/opt/bots/workinportugal_bot_staging/fix_telegram_conflict.py
+/opt/bots/workinportugal_bot_staging/get_user_id.py
+/opt/bots/workinportugal_bot_staging/handlers/__init__.py
+/opt/bots/workinportugal_bot_staging/handlers/admin.py
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py
+/opt/bots/workinportugal_bot_staging/handlers/posting.py
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py
+/opt/bots/workinportugal_bot_staging/handlers/start.py
+/opt/bots/workinportugal_bot_staging/healthcheck_local.sh
+/opt/bots/workinportugal_bot_staging/infra_restructure_summary.md
+/opt/bots/workinportugal_bot_staging/keyboards/__init__.py
+/opt/bots/workinportugal_bot_staging/keyboards/main.py
+/opt/bots/workinportugal_bot_staging/main.py
+/opt/bots/workinportugal_bot_staging/middleware/ban_check.py
+/opt/bots/workinportugal_bot_staging/models/__init__.py
+/opt/bots/workinportugal_bot_staging/models/job_posting.py
+/opt/bots/workinportugal_bot_staging/models/posting_context.py
+/opt/bots/workinportugal_bot_staging/requirements.lock.txt
+/opt/bots/workinportugal_bot_staging/requirements.txt
+/opt/bots/workinportugal_bot_staging/restart.sh
+/opt/bots/workinportugal_bot_staging/rollback_workinportugal.sh
+/opt/bots/workinportugal_bot_staging/run.sh
+/opt/bots/workinportugal_bot_staging/services/__init__.py
+/opt/bots/workinportugal_bot_staging/services/formatting.py
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py
+/opt/bots/workinportugal_bot_staging/services/publisher.py
+/opt/bots/workinportugal_bot_staging/services/scheduler.py
+/opt/bots/workinportugal_bot_staging/services/schema_bootstrap.py
+/opt/bots/workinportugal_bot_staging/services/schema_engine.py
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py
+/opt/bots/workinportugal_bot_staging/services/validation.py
+/opt/bots/workinportugal_bot_staging/smoke_local.sh
+/opt/bots/workinportugal_bot_staging/start_bot.sh
+/opt/bots/workinportugal_bot_staging/telegram_workinportugal_bot.tar.gz
+/opt/bots/workinportugal_bot_staging/unban_user.py
+/opt/bots/workinportugal_bot_staging/update_and_restart.py
+/opt/bots/workinportugal_bot_staging/utils.py
+/opt/bots/workinportugal_bot_staging/venv/pyvenv.cfg
+/opt/bots/workinportugal_bot_staging/workinportugal-bot.service
+
+### JOB/FSM/PUBLISH GREP
+/opt/bots/workinportugal_bot_staging/main.py:18:from aiogram.fsm.context import FSMContext
+/opt/bots/workinportugal_bot_staging/main.py:109:async def cmd_start(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/main.py:112:        logger.warning("TOPIC_DEBUG thread_id=%s chat_id=%s", message.message_thread_id, message.chat.id)
+/opt/bots/workinportugal_bot_staging/main.py:113:    await state.clear()
+/opt/bots/workinportugal_bot_staging/main.py:117:    welcome_text = "Здравствуйте! 
+
+Этот бот поможет вам опубликовать объявления в разделы Справочника.
+
+Выберите действие:"
+/opt/bots/workinportugal_bot_staging/main.py:123:async def show_main_menu(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/main.py:125:    await state.clear()
+/opt/bots/workinportugal_bot_staging/main.py:127:    welcome_text = "Здравствуйте! 
+
+Этот бот поможет вам опубликовать объявления в разделы Справочника.
+
+Выберите действие:"
+/opt/bots/workinportugal_bot_staging/main.py:136:    help_text = "❓ Помощь\n\nОбщие правила:\n• Одно объявление не чаще раза в месяц\n• Максимум 3 активных объявления на пользователя\n• Объявления автоматически удаляются через 30 дней\n• Объявление не опубликуется без @username и португальского номера телефона.\n\nШаги составления объявления (не вводите лишнего раньше времени):\n1. Хэштэги городов (\\#lisboa, \\#porto, \\#online)\n2. Описание работы (минимум 10 символов, без ссылок, эмоджи и контактов)\n3. Социальные сети и/или сайты (или \"нет\")\n4. Telegram @username\n5. Телефон (\\+35191xxxxxxx, \\+35192xxxxxxx, \\+35193xxxxxxx или \\+35196xxxxxxx)\n6. WhatsApp (если отличается от телефона)\n7. Имя или название компании."
+/opt/bots/workinportugal_bot_staging/main.py:155:async def handle_mode_selection(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/main.py:156:    """Handle job posting mode selection."""
+/opt/bots/workinportugal_bot_staging/main.py:160:        mode_text = "Ищу работу"
+/opt/bots/workinportugal_bot_staging/main.py:163:        mode_text = "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/main.py:169:    await state.update_data(mode=mode)
+/opt/bots/workinportugal_bot_staging/main.py:213:        response_text = "Отлично, давайте найдём вам работу.\nГде вы её ищите? (можно выбрать несколько вариантов)"
+/opt/bots/workinportugal_bot_staging/main.py:246:async def back_to_mode_selection(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/main.py:248:    # Clear cities from state
+/opt/bots/workinportugal_bot_staging/main.py:249:    await state.update_data(cities=None)
+/opt/bots/workinportugal_bot_staging/main.py:252:    welcome_text = "Здравствуйте! 
+
+Этот бот поможет вам опубликовать объявления в разделы Справочника.
+
+Выберите действие:"
+/opt/bots/workinportugal_bot_staging/main.py:259:async def handle_city_selection(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/main.py:263:    # Get current mode from state
+/opt/bots/workinportugal_bot_staging/main.py:264:    state_data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/main.py:265:    mode = state_data.get('mode', 'seeking')
+/opt/bots/workinportugal_bot_staging/main.py:272:        await state.set_state("waiting_for_custom_city")
+/opt/bots/workinportugal_bot_staging/main.py:278:        await state.update_data(cities=[city_key])
+/opt/bots/workinportugal_bot_staging/main.py:284:                "Теперь оправьте описание работы, которую вы ищите, начинающееся например с фразы:\n\n"
+/opt/bots/workinportugal_bot_staging/main.py:285:                "• Ищу подработку в сфере услуг\n"
+/opt/bots/workinportugal_bot_staging/main.py:287:                "• Ищу работу на стройке...\n"
+/opt/bots/workinportugal_bot_staging/main.py:297:                "• Предлагаю работу водителю с личным авто\n"
+/opt/bots/workinportugal_bot_staging/main.py:310:        await state.set_state("waiting_for_description")
+/opt/bots/workinportugal_bot_staging/main.py:460:            await message.answer(f"🚫 Пост {post_id} уже обработан (статус: {post['payment_status']}).")
+/opt/bots/workinportugal_bot_staging/main.py:523:            await message.answer(f"🚫 Пост {post_id} уже обработан (статус: {post['payment_status']}).")
+/opt/bots/workinportugal_bot_staging/handlers/start.py:7:from aiogram.fsm.context import FSMContext
+/opt/bots/workinportugal_bot_staging/handlers/start.py:18:async def cmd_start(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/start.py:20:    # Clear any active state
+/opt/bots/workinportugal_bot_staging/handlers/start.py:21:    await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/start.py:36:        "о поиске или предложении работы в разделы Справочника\\.\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/start.py:44:async def show_main_menu(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/start.py:46:    # Clear any active state
+/opt/bots/workinportugal_bot_staging/handlers/start.py:47:    await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/start.py:52:        "о поиске или предложении работы в разделы Справочника\\.\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/start.py:83:        "• Описание работы \\(минимум 10 символов\\)\n"
+/opt/bots/workinportugal_bot_staging/handlers/start.py:89:        "*Для работодателей:*\n"
+/opt/bots/workinportugal_bot_staging/handlers/start.py:107:        "*Часы работы:*\n"
+/opt/bots/workinportugal_bot_staging/handlers/admin.py:7:from aiogram.fsm.context import FSMContext
+/opt/bots/workinportugal_bot_staging/handlers/admin.py:31:async def ban_user_command(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/admin.py:42:        logger.info(f"[ADMIN] Пользователь {message.from_user.id} является администратором, продолжаем обработку")
+/opt/bots/workinportugal_bot_staging/handlers/admin.py:117:            await message.answer("🚫 Ошибка при обработке аргументов команды.")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:6:from aiogram.fsm.context import FSMContext
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:27:def get_smart_back_button(current_state: str) -> InlineKeyboardMarkup:
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:28:    """Get smart back button based on current state."""
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:42:    back_to = navigation_map.get(current_state, "go:main")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:78:async def handle_telegram_username_check(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:85:        await state.update_data(telegram_username=telegram_username)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:88:        await handle_phone_check(message, state)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:106:        await state.set_state("waiting_for_username_creation")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:109:async def handle_phone_check(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:117:        await state.update_data(phone_main=phone_main)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:120:        data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:127:        await state.set_state("waiting_for_phone_whatsapp")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:130:        data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:136:        await state.set_state("waiting_for_phone_main")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:140:async def handle_text_input(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:141:    """Handle text input for various states."""
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:142:    current_state = await state.get_state()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:144:    if current_state == "waiting_for_custom_city":
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:169:        await state.update_data(cities=cities)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:171:        # Get current mode from state
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:172:        state_data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:173:        mode = state_data.get('mode', 'seeking')
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:179:                "Отправьте описание работы, которую вы ищите, например:\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:180:                "• 'Ищу работу водителем с личным авто'\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:181:                "• 'Ищу вакансию в разработке python'\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:182:                "• 'Ищу подработку в сфере услуг'\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:184:                "• 'Ищу работу на стройке'\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:194:                "• 'Предлагаю работу водителю с личным авто'\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:207:        await state.set_state("waiting_for_description")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:209:    elif current_state == "waiting_for_description":
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:237:        await state.update_data(description=description)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:246:        await state.set_state("waiting_for_social_media")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:248:    elif current_state == "waiting_for_social_media":
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:299:        await state.update_data(social_media=social_media)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:302:        await handle_telegram_username_check(message, state)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:304:    elif current_state == "waiting_for_phone_main":
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:314:        await state.update_data(phone_main=phone_main)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:317:        data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:326:        await state.set_state("waiting_for_phone_whatsapp")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:328:    elif current_state == "waiting_for_phone_whatsapp":
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:339:        await state.update_data(phone_whatsapp=phone_whatsapp)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:346:        await state.set_state("waiting_for_name")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:348:    elif current_state == "waiting_for_name":
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:358:        await state.update_data(name=name)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:361:        data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:364:        from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:407:        await state.set_state("waiting_for_confirmation")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:411:async def handle_username_created(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:419:        await state.update_data(telegram_username=telegram_username)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:422:        await handle_phone_check_callback(callback, state)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:444:async def handle_phone_check_callback(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:452:        await state.update_data(phone_main=phone_main)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:455:        data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:462:        await state.set_state("waiting_for_phone_whatsapp")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:465:        data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:471:        await state.set_state("waiting_for_phone_main")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:475:async def handle_confirmation(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:477:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:565:    # Create job posting
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:566:    posting_id = db.create_job_posting(
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:589:    from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:597:    # Clear state
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:598:    await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:658:async def back_to_cities_selection(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:660:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:664:        response_text = "Отлично, давайте найдём вам работу.\nГде вы её ищите? (можно выбрать несколько вариантов)"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:697:async def back_to_description(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:699:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:712:            "Теперь оправьте описание работы, которую вы ищите, начинающееся например с фразы:\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:713:            "• Ищу подработку в сфере услуг\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:715:            "• Ищу работу на стройке...\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:725:            "• Предлагаю работу водителю с личным авто\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:737:    await state.set_state("waiting_for_description")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:742:async def back_to_social_media(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:744:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:761:    await state.set_state("waiting_for_social_media")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:766:async def back_to_telegram_username(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:774:        await state.update_data(telegram_username=telegram_username)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:777:        await handle_phone_check(callback.message, state)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:795:        await state.set_state("waiting_for_username_creation")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:801:async def back_to_phone_main(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:803:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:811:    await state.set_state("waiting_for_phone_main")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:816:async def back_to_phone_whatsapp(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:818:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:828:    await state.set_state("waiting_for_phone_whatsapp")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:6:from aiogram.fsm.context import FSMContext
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:7:from aiogram.fsm.state import State, StatesGroup
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:17:class PremiumPostingStates(StatesGroup):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:18:    """States for premium posting."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:19:    waiting_for_media = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:20:    waiting_for_cities = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:21:    waiting_for_custom_city = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:22:    waiting_for_description = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:23:    waiting_for_social_media = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:24:    waiting_for_username_confirmation = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:25:    waiting_for_telegram_username = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:26:    waiting_for_phone_main = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:27:    waiting_for_phone_whatsapp = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:28:    waiting_for_name = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:29:    waiting_for_section_choice = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:30:    waiting_for_confirmation = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:42:async def start_premium_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:44:    await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:59:        text="🔍 Ищу работу",
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:60:        callback_data="premium:section_job_seeker"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:63:        text="💰 Предлагаю работу",
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:64:        callback_data="premium:section_job_offer"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:77:    await state.set_state(PremiumPostingStates.waiting_for_section_choice)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:80:@router.message(PremiumPostingStates.waiting_for_media, F.photo | F.video)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:81:async def handle_media_upload(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:86:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:102:    await state.update_data(media_list=media_list)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:131:        await state.set_state(PremiumPostingStates.waiting_for_cities)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:135:@router.callback_query(PremiumPostingStates.waiting_for_cities, F.data.startswith("premium:city:"))
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:136:async def handle_premium_city_selection(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:140:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:152:        await state.set_state(PremiumPostingStates.waiting_for_custom_city)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:159:        await state.update_data(cities=[city_key])
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:168:        await state.set_state(PremiumPostingStates.waiting_for_description)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:172:@router.message(PremiumPostingStates.waiting_for_custom_city, F.text)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:173:async def handle_custom_city_input(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:177:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:220:            f"Или напишите 'online' для удаленной работы.",
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:225:    await state.update_data(cities=valid_cities)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:242:    await state.set_state(PremiumPostingStates.waiting_for_description)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:244:@router.message(PremiumPostingStates.waiting_for_description)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:245:async def handle_description(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:279:    await state.update_data(description=description)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:288:    await state.set_state(PremiumPostingStates.waiting_for_social_media)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:290:@router.message(PremiumPostingStates.waiting_for_media)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:300:@router.message(PremiumPostingStates.waiting_for_social_media)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:301:async def handle_social_media(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:304:    await state.update_data(social_media=social_media)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:310:        await state.update_data(telegram_username=username)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:323:        await state.set_state(PremiumPostingStates.waiting_for_username_confirmation)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:332:        await state.set_state(PremiumPostingStates.waiting_for_telegram_username)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:334:@router.callback_query(PremiumPostingStates.waiting_for_username_confirmation, F.data == "premium:confirm_username")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:335:async def confirm_username(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:345:    await state.set_state(PremiumPostingStates.waiting_for_phone_main)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:350:@router.message(PremiumPostingStates.waiting_for_telegram_username)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:351:async def handle_telegram_username(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:358:    await state.update_data(telegram_username=username)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:366:    await state.set_state(PremiumPostingStates.waiting_for_phone_main)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:368:@router.message(PremiumPostingStates.waiting_for_phone_main)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:369:async def handle_phone_main(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:382:    await state.update_data(phone_main=phone)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:390:    await state.set_state(PremiumPostingStates.waiting_for_phone_whatsapp)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:392:@router.message(PremiumPostingStates.waiting_for_phone_whatsapp)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:393:async def handle_phone_whatsapp(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:405:    await state.update_data(phone_whatsapp=whatsapp)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:413:    await state.set_state(PremiumPostingStates.waiting_for_name)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:415:@router.message(PremiumPostingStates.waiting_for_name)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:416:async def handle_name(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:427:    await state.update_data(name=name)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:430:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:433:    section = data.get('section', 'job_offer')  # Default to job_offer if not set
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:434:    section_name = "Ищу работу" if section == "job_seeker" else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:450:        'cities': data.get('cities', ['online'])  # Use actual cities from state
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:550:    await state.set_state(PremiumPostingStates.waiting_for_confirmation)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:553:async def go_back_premium(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:555:    current_state = await state.get_state()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:568:    await state.set_state(PremiumPostingStates.waiting_for_name)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:571:@router.callback_query(PremiumPostingStates.waiting_for_section_choice, F.data == "premium:section_job_seeker")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:572:async def choose_job_seeker_section(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:573:    """Choose job seeker section."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:574:    await state.update_data(section="job_seeker")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:577:        "✅ Раздел выбран: *Ищу работу*\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:586:    await state.set_state(PremiumPostingStates.waiting_for_media)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:589:@router.callback_query(PremiumPostingStates.waiting_for_section_choice, F.data == "premium:section_job_offer")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:590:async def choose_job_offer_section(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:591:    """Choose job offer section."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:592:    await state.update_data(section="job_offer")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:595:        "✅ Раздел выбран: *Предлагаю работу*\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:604:    await state.set_state(PremiumPostingStates.waiting_for_media)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:609:@router.callback_query(PremiumPostingStates.waiting_for_confirmation, F.data == "confirm_premium_post")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:610:async def confirm_premium_post(callback: CallbackQuery, state: FSMContext, bot=None):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:613:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:665:        section = data.get('section', 'job_offer')  # Default to job_offer if not set
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:674:            'cities': data.get('cities', ['online'])  # Use actual cities from state
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:734:                await callback.bot.send_message(
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:760:            message = await callback.bot.send_message(
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:793:    await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:9:from aiogram.fsm.context import FSMContext
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:10:from aiogram.fsm.state import State, StatesGroup
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:19:class DeletePostingStates(StatesGroup):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:20:    """States for deleting posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:21:    confirm_delete = State()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:24:class EditPostingStates(StatesGroup):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:25:    """States for editing posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:26:    select_field = State()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:27:    edit_description = State()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:28:    edit_cities = State()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:29:    edit_phone_whatsapp = State()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:30:    edit_social_media = State()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:103:            "Создайте первое объявление в разделе 'Ищу работу' или 'Предлагаю работу'\\!",
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:193:        f"Тип: {escape_markdown('Ищу работу' if posting['mode'] == 'seeking' else 'Предлагаю работу')}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:219:    if posting['message_id'] and posting['chat_id'] and posting['topic_id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:222:        message_link = f"https://t.me/{chat_username}/{posting['topic_id']}/{posting['message_id']}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:234:        if not posting.get('message_id') and not posting.get('chat_id') and not posting.get('topic_id'):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:247:        if not posting.get('message_id') and not posting.get('chat_id') and not posting.get('topic_id'):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:320:async def confirm_delete_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:335:    # Store posting info in state
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:336:    await state.update_data(posting_id=posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:337:    await state.set_state(DeletePostingStates.confirm_delete)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:357:async def delete_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:438:        # Clear state
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:439:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:453:async def cancel_delete_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:461:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:468:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:471:    # Clear state
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:472:    await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:484:        f"Тип: {'Ищу работу' if posting['mode'] == 'seeking' else 'Предлагаю работу'}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:504:async def start_edit_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:520:    # Store posting data in state
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:521:    await state.update_data(posting_id=posting_id, posting=posting)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:522:    await state.set_state(EditPostingStates.select_field)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:545:async def select_edit_field(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:548:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:551:    # Set appropriate state and show current value
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:553:        await state.set_state(EditPostingStates.edit_description)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:557:        await state.set_state(EditPostingStates.edit_cities)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:561:        await state.set_state(EditPostingStates.edit_phone_whatsapp)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:565:        await state.set_state(EditPostingStates.edit_social_media)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:588:async def handle_edit_text_input(message: Message, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:590:    current_state = await state.get_state()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:591:    data = await state.get_data()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:597:    if current_state == EditPostingStates.edit_description:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:626:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:628:    elif current_state == EditPostingStates.edit_cities:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:658:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:660:    elif current_state == EditPostingStates.edit_phone_whatsapp:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:689:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:691:    elif current_state == EditPostingStates.edit_social_media:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:714:        await state.clear()
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:47:        topic_id = None
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:48:        if post['mode'] == 'job_seeker':
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:49:            topic_id = Config.JOB_SEEKING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:50:        elif post['mode'] == 'job_offer':
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:51:            topic_id = Config.JOB_OFFERING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:95:                    message_thread_id=topic_id
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:106:                        message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:114:                        message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:124:                    message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:132:                    message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:138:            db.update_premium_post_publication(post_id, published_message.message_id, Config.CHANNEL_ID, topic_id)
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:149:        await callback.bot.send_message(
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:203:        await callback.bot.send_message(
+/opt/bots/workinportugal_bot_staging/services/formatting.py:4:from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/services/formatting.py:9:def format_job_posting(posting: JobPosting) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:10:    """Format job posting for publication."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:61:def format_job_posting_html(posting: JobPosting) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:62:    """Format job posting for publication using HTML (fixes underscore in usernames)."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:117:    """Format job posting preview - shows full posting text like in premium posts."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:179:        mode_text = "Ищу работу" if posting.mode == "seeking" else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:224:    section_emoji = "🔍" if post['mode'] == 'job_seeker' else "💰"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:225:    section_text = "Ищу работу" if post['mode'] == 'job_seeker' else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:285:    section_emoji = "🔍" if post['mode'] == 'job_seeker' else "💰"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:286:    section_text = "Ищу работу" if post['mode'] == 'job_seeker' else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:11:class FlowState:
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:24:        self.state = FlowState(section_name=section_name)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:27:        if self.state.is_finished or self.state.is_stopped:
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:29:        step = self.engine.get_step(self.state.step_index)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:33:        if self.state.is_finished or self.state.is_stopped:
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:36:        step = self.engine.get_step(self.state.step_index)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:42:        self.state.step_index += 1
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:45:            self.state.is_stopped = True
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:48:        while not self.engine.is_finished(self.state.step_index):
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:49:            next_step = self.engine.get_step(self.state.step_index)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:53:            self.state.step_index += 1
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:55:        if self.engine.is_finished(self.state.step_index):
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:56:            self.state.is_finished = True
+/opt/bots/workinportugal_bot_staging/services/publisher.py:9:from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/services/publisher.py:10:from services.formatting import format_job_posting_html
+/opt/bots/workinportugal_bot_staging/services/publisher.py:17:    """Service for publishing job postings to channel."""
+/opt/bots/workinportugal_bot_staging/services/publisher.py:23:        """Publish job posting to channel."""
+/opt/bots/workinportugal_bot_staging/services/publisher.py:26:            posting_text = format_job_posting_html(posting)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:29:            topic_id = None
+/opt/bots/workinportugal_bot_staging/services/publisher.py:31:                topic_id = Config.JOB_SEEKING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/services/publisher.py:33:                topic_id = Config.JOB_OFFERING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/services/publisher.py:36:            message = await self.bot.send_message(
+/opt/bots/workinportugal_bot_staging/services/publisher.py:39:                message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:52:                    topic_id=topic_id
+/opt/bots/workinportugal_bot_staging/services/publisher.py:85:                posting_text = format_job_posting_html(posting)
+/opt/bots/workinportugal_bot_staging/services/validation.py:120:    """Validate job description."""
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:23:    assert restaurants.state.is_finished
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:34:    assert talk.state.is_finished
+/opt/bots/workinportugal_bot_staging/keyboards/main.py:12:        text="🔍 Ищу работу",
+/opt/bots/workinportugal_bot_staging/keyboards/main.py:17:        text="💰 Предлагаю работу",
+
+### TELEGRAM ROUTING GREP
+/opt/bots/workinportugal_bot_staging/main.py:25:from handlers.posting import router as posting_router
+/opt/bots/workinportugal_bot_staging/main.py:26:from handlers.my_postings import router as my_postings_router
+/opt/bots/workinportugal_bot_staging/main.py:28:from handlers.premium_posting import router as premium_posting_router
+/opt/bots/workinportugal_bot_staging/main.py:112:        logger.warning("TOPIC_DEBUG thread_id=%s chat_id=%s", message.message_thread_id, message.chat.id)
+/opt/bots/workinportugal_bot_staging/main.py:156:    """Handle job posting mode selection."""
+/opt/bots/workinportugal_bot_staging/main.py:171:    # Check user posting limit
+/opt/bots/workinportugal_bot_staging/main.py:187:    # Check posting limit
+/opt/bots/workinportugal_bot_staging/main.py:188:    can_post, earliest_next_post_date = db.check_user_posting_limit(user_id_db)
+/opt/bots/workinportugal_bot_staging/main.py:190:    if not can_post:
+/opt/bots/workinportugal_bot_staging/main.py:192:        date_str = earliest_next_post_date.strftime("%d.%m.%Y")
+/opt/bots/workinportugal_bot_staging/main.py:201:        # Create keyboard with back button and my postings button
+/opt/bots/workinportugal_bot_staging/main.py:203:            [InlineKeyboardButton(text="📋 Мои объявления", callback_data="my_postings")],
+/opt/bots/workinportugal_bot_staging/main.py:211:    # User can post - continue with city selection
+/opt/bots/workinportugal_bot_staging/main.py:315:# Text input handlers are now in handlers/posting.py
+/opt/bots/workinportugal_bot_staging/main.py:398:@router.message(Command("premium_posts"))
+/opt/bots/workinportugal_bot_staging/main.py:399:async def cmd_premium_posts(message: Message):
+/opt/bots/workinportugal_bot_staging/main.py:400:    """Handle /premium_posts command (admin only)."""
+/opt/bots/workinportugal_bot_staging/main.py:408:    # Get pending premium posts
+/opt/bots/workinportugal_bot_staging/main.py:409:    pending_posts = db.get_pending_premium_posts()
+/opt/bots/workinportugal_bot_staging/main.py:411:    if not pending_posts:
+/opt/bots/workinportugal_bot_staging/main.py:415:    response = f"📋 Ожидающие подтверждения премиум-посты ({len(pending_posts)}):\n\n"
+/opt/bots/workinportugal_bot_staging/main.py:417:    for i, post in enumerate(pending_posts[:10], 1):  # Show first 10
+/opt/bots/workinportugal_bot_staging/main.py:418:        user_info = f"{post['telegram_id']} ({post['username'] or 'без username'})"
+/opt/bots/workinportugal_bot_staging/main.py:419:        response += f"{i}. **ID:** {post['id']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:421:        response += f"   **Тип:** {post['mode']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:422:        response += f"   **Медиа:** {post['media_type']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:423:        response += f"   **Создан:** {post['created_at']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:424:        response += f"   **Стоимость:** €{post['payment_amount']}\n\n"
+/opt/bots/workinportugal_bot_staging/main.py:426:    if len(pending_posts) > 10:
+/opt/bots/workinportugal_bot_staging/main.py:427:        response += f"... и еще {len(pending_posts) - 10} постов"
+/opt/bots/workinportugal_bot_staging/main.py:442:    # Format: /approve_payment <post_id> [notes]
+/opt/bots/workinportugal_bot_staging/main.py:446:        await message.answer("📝 Использование: /approve_payment <post_id> [заметки]")
+/opt/bots/workinportugal_bot_staging/main.py:450:        post_id = int(args[0])
+/opt/bots/workinportugal_bot_staging/main.py:453:        # Get premium post
+/opt/bots/workinportugal_bot_staging/main.py:454:        post = db.get_premium_post(post_id)
+/opt/bots/workinportugal_bot_staging/main.py:455:        if not post:
+/opt/bots/workinportugal_bot_staging/main.py:456:            await message.answer(f"🚫 Премиум-пост с ID {post_id} не найден.")
+/opt/bots/workinportugal_bot_staging/main.py:459:        if post['payment_status'] != 'pending':
+/opt/bots/workinportugal_bot_staging/main.py:460:            await message.answer(f"🚫 Пост {post_id} уже обработан (статус: {post['payment_status']}).")
+/opt/bots/workinportugal_bot_staging/main.py:476:        success = db.approve_premium_post(post_id, admin_user_id, admin_notes)
+/opt/bots/workinportugal_bot_staging/main.py:480:                f"✅ Оплата для поста {post_id} подтверждена!\n\n"
+/opt/bots/workinportugal_bot_staging/main.py:481:                f"**Пользователь:** {post['telegram_id']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:482:                f"**Тип:** {post['mode']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:483:                f"**Медиа:** {post['media_type']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:484:                f"**Стоимость:** €{post['payment_amount']}\n\n"
+/opt/bots/workinportugal_bot_staging/main.py:492:        await message.answer("🚫 Неверный формат post_id. Используйте число.")
+/opt/bots/workinportugal_bot_staging/main.py:505:    # Format: /reject_payment <post_id> <reason>
+/opt/bots/workinportugal_bot_staging/main.py:509:        await message.answer("📝 Использование: /reject_payment <post_id> <причина>")
+/opt/bots/workinportugal_bot_staging/main.py:513:        post_id = int(args[0])
+/opt/bots/workinportugal_bot_staging/main.py:516:        # Get premium post
+/opt/bots/workinportugal_bot_staging/main.py:517:        post = db.get_premium_post(post_id)
+/opt/bots/workinportugal_bot_staging/main.py:518:        if not post:
+/opt/bots/workinportugal_bot_staging/main.py:519:            await message.answer(f"🚫 Премиум-пост с ID {post_id} не найден.")
+/opt/bots/workinportugal_bot_staging/main.py:522:        if post['payment_status'] != 'pending':
+/opt/bots/workinportugal_bot_staging/main.py:523:            await message.answer(f"🚫 Пост {post_id} уже обработан (статус: {post['payment_status']}).")
+/opt/bots/workinportugal_bot_staging/main.py:539:        success = db.reject_premium_post(post_id, admin_user_id, reason)
+/opt/bots/workinportugal_bot_staging/main.py:543:                f"🚫 Оплата для поста {post_id} отклонена.\n\n"
+/opt/bots/workinportugal_bot_staging/main.py:545:                f"**Пользователь:** {post['telegram_id']}\n"
+/opt/bots/workinportugal_bot_staging/main.py:546:                f"**Тип:** {post['mode']}",
+/opt/bots/workinportugal_bot_staging/main.py:553:        await message.answer("🚫 Неверный формат post_id. Используйте число.")
+/opt/bots/workinportugal_bot_staging/main.py:622:            dp.include_router(premium_posting_router)  # Premium posting first
+/opt/bots/workinportugal_bot_staging/main.py:624:            dp.include_router(posting_router)
+/opt/bots/workinportugal_bot_staging/main.py:625:            dp.include_router(my_postings_router)
+/opt/bots/workinportugal_bot_staging/handlers/admin.py:293:        user_postings = db.get_user_postings(target_user['id'])
+/opt/bots/workinportugal_bot_staging/handlers/admin.py:305:        response += f"Активных объявлений: {len(user_postings)}\n"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:364:        from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:367:        temp_posting = JobPosting(
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:383:        confirmation_text = format_preview(temp_posting)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:397:        builder.add(InlineKeyboardButton(text="✅ Опубликовать", callback_data="confirm:post"))
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:474:@router.callback_query(F.data == "confirm:post")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:487:    # Check posting limit by phone number (more reliable than user_id)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:488:    # This prevents creating multiple posts from one phone number via different accounts
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:493:        can_post, earliest_next_post_date = db.check_phone_posting_limit(phone_main, phone_whatsapp)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:495:        if not can_post:
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:497:            date_str = earliest_next_post_date.strftime("%d.%m.%Y %H:%M") if earliest_next_post_date else "неизвестно"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:506:            # Create keyboard with back button and my postings button
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:508:                [InlineKeyboardButton(text="📋 Мои объявления", callback_data="my_postings")],
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:519:        can_post, earliest_next_post_date = db.check_user_posting_limit(user_id)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:521:        if not can_post:
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:523:            date_str = earliest_next_post_date.strftime("%d.%m.%Y %H:%M") if earliest_next_post_date else "неизвестно"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:532:            # Create keyboard with back button and my postings button
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:534:                [InlineKeyboardButton(text="📋 Мои объявления", callback_data="my_postings")],
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:542:    # Check for duplicate postings
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:543:    is_duplicate = db.check_duplicate_posting(user_id, data.get('mode'), data.get('description'))
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:553:        # Create keyboard with back button and my postings button
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:555:            [InlineKeyboardButton(text="📋 Мои объявления", callback_data="my_postings")],
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:565:    # Create job posting
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:566:    posting_id = db.create_job_posting(
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:578:    # Get posting from database
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:579:    posting_data = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:580:    if not posting_data:
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:589:    from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:590:    posting = JobPosting.from_dict(posting_data)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:593:    from services.publisher import Publisher
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:594:    publisher = Publisher(callback.bot)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:595:    published_message = await publisher.publish_posting(posting, user_id)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:601:    if published_message:
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:602:        # Create link to the published message
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:605:            chat_info = await callback.bot.get_chat(Config.CHANNEL_ID)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:607:                message_link = f"https://t.me/{chat_info.username}/{published_message.message_id}"
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:626:        # Publication failed - delete the posting from database and show error
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:628:            db.delete_posting(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:629:            logger.warning(f"Deleted posting {posting_id} due to publication failure")
+/opt/bots/workinportugal_bot_staging/handlers/posting.py:631:            logger.error(f"Failed to delete posting {posting_id} after publication failure: {e}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:1:"""Premium posting handlers for Work in Portugal Bot."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:18:    """States for premium posting."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:29:    waiting_for_section_choice = State()
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:41:@router.callback_query(F.data == "premium_posting")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:42:async def start_premium_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:43:    """Start premium posting process."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:60:        callback_data="premium:section_job_seeker"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:64:        callback_data="premium:section_job_offer"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:77:    await state.set_state(PremiumPostingStates.waiting_for_section_choice)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:127:        builder.add(InlineKeyboardButton(text="← Назад", callback_data="premium_posting"))
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:137:    """Handle city selection for premium posting."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:150:            reply_markup=get_back_button("premium_posting")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:174:    """Handle custom city input for premium posting."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:194:            reply_markup=get_back_button("premium_posting")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:221:            reply_markup=get_back_button("premium_posting")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:246:    """Handle description input for premium posting."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:432:    # Get section with fallback
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:433:    section = data.get('section', 'job_offer')  # Default to job_offer if not set
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:434:    section_name = "Ищу работу" if section == "job_seeker" else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:438:    # Format post in final publication format
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:439:    from services.formatting import format_premium_posting, format_premium_posting_html
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:442:    post_data = {
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:443:        'mode': section,
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:453:    final_post_text = format_premium_posting_html(post_data)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:476:                            caption=final_post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:482:                            caption=final_post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:498:                callback_data="confirm_premium_post"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:513:                callback_data="confirm_premium_post"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:524:                    caption=final_post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:531:                    caption=final_post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:540:            callback_data="confirm_premium_post"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:548:        await message.answer(final_post_text, reply_markup=builder.as_markup(), parse_mode="HTML")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:554:    """Go back to previous step in premium posting."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:571:@router.callback_query(PremiumPostingStates.waiting_for_section_choice, F.data == "premium:section_job_seeker")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:572:async def choose_job_seeker_section(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:573:    """Choose job seeker section."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:574:    await state.update_data(section="job_seeker")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:583:        reply_markup=get_back_button("premium_posting"),
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:589:@router.callback_query(PremiumPostingStates.waiting_for_section_choice, F.data == "premium:section_job_offer")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:590:async def choose_job_offer_section(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:591:    """Choose job offer section."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:592:    await state.update_data(section="job_offer")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:601:        reply_markup=get_back_button("premium_posting"),
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:609:@router.callback_query(PremiumPostingStates.waiting_for_confirmation, F.data == "confirm_premium_post")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:610:async def confirm_premium_post(callback: CallbackQuery, state: FSMContext, bot=None):
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:611:    """Confirm premium post creation."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:612:    logger.info(f"Premium post confirmation handler called for user {callback.from_user.id}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:614:    logger.info(f"Premium post data: {data}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:630:    # Convert section to mode for database compatibility
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:631:    if 'section' in db_data:
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:632:        db_data['mode'] = db_data['section']
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:633:        del db_data['section']
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:654:    # Create premium post
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:655:    post_id = db.create_premium_post(user_id, **db_data)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:659:        logger.info(f"Sending premium post #{post_id} to admin {336224597}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:661:        # Format post in final publication format
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:662:        from services.formatting import format_premium_posting, format_premium_posting_html
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:665:        section = data.get('section', 'job_offer')  # Default to job_offer if not set
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:666:        post_data = {
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:667:            'mode': section,
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:677:        final_post_text = format_premium_posting_html(post_data)
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:681:            f"💎 <b>Новый премиум-пост #{post_id}</b>\n"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:686:        admin_text = admin_header + final_post_text
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:691:            callback_data=f"admin:approve_premium:{post_id}"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:695:            callback_data=f"admin:reject_premium:{post_id}"
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:699:        # Send post with media and buttons
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:727:                published_messages = await callback.bot.send_media_group(
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:731:                message = published_messages[0] if published_messages else None
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:767:        logger.info(f"Successfully sent premium post #{post_id} to admin, message_id: {message.message_id if message else 'N/A'}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:769:        logger.error(f"Failed to send premium post to admin: {e}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:1:"""Handlers for 'My Postings' section."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:14:from utils import get_first_words, escape_markdown, format_posting_card
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:20:    """States for deleting posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:25:    """States for editing posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:35:def get_posting_menu_keyboard(posting_id: int) -> InlineKeyboardMarkup:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:36:    """Create keyboard for posting menu."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:40:            callback_data=f"show_posting_{posting_id}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:44:            callback_data=f"edit_posting_{posting_id}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:48:            callback_data=f"stats_posting_{posting_id}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:52:            callback_data=f"delete_posting_{posting_id}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:56:            callback_data="back_to_my_postings"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:63:def get_delete_confirmation_keyboard(posting_id: int) -> InlineKeyboardMarkup:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:68:            callback_data=f"confirm_delete_{posting_id}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:72:            callback_data=f"cancel_delete_{posting_id}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:79:@router.callback_query(F.data == "my_postings")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:80:async def show_my_postings(callback: CallbackQuery):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:81:    """Show user's postings."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:97:    postings = db.get_user_active_postings(user_id_db)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:99:    if not postings:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:114:    # Create posting cards
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:116:    for posting in postings[:3]:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:117:        card_content = format_posting_card(posting)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:125:    for i, posting in enumerate(postings[:3], 1):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:128:            callback_data=f"posting_{posting['id']}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:148:@router.callback_query(F.data.startswith("posting_"))
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:149:async def show_posting_menu(callback: CallbackQuery):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:150:    """Show menu for specific posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:151:    posting_id = int(callback.data.split("_")[1])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:153:    # Get posting details
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:154:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:155:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:159:                InlineKeyboardButton(text="← Назад", callback_data="my_postings")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:165:    # Check if user owns this posting
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:167:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:171:                InlineKeyboardButton(text="← Назад", callback_data="my_postings")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:178:    description = posting.get('description', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:182:    keyboard = get_posting_menu_keyboard(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:193:        f"Тип: {escape_markdown('Ищу работу' if posting['mode'] == 'seeking' else 'Предлагаю работу')}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:194:        f"Города: {escape_markdown(posting['cities'])}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:195:        f"Создано: {escape_markdown(posting['created_at'].strftime('%d.%m.%Y %H:%M') if isinstance(posting['created_at'], datetime) else str(posting['created_at']))}\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:203:@router.callback_query(F.data.startswith("show_posting_"))
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:204:async def show_posting_link(callback: CallbackQuery):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:205:    """Show posting link."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:206:    posting_id = int(callback.data.split("_")[2])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:208:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:209:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:215:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:219:    if posting['message_id'] and posting['chat_id'] and posting['topic_id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:222:        message_link = f"https://t.me/{chat_username}/{posting['topic_id']}/{posting['message_id']}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:229:                InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:233:        # Check if this is a posting that was never published
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:234:        if not posting.get('message_id') and not posting.get('chat_id') and not posting.get('topic_id'):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:246:        # Create keyboard with delete button for unpublished postings
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:247:        if not posting.get('message_id') and not posting.get('chat_id') and not posting.get('topic_id'):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:249:                [InlineKeyboardButton(text="🗑️ Удалить объявление", callback_data=f"delete_posting_{posting_id}")],
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:250:                [InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")]
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:254:                InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:265:@router.callback_query(F.data.startswith("stats_posting_"))
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:266:async def show_posting_statistics(callback: CallbackQuery):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:267:    """Show posting statistics."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:268:    posting_id = int(callback.data.split("_")[2])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:270:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:271:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:277:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:282:    stats = db.get_posting_statistics(user['id'])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:294:    stats_text += f"• Можно публиковать: {'✅ Да' if stats['can_post'] else '🚫 Нет'}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:296:    if stats['earliest_next_post_date']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:297:        stats_text += f"• Следующая публикация: {escape_markdown(stats['earliest_next_post_date'].strftime('%d.%m.%Y %H:%M'))}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:300:    for i, p in enumerate(stats['all_active_postings'], 1):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:312:            InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:319:@router.callback_query(F.data.startswith("delete_posting_"))
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:320:async def confirm_delete_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:322:    posting_id = int(callback.data.split("_")[2])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:324:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:325:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:331:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:335:    # Store posting info in state
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:336:    await state.update_data(posting_id=posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:340:    description = posting.get('description', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:344:    keyboard = get_delete_confirmation_keyboard(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:357:async def delete_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:358:    """Delete the posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:359:    posting_id = int(callback.data.split("_")[2])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:361:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:362:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:368:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:376:        if posting['message_id'] and posting['chat_id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:380:                    chat_id=posting['chat_id'],
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:381:                    message_id=posting['message_id']
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:384:                print(f"Successfully deleted Telegram message {posting['message_id']} from chat {posting['chat_id']}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:387:                print(f"Failed to delete Telegram message {posting['message_id']} from chat {posting['chat_id']}: {e}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:393:                    print(f"Insufficient permissions to delete message from chat {posting['chat_id']}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:400:                            chat_id=posting['chat_id'],
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:401:                            message_id=posting['message_id'],
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:405:                        print(f"Successfully edited Telegram message {posting['message_id']} to show deletion")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:407:                        print(f"Failed to edit Telegram message {posting['message_id']}: {edit_error}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:412:        success = db.delete_posting(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:426:                    InlineKeyboardButton(text="📋 Мои объявления", callback_data="my_postings"),
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:434:                    InlineKeyboardButton(text="⬅️ Назад", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:445:                InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:453:async def cancel_delete_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:454:    """Cancel posting deletion."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:455:    posting_id = int(callback.data.split("_")[2])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:457:    # Get posting details to return to menu
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:458:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:459:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:466:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:475:    description = posting.get('description', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:479:    keyboard = get_posting_menu_keyboard(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:484:        f"Тип: {'Ищу работу' if posting['mode'] == 'seeking' else 'Предлагаю работу'}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:485:        f"Города: {posting['cities']}\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:486:        f"Создано: {posting['created_at'].strftime('%d.%m.%Y %H:%M') if hasattr(posting['created_at'], 'strftime') else posting['created_at']}\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:493:@router.callback_query(F.data == "back_to_my_postings")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:494:async def back_to_my_postings(callback: CallbackQuery):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:495:    """Go back to my postings list."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:496:    await show_my_postings(callback)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:503:@router.callback_query(F.data.startswith("edit_posting_"))
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:504:async def start_edit_posting(callback: CallbackQuery, state: FSMContext):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:505:    """Start editing a posting."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:506:    posting_id = int(callback.data.split("_")[2])
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:508:    # Get posting details
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:509:    posting = db.get_posting_by_id(posting_id)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:510:    if not posting:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:516:    if not user or posting['user_id'] != user['id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:520:    # Store posting data in state
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:521:    await state.update_data(posting_id=posting_id, posting=posting)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:530:        [InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")]
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:549:    posting = data['posting']
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:554:        current_value = posting.get('description', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:558:        current_value = posting.get('cities', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:562:        current_value = posting.get('phone_whatsapp', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:566:        current_value = posting.get('social_media', '')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:573:        InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{data['posting_id']}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:589:    """Handle text input for editing posting fields."""
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:592:    posting_id = data.get('posting_id')
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:594:    if not posting_id:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:605:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:610:        # Update posting
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:611:        success = db.update_posting(posting_id, description=description)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:616:                    InlineKeyboardButton(text="← К управлению", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:623:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:637:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:642:        # Update posting
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:643:        success = db.update_posting(posting_id, cities=", ".join(cities))
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:648:                    InlineKeyboardButton(text="← К управлению", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:655:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:668:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:673:        # Update posting
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:674:        success = db.update_posting(posting_id, phone_whatsapp=phone)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:679:                    InlineKeyboardButton(text="← К управлению", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:686:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:698:        # Update posting
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:699:        success = db.update_posting(posting_id, social_media=social_media)
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:704:                    InlineKeyboardButton(text="← К управлению", callback_data=f"posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:711:                    InlineKeyboardButton(text="← Назад", callback_data=f"edit_posting_{posting_id}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:1:"""Admin handlers for premium posts."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:7:from services.formatting import format_premium_posting, format_premium_posting_html
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:15:    """Admin approves premium post payment."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:21:    post_id = int(callback.data.split(":")[2])
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:23:    # Get premium post
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:24:    post = db.get_premium_post(post_id)
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:25:    if not post:
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:30:    user = db.get_user_by_id(post['user_id'])
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:35:    # Approve premium post
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:36:    db.approve_premium_post(post_id, callback.from_user.id)
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:39:        # Publish premium post to channel
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:40:        from services.formatting import format_premium_posting, format_premium_posting_html
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:43:        # Format the post text
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:44:        post_text = format_premium_posting_html(post)
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:48:        if post['mode'] == 'job_seeker':
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:49:            topic_id = Config.JOB_SEEKING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:50:        elif post['mode'] == 'job_offer':
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:51:            topic_id = Config.JOB_OFFERING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:54:        published_message = None
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:59:        if post.get('media_list'):
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:61:                media_list = json.loads(post['media_list'])
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:77:                                caption=post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:83:                                caption=post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:92:                published_messages = await callback.bot.send_media_group(
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:93:                    chat_id=Config.CHANNEL_ID,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:95:                    message_thread_id=topic_id
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:97:                published_message = published_messages[0] if published_messages else None
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:102:                    published_message = await callback.bot.send_photo(
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:103:                        chat_id=Config.CHANNEL_ID,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:105:                        caption=post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:106:                        message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:110:                    published_message = await callback.bot.send_video(
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:111:                        chat_id=Config.CHANNEL_ID,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:113:                        caption=post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:114:                        message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:119:            if post['media_type'] == 'photo':
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:120:                published_message = await callback.bot.send_photo(
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:121:                    chat_id=Config.CHANNEL_ID,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:122:                    photo=post['media_file_id'],
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:123:                    caption=post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:124:                    message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:127:            elif post['media_type'] == 'video':
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:128:                published_message = await callback.bot.send_video(
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:129:                    chat_id=Config.CHANNEL_ID,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:130:                    video=post['media_file_id'],
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:131:                    caption=post_text,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:132:                    message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:136:        # Update post with publication info
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:137:        if published_message:
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:138:            db.update_premium_post_publication(post_id, published_message.message_id, Config.CHANNEL_ID, topic_id)
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:139:            logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:143:            f"✅ <b>Ваш премиум-пост #{post_id} одобрен и опубликован!</b>\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:157:            f"✅ <b>Премиум-пост #{post_id} одобрен и опубликован!</b>\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:164:        logger.error(f"Failed to approve premium post: {e}")
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:172:    """Admin rejects premium post."""
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:178:    post_id = int(callback.data.split(":")[2])
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:180:    # Get premium post
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:181:    post = db.get_premium_post(post_id)
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:182:    if not post:
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:187:    user = db.get_user_by_id(post['user_id'])
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:192:    # Reject premium post
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:193:    db.reject_premium_post(post_id, callback.from_user.id, "Отклонено администратором")
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:197:        f"🚫 **Ваш премиум-пост #{post_id} отклонен.**\n\n"
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:213:        f"🚫 **Премиум-пост #{post_id} отклонен.**\n\n"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:4:from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/services/formatting.py:9:def format_job_posting(posting: JobPosting) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:10:    """Format job posting for publication."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:15:    for city in posting.cities:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:24:    cleaned_description = clean_text_advanced(posting.description)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:29:    if posting.social_media and posting.social_media.lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:32:            links = json.loads(posting.social_media) if posting.social_media.startswith('[') else [posting.social_media] if posting.social_media != 'нет' else []
+/opt/bots/workinportugal_bot_staging/services/formatting.py:38:            formatted_link = format_link_as_markdown(posting.social_media)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:44:    escaped_username = escape_markdown(posting.telegram_username)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:48:    lines.append(format_phone_number(posting.phone_main))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:51:    if posting.phone_whatsapp and posting.phone_whatsapp != posting.phone_main:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:52:        if posting.phone_whatsapp.lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:53:            lines.append(format_phone_number(posting.phone_whatsapp))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:56:    lines.append(f"- {posting.name}")
+/opt/bots/workinportugal_bot_staging/services/formatting.py:61:def format_job_posting_html(posting: JobPosting) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:62:    """Format job posting for publication using HTML (fixes underscore in usernames)."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:72:    for city in posting.cities:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:80:    cleaned_description = clean_text_advanced(posting.description)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:84:    if posting.social_media and posting.social_media.lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:87:            links = json.loads(posting.social_media) if posting.social_media.startswith('[') else [posting.social_media] if posting.social_media != 'нет' else []
+/opt/bots/workinportugal_bot_staging/services/formatting.py:92:            formatted_link = format_link_as_html(posting.social_media)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:96:    telegram_username = posting.telegram_username
+/opt/bots/workinportugal_bot_staging/services/formatting.py:103:    lines.append(escape_html(format_phone_number(posting.phone_main)))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:106:    if posting.phone_whatsapp and posting.phone_whatsapp != posting.phone_main:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:107:        if posting.phone_whatsapp.lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:108:            lines.append(escape_html(format_phone_number(posting.phone_whatsapp)))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:111:    lines.append(f"- {escape_html(posting.name)}")
+/opt/bots/workinportugal_bot_staging/services/formatting.py:116:def format_preview(posting: JobPosting) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:117:    """Format job posting preview - shows full posting text like in premium posts."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:125:    for city in posting.cities:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:134:    cleaned_description = clean_text_advanced(posting.description)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:138:    if posting.social_media and posting.social_media.lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:141:            links = json.loads(posting.social_media) if posting.social_media.startswith('[') else [posting.social_media] if posting.social_media != 'нет' else []
+/opt/bots/workinportugal_bot_staging/services/formatting.py:147:            formatted_link = format_link_as_markdown(posting.social_media)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:153:    escaped_username = escape_markdown(posting.telegram_username)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:157:    lines.append(format_phone_number(posting.phone_main))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:160:    if posting.phone_whatsapp and posting.phone_whatsapp != posting.phone_main:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:161:        if posting.phone_whatsapp.lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:162:            lines.append(format_phone_number(posting.phone_whatsapp))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:165:    lines.append(f"- {posting.name}")
+/opt/bots/workinportugal_bot_staging/services/formatting.py:170:def format_user_postings_list(postings: List[JobPosting]) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:171:    """Format list of user's postings."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:172:    if not postings:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:177:    for i, posting in enumerate(postings, 1):
+/opt/bots/workinportugal_bot_staging/services/formatting.py:178:        mode_emoji = "🔍" if posting.mode == "seeking" else "💼"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:179:        mode_text = "Ищу работу" if posting.mode == "seeking" else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:180:        cities_text = ", ".join([Config.CITIES.get(city, city) for city in posting.cities])
+/opt/bots/workinportugal_bot_staging/services/formatting.py:183:        cleaned_description = clean_user_input_advanced(posting.description)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:196:        result += f"   📅 {escape_markdown(posting.created_at.strftime('%d.%m.%Y') if posting.created_at else 'N/A')}\n"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:197:        result += f"   🆔 ID: {posting.id}\n\n"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:202:def format_premium_posting(post: dict) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:203:    """Format premium posting for publication."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:212:    # 1. Hashtags (like in regular posts)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:214:    cities = post.get('cities', ['online'])  # Default to online if not specified
+/opt/bots/workinportugal_bot_staging/services/formatting.py:223:    # 2. Premium badge and section
+/opt/bots/workinportugal_bot_staging/services/formatting.py:224:    section_emoji = "🔍" if post['mode'] == 'job_seeker' else "💰"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:225:    section_text = "Ищу работу" if post['mode'] == 'job_seeker' else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:226:    lines.append(f"💎 {section_emoji} *{section_text}*")
+/opt/bots/workinportugal_bot_staging/services/formatting.py:230:    cleaned_description = clean_text_advanced(post['description'])
+/opt/bots/workinportugal_bot_staging/services/formatting.py:234:    if post['social_media'] and post['social_media'].lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:237:            links = json.loads(post['social_media']) if post['social_media'].startswith('[') else [post['social_media']] if post['social_media'] != 'нет' else []
+/opt/bots/workinportugal_bot_staging/services/formatting.py:243:            formatted_link = format_link_as_markdown(post['social_media'])
+/opt/bots/workinportugal_bot_staging/services/formatting.py:247:    lines.append(escape_markdown(post['telegram_username']))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:250:    lines.append(escape_markdown(post['phone_main']))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:253:    if post['phone_whatsapp'] and post['phone_whatsapp'] != post['phone_main']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:254:        if post['phone_whatsapp'].lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:255:            lines.append(escape_markdown(post['phone_whatsapp']))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:258:    lines.append(f"\\- {escape_markdown(post['name'])}")
+/opt/bots/workinportugal_bot_staging/services/formatting.py:263:def format_premium_posting_html(post: dict) -> str:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:264:    """Format premium posting for publication using HTML."""
+/opt/bots/workinportugal_bot_staging/services/formatting.py:273:    # 1. Hashtags (like in regular posts)
+/opt/bots/workinportugal_bot_staging/services/formatting.py:275:    cities = post.get('cities', ['online'])  # Default to online if not specified
+/opt/bots/workinportugal_bot_staging/services/formatting.py:284:    # 2. Premium badge and section
+/opt/bots/workinportugal_bot_staging/services/formatting.py:285:    section_emoji = "🔍" if post['mode'] == 'job_seeker' else "💰"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:286:    section_text = "Ищу работу" if post['mode'] == 'job_seeker' else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/services/formatting.py:287:    lines.append(f"💎 {section_emoji} <b>{section_text}</b>")
+/opt/bots/workinportugal_bot_staging/services/formatting.py:291:    cleaned_description = clean_text_advanced(post['description'])
+/opt/bots/workinportugal_bot_staging/services/formatting.py:295:    if post['social_media'] and post['social_media'].lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:298:            links = json.loads(post['social_media']) if post['social_media'].startswith('[') else [post['social_media']] if post['social_media'] != 'нет' else []
+/opt/bots/workinportugal_bot_staging/services/formatting.py:304:            formatted_link = format_link_as_html(post['social_media'])
+/opt/bots/workinportugal_bot_staging/services/formatting.py:308:    telegram_username = post['telegram_username']
+/opt/bots/workinportugal_bot_staging/services/formatting.py:316:    lines.append(escape_html(post['phone_main']))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:319:    if post['phone_whatsapp'] and post['phone_whatsapp'] != post['phone_main']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:320:        if post['phone_whatsapp'].lower() not in ['нет', 'no', 'none', '']:
+/opt/bots/workinportugal_bot_staging/services/formatting.py:321:            lines.append(escape_html(post['phone_whatsapp']))
+/opt/bots/workinportugal_bot_staging/services/formatting.py:324:    lines.append(f"- {escape_html(post['name'])}")
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:30:    section_name: str
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:38:        self._by_section: dict[str, CategorySchema] = {}
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:49:        by_section: dict[str, CategorySchema] = {}
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:55:            if schema.section_name in by_section:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:56:                raise SchemaRegistryError(f"duplicate section_name: {schema.section_name}")
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:59:            by_section[schema.section_name] = schema
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:62:        self._by_section = by_section
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:66:    def get_by_section(self, section_name: str) -> CategorySchema:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:68:            return self._by_section[section_name]
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:70:            raise SchemaRegistryError(f"unknown section_name: {section_name}") from exc
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:72:    def has_section(self, section_name: str) -> bool:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:73:        return section_name in self._by_section
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:75:    def list_sections(self) -> list[str]:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:76:        return sorted(self._by_section.keys())
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:79:        required_top = ["schema_id", "section_name", "version", "steps"]
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:133:            section_name=str(raw["section_name"]),
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:5:from models.posting_context import PostingContext
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:12:    section_name: str
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:19:    def __init__(self, section_name: str):
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:21:        schema = registry.get_by_section(section_name)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:23:        self.ctx = PostingContext(section_name=section_name)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:24:        self.state = FlowState(section_name=section_name)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:9:from models.job_posting import JobPosting
+/opt/bots/workinportugal_bot_staging/services/publisher.py:10:from services.formatting import format_job_posting_html
+/opt/bots/workinportugal_bot_staging/services/publisher.py:17:    """Service for publishing job postings to channel."""
+/opt/bots/workinportugal_bot_staging/services/publisher.py:22:    async def publish_posting(self, posting: JobPosting, user_id: int) -> Optional[Message]:
+/opt/bots/workinportugal_bot_staging/services/publisher.py:23:        """Publish job posting to channel."""
+/opt/bots/workinportugal_bot_staging/services/publisher.py:25:            # Format posting text (HTML avoids underscore display issues in usernames)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:26:            posting_text = format_job_posting_html(posting)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:30:            if posting.mode == "seeking":
+/opt/bots/workinportugal_bot_staging/services/publisher.py:31:                topic_id = Config.JOB_SEEKING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/services/publisher.py:32:            elif posting.mode == "offering":
+/opt/bots/workinportugal_bot_staging/services/publisher.py:33:                topic_id = Config.JOB_OFFERING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/services/publisher.py:37:                chat_id=Config.CHANNEL_ID,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:38:                text=posting_text,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:39:                message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:44:            logger.info(f"Published posting {posting.id} to channel")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:46:            # Save posting to database with message info
+/opt/bots/workinportugal_bot_staging/services/publisher.py:47:            if posting.id:
+/opt/bots/workinportugal_bot_staging/services/publisher.py:48:                db.update_posting(
+/opt/bots/workinportugal_bot_staging/services/publisher.py:49:                    posting.id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:58:            logger.error(f"Failed to publish posting: {e}")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:61:    async def delete_posting(self, posting: JobPosting) -> bool:
+/opt/bots/workinportugal_bot_staging/services/publisher.py:62:        """Delete posting from channel."""
+/opt/bots/workinportugal_bot_staging/services/publisher.py:64:            if posting.message_id and posting.chat_id:
+/opt/bots/workinportugal_bot_staging/services/publisher.py:66:                    chat_id=posting.chat_id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:67:                    message_id=posting.message_id
+/opt/bots/workinportugal_bot_staging/services/publisher.py:70:                logger.info(f"Deleted posting {posting.id} from channel")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:73:                logger.warning(f"No message info for posting {posting.id}")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:77:            logger.error(f"Failed to delete posting: {e}")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:80:    async def edit_posting(self, posting: JobPosting) -> bool:
+/opt/bots/workinportugal_bot_staging/services/publisher.py:81:        """Edit posting in channel."""
+/opt/bots/workinportugal_bot_staging/services/publisher.py:83:            if posting.message_id and posting.chat_id:
+/opt/bots/workinportugal_bot_staging/services/publisher.py:84:                # Format updated posting text (HTML - same as publish, fixes underscore in usernames)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:85:                posting_text = format_job_posting_html(posting)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:88:                    chat_id=posting.chat_id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:89:                    message_id=posting.message_id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:90:                    text=posting_text,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:94:                logger.info(f"Edited posting {posting.id} in channel")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:97:                logger.warning(f"No message info for posting {posting.id}")
+/opt/bots/workinportugal_bot_staging/services/publisher.py:101:            logger.error(f"Failed to edit posting: {e}")
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:10:from services.publisher import Publisher
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:16:    """Scheduler for automatic cleanup of expired postings."""
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:20:        self.publisher = Publisher(bot)
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:93:        """Perform the cleanup of expired postings and bans."""
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:95:            logger.info("Starting cleanup of expired postings and bans...")
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:97:            # Clean up expired postings
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:98:            deleted_count, deleted_postings = db.cleanup_expired_postings()
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:101:                logger.info(f"Cleaned up {deleted_count} expired postings")
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:104:                await self._delete_telegram_messages(deleted_postings)
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:107:                for posting in deleted_postings:
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:109:                        f"Deleted posting ID {posting['id']} by user {posting['user_id']} "
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:110:                        f"({posting['mode']}, {posting['cities']}, {posting['name']}) "
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:111:                        f"created at {posting['created_at']}"
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:114:                logger.info("No expired postings found")
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:129:    async def _delete_telegram_messages(self, deleted_postings: list[dict]):
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:131:        for posting in deleted_postings:
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:133:                if posting['message_id'] and posting['chat_id']:
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:135:                        chat_id=posting['chat_id'],
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:136:                        message_id=posting['message_id']
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:138:                    logger.info(f"Deleted Telegram message {posting['message_id']} for posting {posting['id']}")
+/opt/bots/workinportugal_bot_staging/services/scheduler.py:140:                logger.warning(f"Failed to delete Telegram message for posting {posting['id']}: {e}")
+/opt/bots/workinportugal_bot_staging/services/schema_engine.py:7:from models.posting_context import PostingContext
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:9:    sections = registry.list_sections()
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:10:    assert "Рестораны" in sections, sections
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:11:    assert "Поговори" in sections, sections
+/opt/bots/workinportugal_bot_staging/config.py:17:    CHANNEL_ID: int = int(os.getenv("CHANNEL_ID", "-1001788799608"))
+/opt/bots/workinportugal_bot_staging/config.py:18:    JOB_SEEKING_TOPIC_ID: int = int(os.getenv("JOB_SEEKING_TOPIC_ID", "9039"))
+/opt/bots/workinportugal_bot_staging/config.py:19:    JOB_OFFERING_TOPIC_ID: int = int(os.getenv("JOB_OFFERING_TOPIC_ID", "9040"))
+/opt/bots/workinportugal_bot_staging/config.py:136:        if not cls.CHANNEL_ID:
+/opt/bots/workinportugal_bot_staging/config.py:137:            raise ValueError("CHANNEL_ID is required")
+/opt/bots/workinportugal_bot_staging/database.py:49:            # Job postings table
+/opt/bots/workinportugal_bot_staging/database.py:51:                CREATE TABLE IF NOT EXISTS job_postings (
+/opt/bots/workinportugal_bot_staging/database.py:106:            # Premium posts table
+/opt/bots/workinportugal_bot_staging/database.py:108:                CREATE TABLE IF NOT EXISTS premium_posts (
+/opt/bots/workinportugal_bot_staging/database.py:137:                cursor.execute("ALTER TABLE premium_posts ADD COLUMN media_list TEXT")
+/opt/bots/workinportugal_bot_staging/database.py:138:                logger.info("Added media_list column to premium_posts table")
+/opt/bots/workinportugal_bot_staging/database.py:149:                    premium_post_id INTEGER NOT NULL,
+/opt/bots/workinportugal_bot_staging/database.py:158:                    FOREIGN KEY (premium_post_id) REFERENCES premium_posts (id),
+/opt/bots/workinportugal_bot_staging/database.py:215:    def create_job_posting(self, user_id: int, mode: str, cities: List[str], 
+/opt/bots/workinportugal_bot_staging/database.py:219:        """Create job posting with links (websites, social media, portfolio, etc.)."""
+/opt/bots/workinportugal_bot_staging/database.py:224:                INSERT INTO job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:237:    def get_user_postings(self, user_id: int) -> List[Dict[str, Any]]:
+/opt/bots/workinportugal_bot_staging/database.py:238:        """Get all postings for user."""
+/opt/bots/workinportugal_bot_staging/database.py:242:                SELECT * FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:250:    def get_posting_by_id(self, posting_id: int) -> Optional[Dict[str, Any]]:
+/opt/bots/workinportugal_bot_staging/database.py:251:        """Get posting by ID."""
+/opt/bots/workinportugal_bot_staging/database.py:254:            cursor.execute("SELECT * FROM job_postings WHERE id = ?", (posting_id,))
+/opt/bots/workinportugal_bot_staging/database.py:258:    def update_posting(self, posting_id: int, **kwargs) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:259:        """Update posting."""
+/opt/bots/workinportugal_bot_staging/database.py:272:            cursor.execute(f"UPDATE job_postings SET {set_clause} WHERE id = ?", 
+/opt/bots/workinportugal_bot_staging/database.py:273:                         values + [posting_id])
+/opt/bots/workinportugal_bot_staging/database.py:278:    def delete_posting(self, posting_id: int) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:279:        """Delete posting (soft delete)."""
+/opt/bots/workinportugal_bot_staging/database.py:280:        return self.update_posting(posting_id, status='deleted')
+/opt/bots/workinportugal_bot_staging/database.py:282:    def get_user_active_postings(self, user_id: int) -> list[dict]:
+/opt/bots/workinportugal_bot_staging/database.py:283:        """Get all active postings for user."""
+/opt/bots/workinportugal_bot_staging/database.py:288:                FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:296:    def get_all_active_postings_with_messages(self) -> list[dict]:
+/opt/bots/workinportugal_bot_staging/database.py:297:        """Get all active postings that have message_id and chat_id."""
+/opt/bots/workinportugal_bot_staging/database.py:302:                FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:310:    def get_posting_statistics(self, user_id: int) -> dict:
+/opt/bots/workinportugal_bot_staging/database.py:325:                FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:331:            recent_postings = cursor.fetchall()
+/opt/bots/workinportugal_bot_staging/database.py:336:                FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:341:            all_active_postings = cursor.fetchall()
+/opt/bots/workinportugal_bot_staging/database.py:344:            current_count = len(recent_postings)
+/opt/bots/workinportugal_bot_staging/database.py:345:            can_post = current_count < 3
+/opt/bots/workinportugal_bot_staging/database.py:347:            earliest_next_post_date = None
+/opt/bots/workinportugal_bot_staging/database.py:349:                oldest_posting_date_str = recent_postings[0]['created_at']
+/opt/bots/workinportugal_bot_staging/database.py:350:                if isinstance(oldest_posting_date_str, str):
+/opt/bots/workinportugal_bot_staging/database.py:351:                    oldest_posting_date = datetime.fromisoformat(oldest_posting_date_str.replace('Z', '+00:00'))
+/opt/bots/workinportugal_bot_staging/database.py:353:                    oldest_posting_date = oldest_posting_date_str
+/opt/bots/workinportugal_bot_staging/database.py:354:                earliest_next_post_date = oldest_posting_date + timedelta(days=30)
+/opt/bots/workinportugal_bot_staging/database.py:359:                'can_post': can_post,
+/opt/bots/workinportugal_bot_staging/database.py:360:                'earliest_next_post_date': earliest_next_post_date,
+/opt/bots/workinportugal_bot_staging/database.py:361:                'recent_postings': [dict(p) for p in recent_postings],
+/opt/bots/workinportugal_bot_staging/database.py:362:                'all_active_postings': [dict(p) for p in all_active_postings]
+/opt/bots/workinportugal_bot_staging/database.py:365:    def check_posting_cooldown(self, user_id: int, mode: str) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:366:        """Check if user can post (cooldown period)."""
+/opt/bots/workinportugal_bot_staging/database.py:370:            # Check for recent postings in the same mode
+/opt/bots/workinportugal_bot_staging/database.py:374:                SELECT COUNT(*) as count FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:382:    def get_user_active_postings_count(self, user_id: int) -> int:
+/opt/bots/workinportugal_bot_staging/database.py:383:        """Get count of active postings for user."""
+/opt/bots/workinportugal_bot_staging/database.py:387:                SELECT COUNT(*) as count FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:394:    def check_user_posting_limit(self, user_id: int) -> tuple[bool, Optional[datetime]]:
+/opt/bots/workinportugal_bot_staging/database.py:400:                - can_post: можно ли публиковать
+/opt/bots/workinportugal_bot_staging/database.py:401:                - earliest_next_post_date: дата следующей возможной публикации (если лимит превышен)
+/opt/bots/workinportugal_bot_staging/database.py:412:                SELECT created_at FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:418:            recent_postings = cursor.fetchall()
+/opt/bots/workinportugal_bot_staging/database.py:420:            if len(recent_postings) < 3:
+/opt/bots/workinportugal_bot_staging/database.py:425:            oldest_posting_date_str = recent_postings[0]['created_at']
+/opt/bots/workinportugal_bot_staging/database.py:428:            if isinstance(oldest_posting_date_str, str):
+/opt/bots/workinportugal_bot_staging/database.py:429:                oldest_posting_date = datetime.fromisoformat(oldest_posting_date_str.replace('Z', '+00:00'))
+/opt/bots/workinportugal_bot_staging/database.py:431:                oldest_posting_date = oldest_posting_date_str
+/opt/bots/workinportugal_bot_staging/database.py:433:            earliest_next_post = oldest_posting_date + timedelta(days=30)
+/opt/bots/workinportugal_bot_staging/database.py:436:            if earliest_next_post > datetime.now():
+/opt/bots/workinportugal_bot_staging/database.py:437:                return False, earliest_next_post
+/opt/bots/workinportugal_bot_staging/database.py:442:    def check_phone_posting_limit(self, phone_main: str, phone_whatsapp: Optional[str] = None) -> tuple[bool, Optional[datetime]]:
+/opt/bots/workinportugal_bot_staging/database.py:453:                - can_post: можно ли публиковать
+/opt/bots/workinportugal_bot_staging/database.py:454:                - earliest_next_post_date: дата следующей возможной публикации (если лимит превышен)
+/opt/bots/workinportugal_bot_staging/database.py:468:                    SELECT created_at FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:477:                    SELECT created_at FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:484:            recent_postings = cursor.fetchall()
+/opt/bots/workinportugal_bot_staging/database.py:486:            if len(recent_postings) < 3:
+/opt/bots/workinportugal_bot_staging/database.py:491:            oldest_posting_date_str = recent_postings[0]['created_at']
+/opt/bots/workinportugal_bot_staging/database.py:494:            if isinstance(oldest_posting_date_str, str):
+/opt/bots/workinportugal_bot_staging/database.py:495:                oldest_posting_date = datetime.fromisoformat(oldest_posting_date_str.replace('Z', '+00:00'))
+/opt/bots/workinportugal_bot_staging/database.py:497:                oldest_posting_date = oldest_posting_date_str
+/opt/bots/workinportugal_bot_staging/database.py:499:            earliest_next_post = oldest_posting_date + timedelta(days=30)
+/opt/bots/workinportugal_bot_staging/database.py:502:            if earliest_next_post > datetime.now():
+/opt/bots/workinportugal_bot_staging/database.py:503:                return False, earliest_next_post
+/opt/bots/workinportugal_bot_staging/database.py:508:    def check_duplicate_posting(self, user_id: int, mode: str, description: str) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:525:                SELECT description FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:530:            existing_postings = cursor.fetchall()
+/opt/bots/workinportugal_bot_staging/database.py:535:            for posting in existing_postings:
+/opt/bots/workinportugal_bot_staging/database.py:536:                existing_desc = posting['description'][:100].lower().strip()
+/opt/bots/workinportugal_bot_staging/database.py:568:        intersection = words1.intersection(words2)
+/opt/bots/workinportugal_bot_staging/database.py:571:        return len(intersection) / len(union)
+/opt/bots/workinportugal_bot_staging/database.py:817:    def create_premium_post(self, user_id: int, **data) -> int:
+/opt/bots/workinportugal_bot_staging/database.py:832:                INSERT INTO premium_posts (
+/opt/bots/workinportugal_bot_staging/database.py:844:            post_id = cursor.lastrowid
+/opt/bots/workinportugal_bot_staging/database.py:846:            return post_id
+/opt/bots/workinportugal_bot_staging/database.py:848:    def get_premium_post(self, post_id: int) -> Optional[Dict[str, Any]]:
+/opt/bots/workinportugal_bot_staging/database.py:853:            post_id: ID поста
+/opt/bots/workinportugal_bot_staging/database.py:863:                FROM premium_posts pp
+/opt/bots/workinportugal_bot_staging/database.py:866:            """, (post_id,))
+/opt/bots/workinportugal_bot_staging/database.py:870:                post_data = dict(result)
+/opt/bots/workinportugal_bot_staging/database.py:872:                if post_data.get('media_list'):
+/opt/bots/workinportugal_bot_staging/database.py:874:                        post_data['media_list'] = json.loads(post_data['media_list'])
+/opt/bots/workinportugal_bot_staging/database.py:876:                        post_data['media_list'] = []
+/opt/bots/workinportugal_bot_staging/database.py:878:                    post_data['media_list'] = []
+/opt/bots/workinportugal_bot_staging/database.py:881:                if post_data.get('cities'):
+/opt/bots/workinportugal_bot_staging/database.py:883:                        post_data['cities'] = json.loads(post_data['cities'])
+/opt/bots/workinportugal_bot_staging/database.py:885:                        post_data['cities'] = ['online']
+/opt/bots/workinportugal_bot_staging/database.py:887:                    post_data['cities'] = ['online']
+/opt/bots/workinportugal_bot_staging/database.py:888:                return post_data
+/opt/bots/workinportugal_bot_staging/database.py:891:    def get_pending_premium_posts(self) -> List[Dict[str, Any]]:
+/opt/bots/workinportugal_bot_staging/database.py:903:                FROM premium_posts pp
+/opt/bots/workinportugal_bot_staging/database.py:912:    def approve_premium_post(self, post_id: int, admin_id: int, admin_notes: str = None) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:917:            post_id: ID поста
+/opt/bots/workinportugal_bot_staging/database.py:928:                UPDATE premium_posts 
+/opt/bots/workinportugal_bot_staging/database.py:931:            """, (admin_notes, datetime.now(), post_id))
+/opt/bots/workinportugal_bot_staging/database.py:936:    def reject_premium_post(self, post_id: int, admin_id: int, admin_notes: str) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:941:            post_id: ID поста
+/opt/bots/workinportugal_bot_staging/database.py:952:                UPDATE premium_posts 
+/opt/bots/workinportugal_bot_staging/database.py:955:            """, (admin_notes, datetime.now(), post_id))
+/opt/bots/workinportugal_bot_staging/database.py:960:    def update_premium_post_publication(self, post_id: int, message_id: int, chat_id: int, topic_id: int = None) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:965:            post_id: ID поста
+/opt/bots/workinportugal_bot_staging/database.py:977:                UPDATE premium_posts 
+/opt/bots/workinportugal_bot_staging/database.py:978:                SET message_id = ?, chat_id = ?, topic_id = ?, status = 'published', updated_at = ?
+/opt/bots/workinportugal_bot_staging/database.py:980:            """, (message_id, chat_id, topic_id, datetime.now(), post_id))
+/opt/bots/workinportugal_bot_staging/database.py:1010:                SELECT COUNT(*) as count FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:1024:                SELECT COUNT(*) as count FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:1038:                SELECT COUNT(*) as count FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:1049:                SELECT COUNT(*) as count FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:1097:    def cleanup_expired_postings(self) -> tuple[int, list[dict]]:
+/opt/bots/workinportugal_bot_staging/database.py:1104:                - deleted_postings: список удаленных объявлений с информацией
+/opt/bots/workinportugal_bot_staging/database.py:1115:                FROM job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:1119:            expired_postings = cursor.fetchall()
+/opt/bots/workinportugal_bot_staging/database.py:1123:            for posting in expired_postings:
+/opt/bots/workinportugal_bot_staging/database.py:1125:                posting_info = {
+/opt/bots/workinportugal_bot_staging/database.py:1126:                    'id': posting['id'],
+/opt/bots/workinportugal_bot_staging/database.py:1127:                    'user_id': posting['user_id'],
+/opt/bots/workinportugal_bot_staging/database.py:1128:                    'mode': posting['mode'],
+/opt/bots/workinportugal_bot_staging/database.py:1129:                    'cities': posting['cities'],
+/opt/bots/workinportugal_bot_staging/database.py:1130:                    'name': posting['name'],
+/opt/bots/workinportugal_bot_staging/database.py:1131:                    'message_id': posting['message_id'],
+/opt/bots/workinportugal_bot_staging/database.py:1132:                    'chat_id': posting['chat_id'],
+/opt/bots/workinportugal_bot_staging/database.py:1133:                    'topic_id': posting['topic_id'],
+/opt/bots/workinportugal_bot_staging/database.py:1134:                    'created_at': posting['created_at']
+/opt/bots/workinportugal_bot_staging/database.py:1136:                deleted_info.append(posting_info)
+/opt/bots/workinportugal_bot_staging/database.py:1140:                    UPDATE job_postings 
+/opt/bots/workinportugal_bot_staging/database.py:1143:                """, (datetime.now(), posting['id']))
+
+### SECTIONS REGISTRY REFERENCES
+/opt/bots/workinportugal_bot_staging/handlers/premium_posting.py:434:    section_name = "Ищу работу" if section == "job_seeker" else "Предлагаю работу"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:219:    if posting['message_id'] and posting['chat_id'] and posting['topic_id']:
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:222:        message_link = f"https://t.me/{chat_username}/{posting['topic_id']}/{posting['message_id']}"
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:234:        if not posting.get('message_id') and not posting.get('chat_id') and not posting.get('topic_id'):
+/opt/bots/workinportugal_bot_staging/handlers/my_postings.py:247:        if not posting.get('message_id') and not posting.get('chat_id') and not posting.get('topic_id'):
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:47:        topic_id = None
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:49:            topic_id = Config.JOB_SEEKING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:51:            topic_id = Config.JOB_OFFERING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:95:                    message_thread_id=topic_id
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:106:                        message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:114:                        message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:124:                    message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:132:                    message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/handlers/premium_admin.py:138:            db.update_premium_post_publication(post_id, published_message.message_id, Config.CHANNEL_ID, topic_id)
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:30:    section_name: str
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:55:            if schema.section_name in by_section:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:56:                raise SchemaRegistryError(f"duplicate section_name: {schema.section_name}")
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:59:            by_section[schema.section_name] = schema
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:66:    def get_by_section(self, section_name: str) -> CategorySchema:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:68:            return self._by_section[section_name]
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:70:            raise SchemaRegistryError(f"unknown section_name: {section_name}") from exc
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:72:    def has_section(self, section_name: str) -> bool:
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:73:        return section_name in self._by_section
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:79:        required_top = ["schema_id", "section_name", "version", "steps"]
+/opt/bots/workinportugal_bot_staging/services/fsm_schema_registry.py:133:            section_name=str(raw["section_name"]),
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:6:from services.schema_bootstrap import build_schema_registry
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:12:    section_name: str
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:19:    def __init__(self, section_name: str):
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:20:        registry = build_schema_registry()
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:21:        schema = registry.get_by_section(section_name)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:23:        self.ctx = PostingContext(section_name=section_name)
+/opt/bots/workinportugal_bot_staging/services/schema_flow_adapter.py:24:        self.state = FlowState(section_name=section_name)
+/opt/bots/workinportugal_bot_staging/services/publisher.py:29:            topic_id = None
+/opt/bots/workinportugal_bot_staging/services/publisher.py:31:                topic_id = Config.JOB_SEEKING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/services/publisher.py:33:                topic_id = Config.JOB_OFFERING_TOPIC_ID
+/opt/bots/workinportugal_bot_staging/services/publisher.py:39:                message_thread_id=topic_id,
+/opt/bots/workinportugal_bot_staging/services/publisher.py:52:                    topic_id=topic_id
+/opt/bots/workinportugal_bot_staging/services/schema_engine.py:8:from services.fsm_schema_registry import CategorySchema, StepDefinition
+/opt/bots/workinportugal_bot_staging/services/schema_bootstrap.py:5:from services.fsm_schema_registry import FsmSchemaRegistry
+/opt/bots/workinportugal_bot_staging/services/schema_bootstrap.py:8:def build_schema_registry() -> FsmSchemaRegistry:
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:3:from services.schema_bootstrap import build_schema_registry
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:8:    registry = build_schema_registry()
+/opt/bots/workinportugal_bot_staging/services/schema_smoke.py:9:    sections = registry.list_sections()
+/opt/bots/workinportugal_bot_staging/database.py:64:                    topic_id INTEGER,
+/opt/bots/workinportugal_bot_staging/database.py:127:                    topic_id INTEGER,
+/opt/bots/workinportugal_bot_staging/database.py:287:                SELECT id, mode, cities, description, name, created_at, message_id, chat_id, topic_id
+/opt/bots/workinportugal_bot_staging/database.py:301:                SELECT id, user_id, mode, cities, description, name, created_at, message_id, chat_id, topic_id
+/opt/bots/workinportugal_bot_staging/database.py:960:    def update_premium_post_publication(self, post_id: int, message_id: int, chat_id: int, topic_id: int = None) -> bool:
+/opt/bots/workinportugal_bot_staging/database.py:968:            topic_id: ID топика (опционально)
+/opt/bots/workinportugal_bot_staging/database.py:978:                SET message_id = ?, chat_id = ?, topic_id = ?, status = 'published', updated_at = ?
+/opt/bots/workinportugal_bot_staging/database.py:980:            """, (message_id, chat_id, topic_id, datetime.now(), post_id))
+/opt/bots/workinportugal_bot_staging/database.py:1114:                SELECT id, user_id, mode, cities, name, message_id, chat_id, topic_id, created_at
+/opt/bots/workinportugal_bot_staging/database.py:1133:                    'topic_id': posting['topic_id'],

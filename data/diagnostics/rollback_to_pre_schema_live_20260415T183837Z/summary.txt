@@ -1,0 +1,6 @@
+STATUS=rolled_back
+BASE=/opt/bots/workinportugal_bot_staging
+RESTORED_FROM=/tmp/workinportugal_predeploy_schema_live_20260415T182702Z.tar.gz
+PRE_FAIL_SNAPSHOT=/tmp/workinportugal_staging_before_rollback_20260415T183837Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/rollback_to_pre_schema_live_20260415T183837Z
+NEXT_STRATEGY=restart_from_clean_anchor_and_do_smaller_safe_slice

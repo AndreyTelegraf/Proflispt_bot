@@ -1,0 +1,10 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_predeploy_layer_c_router_v3_20260415T195520Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/layer_c_restaurants_router_v3_20260415T195520Z
+CHANGED=handlers/restaurants_schema.py,main.py
+SCOPE=layer_c_restaurants_v3
+LIVE_RESTAURANTS_ENABLED=yes
+LIVE_TALK_ENABLED=no
+ENTRYPOINTS=/restaurants,section:restaurants
+LEGACY_POSTING_HANDLER_UNCHANGED=yes

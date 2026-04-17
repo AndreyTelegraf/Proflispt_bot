@@ -1,0 +1,8 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_predeploy_layer_b_20260415T185410Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/layer_b_schema_engine_20260415T185410Z
+CHANGED=models/posting_context.py,services/fsm_schema_registry.py,services/schema_engine.py,services/schema_bootstrap.py,services/schema_flow_adapter.py,services/schema_smoke.py,config/fsm_schemas/restaurants.json,config/fsm_schemas/talk_to_me.json,healthcheck_local.sh,smoke_local.sh
+SCOPE=layer_b_only
+LIVE_HANDLERS_TOUCHED=no
+LIVE_MAIN_TOUCHED=no

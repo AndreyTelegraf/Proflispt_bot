@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.sqlite3
+*.db
+.env
+*.log
+bot.lock

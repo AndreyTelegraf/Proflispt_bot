@@ -1,0 +1,79 @@
+{
+  "schema_id": "restaurants_v1",
+  "section_name": "Рестораны",
+  "version": 1,
+  "steps": [
+    {
+      "step_id": "residency_gate",
+      "kind": "choice",
+      "field_name": "resides_in_portugal",
+      "prompt": "Справочник создан для поддержки наших иммигрантов в Португалии. Вы проживаете в Португалии? Ответьте: да или нет.",
+      "required": true,
+      "options": [
+        { "value": "yes", "aliases": ["да", "yes", "y"] },
+        { "value": "no", "aliases": ["нет", "no", "n"] }
+      ],
+      "stop_if_negative": true
+    },
+    {
+      "step_id": "place_name_and_address",
+      "kind": "location_or_text",
+      "field_name": "place_name_and_address",
+      "prompt": "Укажите название и адрес вашего заведения или отправьте точку на карте.",
+      "required": true,
+      "validation": { "max_len": 500 }
+    },
+    {
+      "step_id": "description",
+      "kind": "text",
+      "field_name": "description",
+      "prompt": "Опишите свои услуги, ассортимент, время работы и всё остальное, что вы считаете нужным сообщить потенциальным клиентам. 
+
+Пока не указывайте ни ссылки ни контакты, их можно будет добавить на следующих шагах.
+
+Максимальная длина текста в этом блоке – 1.200 знаков:",
+      "required": true,
+      "validation": { "max_len": 1200 }
+    },
+    {
+      "step_id": "social_links",
+      "kind": "text",
+      "field_name": "social_links",
+      "prompt": "Вставьте ссылки на соцсети или сайты вашего бизнеса, если они есть:",
+      "required": false,
+      "validation": { "max_len": 1200 }
+    },
+    {
+      "step_id": "telegram",
+      "kind": "text",
+      "field_name": "telegram",
+      "prompt": "Укажите ваше имя пользователя в Telegram, начиная с @.",
+      "required": true,
+      "validation": { "max_len": 100 }
+    },
+    {
+      "step_id": "phone_main",
+      "kind": "phone",
+      "field_name": "phone_main",
+      "prompt": "Укажите португальский номер телефона для основной связи, начиная с +351.",
+      "required": true,
+      "validation": { "regex": "^\\+351\\d{9}$" }
+    },
+    {
+      "step_id": "phone_whatsapp",
+      "kind": "phone",
+      "field_name": "phone_whatsapp",
+      "prompt": "Укажите номер телефона, к которому привязан WhatsApp для резервной связи, если отличается от основного. Можно оставить пустым.",
+      "required": false,
+      "validation": { "regex": "^\\+351\\d{9}$" }
+    },
+    {
+      "step_id": "contact_name",
+      "kind": "text",
+      "field_name": "contact_name",
+      "prompt": "Укажите название компании или имя представителя:",
+      "required": true,
+      "validation": { "max_len": 300 }
+    }
+  ]
+}

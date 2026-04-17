@@ -1,0 +1,6 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_predeploy_fix_local_smokes_20260415T184946Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/fix_local_smokes_20260415T184946Z
+CHANGED=healthcheck_local.sh,smoke_local.sh
+FIX=venv/.venv autodetect

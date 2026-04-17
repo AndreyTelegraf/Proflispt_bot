@@ -1,0 +1,9 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_layer_g_restaurants_premium_20260416T123932Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/layer_g_restaurants_premium_20260416T123932Z
+CHANGED=handlers/restaurants_schema.py
+SCOPE=layer_g_restaurants_premium
+FREE_FLOW_UNCHANGED=yes
+PREMIUM_ENTRY=restaurants_preview_button
+PREMIUM_REUSE=db.create_premium_post + existing_admin_approval

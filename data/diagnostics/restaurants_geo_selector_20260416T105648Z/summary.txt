@@ -1,0 +1,7 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_restaurants_geo_selector_20260416T105648Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_geo_selector_20260416T105648Z
+CHANGED=handlers/restaurants_schema.py
+SCOPE=restaurants_geo_selector
+FIX=geo_tags_migrated_to_buttons_with_custom_fallback

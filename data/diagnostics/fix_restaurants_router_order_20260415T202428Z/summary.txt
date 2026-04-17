@@ -1,0 +1,5 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_predeploy_fix_restaurants_router_order_20260415T202428Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/fix_restaurants_router_order_20260415T202428Z
+FIX=restaurants_schema_router moved before posting_router

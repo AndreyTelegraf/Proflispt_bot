@@ -1,0 +1,7 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_rewrite_restaurants_handler_v3_back_20260416T092526Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/rewrite_restaurants_handler_v3_back_20260416T092526Z
+CHANGED=handlers/restaurants_schema.py
+SCOPE=restaurants_back_navigation_slice
+FIX=real_step_back_navigation

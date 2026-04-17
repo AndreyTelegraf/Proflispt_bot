@@ -1,0 +1,81 @@
+{
+  "schema_id": "talk_to_me_v1",
+  "section_name": "Поговори",
+  "version": 1,
+  "steps": [
+    {
+      "step_id": "residency_gate",
+      "kind": "choice",
+      "field_name": "resides_in_portugal",
+      "prompt": "Справочник создан для поддержки наших иммигрантов в Португалии. Вы проживаете в Португалии? Ответьте: да или нет.",
+      "required": true,
+      "options": [
+        { "value": "yes", "aliases": ["да", "yes", "y"] },
+        { "value": "no", "aliases": ["нет", "no", "n"] }
+      ],
+      "stop_if_negative": true
+    },
+    {
+      "step_id": "disclaimer_intro",
+      "kind": "info",
+      "field_name": null,
+      "prompt": "Раздел «Поговори со мной» не имеет целью знакомства и профессиональную психотерапию, но и не исключает их.",
+      "required": false
+    },
+    {
+      "step_id": "profile_description",
+      "kind": "text",
+      "field_name": "profile_description",
+      "prompt": "Укажите ваш пол, приблизительный возраст, образование, социальное положение — всё опционально, но желательно.",
+      "required": false,
+      "validation": { "max_len": 1200 }
+    },
+    {
+      "step_id": "availability",
+      "kind": "text",
+      "field_name": "availability",
+      "prompt": "Укажите язык общения, дни и часы приёма, а также темы, которые вы не затрагиваете.",
+      "required": true,
+      "validation": { "max_len": 1200 }
+    },
+    {
+      "step_id": "telegram",
+      "kind": "text",
+      "field_name": "telegram",
+      "prompt": "Укажите ваше имя пользователя в Telegram, начиная с @.",
+      "required": true,
+      "validation": { "max_len": 100 }
+    },
+    {
+      "step_id": "phone_main",
+      "kind": "phone",
+      "field_name": "phone_main",
+      "prompt": "Укажите португальский номер телефона для основной связи, начиная с +351. Поле опционально, можно оставить пустым.",
+      "required": false,
+      "validation": { "regex": "^\\+351\\d{9}$" }
+    },
+    {
+      "step_id": "phone_whatsapp",
+      "kind": "phone",
+      "field_name": "phone_whatsapp",
+      "prompt": "Укажите номер телефона, к которому привязан WhatsApp для резервной связи, если отличается от основного. Поле опционально.",
+      "required": false,
+      "validation": { "regex": "^\\+351\\d{9}$" }
+    },
+    {
+      "step_id": "name",
+      "kind": "text",
+      "field_name": "name",
+      "prompt": "Укажите имя и фамилию. Поле опционально.",
+      "required": false,
+      "validation": { "max_len": 300 }
+    },
+    {
+      "step_id": "free_publication_notice",
+      "kind": "info",
+      "field_name": null,
+      "prompt": "Публикация в Справочнике бесплатная, но просим вас быть на связи по указанному в объявлении способу связи.",
+      "required": false
+    }
+  ]
+}

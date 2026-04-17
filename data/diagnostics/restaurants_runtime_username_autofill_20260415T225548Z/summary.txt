@@ -1,0 +1,7 @@
+STATUS=green
+BASE=/opt/bots/workinportugal_bot_staging
+BACKUP=/tmp/workinportugal_restaurants_runtime_username_autofill_20260415T225548Z.tar.gz
+OUT_DIR=/opt/bots/workinportugal_bot_staging/data/diagnostics/restaurants_runtime_username_autofill_20260415T225548Z
+CHANGED=handlers/restaurants_schema.py
+SCOPE=runtime_only
+FIX=telegram_username_autofill_without_schema_change
