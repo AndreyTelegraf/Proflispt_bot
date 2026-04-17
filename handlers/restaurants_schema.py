@@ -21,6 +21,7 @@ router = Router()
 STATE_INPUT = "restaurants_schema_waiting_input"
 STATE_CONFIRM = "restaurants_schema_waiting_confirmation"
 STATE_GEO_CUSTOM = "restaurants_schema_waiting_custom_geo"
+STATE_TELEGRAM_REQUIRED = "restaurants_schema_waiting_telegram_required"
 
 
 def get_back_button(back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
@@ -67,6 +68,14 @@ def _social_links_fast_keyboard() -> InlineKeyboardMarkup:
     builder.adjust(1)
     return builder.as_markup()
 
+def _whatsapp_fast_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Совпадает с основным", callback_data="restaurants:wa_same"))
+    builder.add(InlineKeyboardButton(text="Нет WhatsApp", callback_data="restaurants:wa_none"))
+    builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+    builder.adjust(1)
+    return builder.as_markup()
+
 def _step_reply_markup(step, *, back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
     if getattr(step, "field_name", "") == "social_links":
         return _social_links_fast_keyboard()
@@ -75,6 +84,15 @@ def _step_reply_markup(step, *, back_to: str = "restaurants:back") -> InlineKeyb
     return get_back_button(back_to)
 
 
+
+def _step_reply_markup(step, *, back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
+    if getattr(step, "field_name", "") == "phone_whatsapp":
+        return _whatsapp_fast_keyboard()
+    if getattr(step, "field_name", "") == "social_links":
+        return _social_links_fast_keyboard()
+    if getattr(step, "kind", None) == "choice":
+        return _choice_keyboard(step, back_to=back_to)
+    return get_back_button(back_to)
 
 def _next_prompt(schema, next_index: int) -> tuple[int, str]:
     prompts = []
@@ -101,9 +119,13 @@ def _previous_interactive_index(schema, current_index: int):
     idx = current_index - 1
     while idx >= 0:
         step = schema.steps[idx]
-        if getattr(step, "kind", None) != "info":
-            return idx
-        idx -= 1
+        if getattr(step, "kind", None) == "info":
+            idx -= 1
+            continue
+        if getattr(step, "field_name", None) == "telegram":
+            idx -= 1
+            continue
+        return idx
     return None
 
 
@@ -155,6 +177,113 @@ def _render_html(payload: dict) -> str:
         lines.append(f"<b>{html.escape(label)}:</b> {html.escape(clean)}")
 
     return "\n".join(lines).strip()
+
+
+def _username_value(user):
+    if not user:
+        return None
+    username = getattr(user, "username", None)
+    if not username:
+        return None
+    username = str(username).strip()
+    if not username:
+        return None
+    return f"@{username.lstrip('@')}"
+
+
+def _valid_pt_mobile(value: str) -> bool:
+    value = str(value or "").strip()
+    if len(value) != 13:
+        return False
+    if not value.startswith("+351"):
+        return False
+    if not value[4:].isdigit():
+        return False
+    return (
+        value.startswith("+35191")
+        or value.startswith("+35192")
+        or value.startswith("+35193")
+        or value.startswith("+35196")
+    )
+
+def _telegram_username_required_text() -> str:
+    return (
+        "Для публикации в справочнике нужен Telegram username.\n\n"
+        "Как создать @username в Telegram:\n"
+        "1. Откройте Настройки.\n"
+        "2. Зайдите в «Имя пользователя».\n"
+        "3. Создайте и сохраните @username.\n\n"
+        "После этого нажмите кнопку «@username создан»."
+    )
+
+
+def _telegram_username_required_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="@username создан", callback_data="restaurants:username_created"))
+    builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+    builder.adjust(1)
+    return builder.as_markup()
+
+
+async def _go_after_telegram_gate(target, actor_user, state: FSMContext, schema, payload: dict, next_index: int):
+    ctx = _make_ctx(payload)
+    username_value = _username_value(actor_user)
+    if not username_value:
+        await state.set_state(STATE_TELEGRAM_REQUIRED)
+        if hasattr(target, "edit_text"):
+            await target.edit_text(
+                _telegram_username_required_text(),
+                reply_markup=_telegram_username_required_keyboard()
+            )
+        else:
+            await target.answer(
+                _telegram_username_required_text(),
+                reply_markup=_telegram_username_required_keyboard()
+            )
+        return False, payload
+
+    ctx.set_value("telegram", username_value)
+    payload = ctx.data
+
+    next_index, next_prompt = _next_prompt(schema, next_index + 1)
+
+    await state.update_data(
+        restaurants_schema_active=True,
+        restaurants_schema_payload=payload,
+        restaurants_schema_step_index=next_index,
+    )
+
+    if next_index >= len(schema.steps):
+        builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+        builder.adjust(1)
+        if hasattr(target, "edit_text"):
+            await target.edit_text(
+                _confirmation_text(payload),
+                reply_markup=builder.as_markup()
+            )
+        else:
+            await target.answer(
+                _confirmation_text(payload),
+                reply_markup=builder.as_markup()
+            )
+        await state.set_state(STATE_CONFIRM)
+        return False, payload
+
+    next_step = schema.steps[next_index]
+    if hasattr(target, "edit_text"):
+        await target.edit_text(
+            next_prompt,
+            reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+        )
+    else:
+        await target.answer(
+            next_prompt,
+            reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+        )
+    await state.set_state(STATE_INPUT)
+    return False, payload
 
 
 def _make_ctx(payload: dict) -> PostingContext:
@@ -232,6 +361,8 @@ async def restaurants_back(callback: CallbackQuery, state: FSMContext):
 
     if current_state == STATE_GEO_CUSTOM:
         prev_index = _find_step_index(schema, "geo_tags")
+    elif current_state == STATE_TELEGRAM_REQUIRED:
+        prev_index = _find_step_index(schema, "social_links")
     elif current_state == STATE_CONFIRM:
         prev_index = _previous_interactive_index(schema, len(schema.steps))
     else:
@@ -383,8 +514,8 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
 
 
 
-@router.callback_query(F.data == "restaurants:social_none")
-async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == "restaurants:wa_same")
+async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if not data.get("restaurants_schema_active"):
         await callback.answer()
@@ -393,9 +524,14 @@ async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
     payload = data.get("restaurants_schema_payload", {})
     step_index = int(data.get("restaurants_schema_step_index", 0))
 
+    phone_main = str(payload.get("phone_main") or "").strip()
+    if not _valid_pt_mobile(phone_main):
+        await callback.answer("Сначала укажите корректный основной номер.", show_alert=True)
+        return
+
     schema = build_schema_registry().get_by_section("Рестораны")
     ctx = _make_ctx(payload)
-    ctx.set_value("social_links", "нет")
+    ctx.set_value("phone_whatsapp", phone_main)
 
     next_index, next_prompt = _next_prompt(schema, step_index + 1)
 
@@ -411,6 +547,147 @@ async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(ctx.data),
+            reply_markup=builder.as_markup()
+        )
+        await state.set_state(STATE_CONFIRM)
+        await callback.answer()
+        return
+
+    next_step = schema.steps[next_index]
+    await callback.message.edit_text(
+        next_prompt,
+        reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+    )
+    await state.set_state(STATE_INPUT)
+    await callback.answer()
+
+@router.callback_query(F.data == "restaurants:wa_none")
+async def restaurants_wa_none(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if not data.get("restaurants_schema_active"):
+        await callback.answer()
+        return
+
+    payload = data.get("restaurants_schema_payload", {})
+    step_index = int(data.get("restaurants_schema_step_index", 0))
+
+    schema = build_schema_registry().get_by_section("Рестораны")
+    ctx = _make_ctx(payload)
+    ctx.set_value("phone_whatsapp", "нет")
+
+    next_index, next_prompt = _next_prompt(schema, step_index + 1)
+
+    await state.update_data(
+        restaurants_schema_payload=ctx.data,
+        restaurants_schema_step_index=next_index,
+    )
+
+    if next_index >= len(schema.steps):
+        builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+        builder.adjust(1)
+        await callback.message.edit_text(
+            _confirmation_text(ctx.data),
+            reply_markup=builder.as_markup()
+        )
+        await state.set_state(STATE_CONFIRM)
+        await callback.answer()
+        return
+
+    next_step = schema.steps[next_index]
+    await callback.message.edit_text(
+        next_prompt,
+        reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+    )
+    await state.set_state(STATE_INPUT)
+    await callback.answer()
+
+@router.callback_query(F.data == "restaurants:username_created")
+async def restaurants_username_created(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    payload = data.get("restaurants_schema_payload", {})
+
+    schema = build_schema_registry().get_by_section("Рестораны")
+    telegram_index = _find_step_index(schema, "telegram")
+    if telegram_index is None:
+        await callback.answer("Шаг Telegram не найден.", show_alert=True)
+        return
+
+    username_value = _username_value(callback.from_user)
+    if not username_value:
+        await callback.answer("Telegram username пока не найден. Сначала создайте его в настройках.", show_alert=True)
+        return
+
+    ctx = _make_ctx(payload)
+    ctx.set_value("telegram", username_value)
+
+    next_index, next_prompt = _next_prompt(schema, telegram_index + 1)
+
+    await state.update_data(
+        restaurants_schema_active=True,
+        restaurants_schema_payload=ctx.data,
+        restaurants_schema_step_index=next_index,
+    )
+
+    if next_index >= len(schema.steps):
+        builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+        builder.adjust(1)
+        await callback.message.edit_text(
+            _confirmation_text(ctx.data),
+            reply_markup=builder.as_markup()
+        )
+        await state.set_state(STATE_CONFIRM)
+        await callback.answer()
+        return
+
+    next_step = schema.steps[next_index]
+    await callback.message.edit_text(
+        next_prompt,
+        reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+    )
+    await state.set_state(STATE_INPUT)
+    await callback.answer()
+
+
+@router.callback_query(F.data == "restaurants:social_none")
+async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if not data.get("restaurants_schema_active"):
+        await callback.answer()
+        return
+
+    payload = data.get("restaurants_schema_payload", {})
+    step_index = int(data.get("restaurants_schema_step_index", 0))
+
+    schema = build_schema_registry().get_by_section("Рестораны")
+    ctx = _make_ctx(payload)
+    ctx.set_value("social_links", "нет")
+    payload = ctx.data
+
+    next_index, next_prompt = _next_prompt(schema, step_index + 1)
+
+    if next_index < len(schema.steps):
+        next_step = schema.steps[next_index]
+        if getattr(next_step, "field_name", None) == "telegram":
+            await _go_after_telegram_gate(callback.message, callback.from_user, state, schema, payload, next_index)
+            await callback.answer()
+            return
+
+    await state.update_data(
+        restaurants_schema_payload=payload,
+        restaurants_schema_step_index=next_index,
+    )
+
+    if next_index >= len(schema.steps):
+        builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+        builder.adjust(1)
+        await callback.message.edit_text(
+            _confirmation_text(payload),
             reply_markup=builder.as_markup()
         )
         await state.set_state(STATE_CONFIRM)
@@ -442,6 +719,59 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
         ctx = _make_ctx(payload)
 
         step = engine.get_step(step_index)
+        field_name = getattr(step, "field_name", None)
+        raw = str(message.text or "").strip()
+
+        if field_name == "phone_main":
+            if not _valid_pt_mobile(raw):
+                await message.answer(
+                    "Неверный номер, перепроверьте",
+                    reply_markup=get_back_button("restaurants:back")
+                )
+                return
+
+        if field_name == "phone_whatsapp":
+            if raw.lower() in {"нет", "no", "none", ""}:
+                ctx.set_value("phone_whatsapp", "нет")
+                next_index, next_prompt = _next_prompt(schema, step_index + 1)
+
+                await state.update_data(
+                    restaurants_schema_active=True,
+                    restaurants_schema_payload=ctx.data,
+                    restaurants_schema_step_index=next_index,
+                )
+
+                if next_index >= len(schema.steps):
+                    builder = InlineKeyboardBuilder()
+                    builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+                    builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+                    builder.adjust(1)
+                    await message.answer(
+                        _confirmation_text(ctx.data),
+                        reply_markup=builder.as_markup()
+                    )
+                    await state.set_state(STATE_CONFIRM)
+                    return
+
+                next_step = schema.steps[next_index]
+                await message.answer(
+                    next_prompt,
+                    reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+                )
+                await state.set_state(STATE_INPUT)
+                return
+
+            if not _valid_pt_mobile(raw):
+                await message.answer(
+                    "Неверный номер, перепроверьте",
+                    reply_markup=_whatsapp_fast_keyboard()
+                )
+                return
+
+        if field_name == "telegram":
+            await _go_after_telegram_gate(message, message.from_user, state, schema, payload, step_index)
+            return
+
         if getattr(step, "kind", None) == "choice":
             await message.answer(
                 "Используйте кнопки ниже.",
@@ -449,7 +779,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             )
             return
 
-        result = engine.process_answer(step, message.text, ctx)
+        result = engine.process_answer(step, raw, ctx)
 
         if not result.accepted:
             await message.answer(
@@ -466,11 +796,18 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             )
             return
 
+        payload = ctx.data
         next_index, next_prompt = _next_prompt(schema, step_index + 1)
+
+        if next_index < len(schema.steps):
+            next_step = schema.steps[next_index]
+            if getattr(next_step, "field_name", None) == "telegram":
+                await _go_after_telegram_gate(message, message.from_user, state, schema, payload, next_index)
+                return
 
         await state.update_data(
             restaurants_schema_active=True,
-            restaurants_schema_payload=ctx.data,
+            restaurants_schema_payload=payload,
             restaurants_schema_step_index=next_index,
         )
 
@@ -481,7 +818,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             builder.adjust(1)
 
             await message.answer(
-                _confirmation_text(ctx.data),
+                _confirmation_text(payload),
                 reply_markup=builder.as_markup()
             )
             await state.set_state(STATE_CONFIRM)
@@ -501,7 +838,6 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             "Ошибка при обработке формы. Вернитесь в меню и попробуйте снова.",
             reply_markup=get_back_button("restaurants:back")
         )
-
 
 @router.callback_query(F.data == "confirm:restaurants_post")
 async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state: FSMContext):
