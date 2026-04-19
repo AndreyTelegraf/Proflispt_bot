@@ -106,13 +106,13 @@
       }
     },
     {
-      "step_id": "telegram",
+      "step_id": "review_links",
+      "field_name": "review_links",
       "kind": "text",
-      "field_name": "telegram",
-      "prompt": "Укажите ваше имя пользователя в Telegram, начиная с @.",
+      "prompt": "Добавьте ссылки на отзывы о ваших услугах (только из раздела Отзывы Справочника):",
       "required": true,
       "validation": {
-        "max_len": 100
+        "max_len": 1200
       }
     },
     {
