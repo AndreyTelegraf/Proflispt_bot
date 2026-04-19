@@ -73,7 +73,7 @@ def _social_links_fast_keyboard() -> InlineKeyboardMarkup:
 def _reviews_fast_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Отзывов пока нет", callback_data="restaurants:reviews_none"))
-    builder.add(InlineKeyboardButton(text="Отзывы", url="https://t.me/proflistpt/12860"))
+    builder.add(InlineKeyboardButton(text="Отзывы", url="https://t.me/c/proflistpt/12860"))
     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
     builder.adjust(1)
     return builder.as_markup()
@@ -98,7 +98,7 @@ def _normalize_review_links(raw: str) -> str:
 def _reviews_invalid_html() -> str:
     return (
         'Неверная ссылка на отзыв. Используйте только ссылки из раздела '
-        '<a href="https://t.me/proflistpt/12860">Отзывы</a>. '
+        '<a href="https://t.me/c/proflistpt/12860">Отзывы</a>. '
         'Допустимый формат: https://t.me/proflistpt/12860/&lt;id&gt;'
     )
 
@@ -172,8 +172,8 @@ def _confirmation_text(payload: dict) -> str:
     rows = [
         ("Название и адрес", payload.get("place_name_and_address")),
         ("Описание", payload.get("description")),
-        ("Ссылки", social_value if social_value and social_value.lower() not in {"нет", "no", "none"} else None),
-        ("Отзывы", review_value if review_value and review_value.lower() not in {"нет", "no", "none"} else None),
+        ("Ссылки", "есть" if social_value and social_value.lower() not in {"нет", "no", "none"} else None),
+        ("Отзывы", "есть" if review_value and review_value.lower() not in {"нет", "no", "none"} else None),
         ("Telegram", payload.get("telegram")),
         ("Телефон", payload.get("phone_main")),
         ("WhatsApp", payload.get("phone_whatsapp")),
@@ -192,6 +192,7 @@ def _confirmation_text(payload: dict) -> str:
         lines.append(f"{label}: {clean}")
 
     return "\n".join(lines).strip()
+
 
 def _render_html(payload: dict) -> str:
     rows = [
@@ -466,8 +467,9 @@ async def restaurants_geo_custom_input(message: Message, state: FSMContext):
         b.adjust(1)
         await message.answer(
             _confirmation_text(ctx.data),
-            reply_markup=b.as_markup()
-        )
+            reply_markup=b.as_markup(),
+            disable_web_page_preview=True
+)
         await state.set_state(STATE_CONFIRM)
         return
 
@@ -532,8 +534,9 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
 
             await callback.message.edit_text(
                 _confirmation_text(ctx.data),
-                reply_markup=builder.as_markup()
-            )
+                reply_markup=builder.as_markup(),
+                disable_web_page_preview=True
+)
             await state.set_state(STATE_CONFIRM)
             await callback.answer()
             return
@@ -591,8 +594,9 @@ async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(ctx.data),
-            reply_markup=builder.as_markup()
-        )
+            reply_markup=builder.as_markup(),
+            disable_web_page_preview=True
+)
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
         return
@@ -633,8 +637,9 @@ async def restaurants_wa_none(callback: CallbackQuery, state: FSMContext):
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(ctx.data),
-            reply_markup=builder.as_markup()
-        )
+            reply_markup=builder.as_markup(),
+            disable_web_page_preview=True
+)
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
         return
@@ -719,8 +724,9 @@ async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(payload),
-            reply_markup=builder.as_markup()
-        )
+            reply_markup=builder.as_markup(),
+            disable_web_page_preview=True
+)
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
         return
@@ -768,8 +774,9 @@ async def restaurants_reviews_none(callback: CallbackQuery, state: FSMContext):
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(payload),
-            reply_markup=builder.as_markup()
-        )
+            reply_markup=builder.as_markup(),
+            disable_web_page_preview=True
+)
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
         return
@@ -825,8 +832,9 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                     builder.adjust(1)
                     await message.answer(
                         _confirmation_text(payload),
-                        reply_markup=builder.as_markup()
-                    )
+                        reply_markup=builder.as_markup(),
+                        disable_web_page_preview=True
+)
                     await state.set_state(STATE_CONFIRM)
                     return
 
@@ -869,8 +877,9 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                 builder.adjust(1)
                 await message.answer(
                     _confirmation_text(payload),
-                    reply_markup=builder.as_markup()
-                )
+                    reply_markup=builder.as_markup(),
+                    disable_web_page_preview=True
+)
                 await state.set_state(STATE_CONFIRM)
                 return
 
@@ -908,8 +917,9 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                     builder.adjust(1)
                     await message.answer(
                         _confirmation_text(ctx.data),
-                        reply_markup=builder.as_markup()
-                    )
+                        reply_markup=builder.as_markup(),
+                        disable_web_page_preview=True
+)
                     await state.set_state(STATE_CONFIRM)
                     return
 
@@ -979,8 +989,9 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
 
             await message.answer(
                 _confirmation_text(payload),
-                reply_markup=builder.as_markup()
-            )
+                reply_markup=builder.as_markup(),
+                disable_web_page_preview=True
+)
             await state.set_state(STATE_CONFIRM)
             return
 
