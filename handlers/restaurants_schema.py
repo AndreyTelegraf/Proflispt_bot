@@ -221,7 +221,10 @@ def _render_html(payload: dict) -> str:
 
     geo_tags = _split_lines(payload.get("geo_tags"))
     if geo_tags:
-        lines.append(html.escape(geo_tags[0]))
+        first_geo = geo_tags[0]
+        if not first_geo.startswith("#"):
+            first_geo = "#" + first_geo
+        lines.append(html.escape(first_geo))
 
     description = _norm(payload.get("description"))
     if description:
@@ -232,7 +235,7 @@ def _render_html(payload: dict) -> str:
                 lines.append(html.escape(part))
 
     for link in _split_lines(payload.get("social_links")):
-        lines.append(html.escape(link))
+        lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
 
     telegram = _norm(payload.get("telegram"))
     if telegram:
@@ -255,7 +258,7 @@ def _render_html(payload: dict) -> str:
         if lines:
             lines.append("")
         for link in review_links:
-            lines.append("- " + html.escape(link))
+            lines.append("- " + f'<a href="{html.escape(link, quote=True)}">Отзыв</a>')
 
     return "\n".join(lines).strip()
 
