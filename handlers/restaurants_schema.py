@@ -166,14 +166,11 @@ def _previous_interactive_index(schema, current_index: int):
 
 
 def _confirmation_text(payload: dict) -> str:
-    social_value = str(payload.get("social_links") or "").strip()
-    review_value = str(payload.get("review_links") or "").strip()
-
     rows = [
         ("Название и адрес", payload.get("place_name_and_address")),
         ("Описание", payload.get("description")),
-        ("Ссылки", "есть" if social_value and social_value.lower() not in {"нет", "no", "none"} else None),
-        ("Отзывы", "есть" if review_value and review_value.lower() not in {"нет", "no", "none"} else None),
+        ("Ссылки", payload.get("social_links")),
+        ("Отзывы", payload.get("review_links")),
         ("Telegram", payload.get("telegram")),
         ("Телефон", payload.get("phone_main")),
         ("WhatsApp", payload.get("phone_whatsapp")),
@@ -189,6 +186,15 @@ def _confirmation_text(payload: dict) -> str:
             continue
         if clean.lower() in {"нет", "no", "none"} and label != "Описание":
             continue
+
+        if label in {"Ссылки", "Отзывы"}:
+            links = [part.strip() for part in clean.splitlines() if part.strip()]
+            if not links:
+                continue
+            lines.append(f"{label}:")
+            lines.extend(links)
+            continue
+
         lines.append(f"{label}: {clean}")
 
     return "\n".join(lines).strip()
@@ -287,9 +293,17 @@ async def _go_after_telegram_gate(target, actor_user, state: FSMContext, schema,
 
     async def _show_text(text: str, reply_markup):
         if _can_edit_target_message(target):
-            await target.edit_text(text, reply_markup=reply_markup)
+            await target.edit_text(
+                text,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
         else:
-            await target.answer(text, reply_markup=reply_markup)
+            await target.answer(
+                text,
+                reply_markup=reply_markup,
+                disable_web_page_preview=True
+            )
 
     ctx = _make_ctx(payload)
     username_value = _username_value(actor_user)
