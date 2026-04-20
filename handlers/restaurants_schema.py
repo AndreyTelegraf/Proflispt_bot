@@ -201,42 +201,61 @@ def _confirmation_text(payload: dict) -> str:
 
 
 def _render_html(payload: dict) -> str:
-    rows = [
-        ("Название и адрес", payload.get("place_name_and_address")),
-        ("Описание", payload.get("description")),
-        ("Ссылки", payload.get("social_links")),
-        ("Отзывы", payload.get("review_links")),
-        ("Telegram", payload.get("telegram")),
-        ("Телефон", payload.get("phone_main")),
-        ("WhatsApp", payload.get("phone_whatsapp")),
-        ("Контакт", payload.get("contact_name")),
-    ]
-
-    lines = ["<b>Рестораны</b>", ""]
-    for label, value in rows:
+    def _norm(value: object) -> str:
         if value is None:
-            continue
+            return ""
         clean = str(value).strip()
         if not clean:
-            continue
-        if clean.lower() in {"нет", "no", "none"} and label != "Описание":
-            continue
+            return ""
+        if clean.lower() in {"нет", "no", "none"}:
+            return ""
+        return clean
 
-        if label == "Ссылки":
-            links = [part.strip() for part in clean.splitlines() if part.strip()]
-            if links:
-                first_link = links[0]
-                lines.append(f'<b>{html.escape(label)}:</b> <a href="{html.escape(first_link, quote=True)}">Ссылки</a>')
-            continue
+    def _split_lines(value: object) -> list[str]:
+        clean = _norm(value)
+        if not clean:
+            return []
+        return [part.strip() for part in clean.splitlines() if part.strip()]
 
-        if label == "Отзывы":
-            links = [part.strip() for part in clean.splitlines() if part.strip()]
-            if links:
-                first_link = links[0]
-                lines.append(f'<b>{html.escape(label)}:</b> <a href="{html.escape(first_link, quote=True)}">Отзывы</a>')
-            continue
+    lines: list[str] = []
 
-        lines.append(f"<b>{html.escape(label)}:</b> {html.escape(clean)}")
+    geo_tags = _split_lines(payload.get("geo_tags"))
+    if geo_tags:
+        lines.append(html.escape(geo_tags[0]))
+
+    description = _norm(payload.get("description"))
+    if description:
+        desc_lines = [part.strip() for part in description.splitlines() if part.strip()]
+        if desc_lines:
+            lines.append("- " + html.escape(desc_lines[0]))
+            for part in desc_lines[1:]:
+                lines.append(html.escape(part))
+
+    for link in _split_lines(payload.get("social_links")):
+        lines.append(html.escape(link))
+
+    telegram = _norm(payload.get("telegram"))
+    if telegram:
+        lines.append(html.escape(telegram))
+
+    phone_main = _norm(payload.get("phone_main"))
+    if phone_main:
+        lines.append(html.escape(phone_main))
+
+    phone_whatsapp = _norm(payload.get("phone_whatsapp"))
+    if phone_whatsapp:
+        lines.append(html.escape(phone_whatsapp))
+
+    contact_name = _norm(payload.get("contact_name"))
+    if contact_name:
+        lines.append("- " + html.escape(contact_name))
+
+    review_links = _split_lines(payload.get("review_links"))
+    if review_links:
+        if lines:
+            lines.append("")
+        for link in review_links:
+            lines.append("- " + html.escape(link))
 
     return "\n".join(lines).strip()
 
