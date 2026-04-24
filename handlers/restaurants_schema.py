@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 import logging
 import re
 
@@ -11,6 +12,7 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import Config
+from database import db
 from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
@@ -23,6 +25,7 @@ STATE_INPUT = "restaurants_schema_waiting_input"
 STATE_CONFIRM = "restaurants_schema_waiting_confirmation"
 STATE_GEO_CUSTOM = "restaurants_schema_waiting_custom_geo"
 STATE_TELEGRAM_REQUIRED = "restaurants_schema_waiting_telegram_required"
+STATE_PREMIUM_MEDIA = "restaurants_schema_waiting_premium_media"
 
 
 def get_back_button(back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
@@ -73,10 +76,129 @@ def _social_links_fast_keyboard() -> InlineKeyboardMarkup:
 def _reviews_fast_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Отзывов пока нет", callback_data="restaurants:reviews_none"))
-    builder.add(InlineKeyboardButton(text="Отзывы", url="https://t.me/c/proflistpt/12860"))
+    builder.add(InlineKeyboardButton(text="Отзывы", url="https://t.me/proflistpt/12860"))
     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
     builder.adjust(1)
     return builder.as_markup()
+
+
+def _premium_media_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Готово, отправить на модерацию", callback_data="restaurants:premium_submit"))
+    builder.add(InlineKeyboardButton(text="← Назад к превью", callback_data="restaurants:premium_cancel"))
+    builder.adjust(1)
+    return builder.as_markup()
+
+
+def _media_payload_from_message(message: Message) -> dict | None:
+    if message.photo:
+        best = message.photo[-1]
+        return {"type": "photo", "file_id": best.file_id}
+    if message.video:
+        return {"type": "video", "file_id": message.video.file_id}
+    return None
+
+
+def _normalize_geo_tags_for_db(value: object) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return json.dumps([], ensure_ascii=False)
+
+    parts = []
+    for chunk in raw.replace(",", " ").split():
+        clean = chunk.strip().lstrip("#").lower()
+        if clean:
+            parts.append(clean)
+
+    return json.dumps(parts, ensure_ascii=False)
+
+
+async def _upsert_premium_media_status(message: Message, state: FSMContext, text: str):
+    data = await state.get_data()
+    status_message_id = data.get("restaurants_premium_status_message_id")
+
+    if status_message_id:
+        try:
+            await message.bot.edit_message_text(
+                chat_id=message.chat.id,
+                message_id=status_message_id,
+                text=text,
+                reply_markup=_premium_media_keyboard(),
+                disable_web_page_preview=True,
+            )
+            return
+        except Exception:
+            pass
+
+    sent = await message.answer(
+        text,
+        reply_markup=_premium_media_keyboard(),
+        disable_web_page_preview=True,
+    )
+    await state.update_data(restaurants_premium_status_message_id=sent.message_id)
+
+
+async def _premium_notify_admin(bot, premium_post_id: int, payload: dict, media_list: list[dict]):
+    from aiogram.types import InputMediaPhoto, InputMediaVideo
+
+    admin_chat_id = 336224597
+
+    lines = [
+        "<b>Новая премиум-заявка</b>",
+        "",
+        f"ID: {premium_post_id}",
+        "Раздел: Рестораны",
+        "",
+        _render_html(payload),
+        "",
+        f"Медиа: {len(media_list)}",
+    ]
+    text = "\n".join(lines).strip()
+
+    group = []
+    for idx, item in enumerate(media_list[:10]):
+        media_type = item.get("type")
+        file_id = item.get("file_id")
+        if not file_id:
+            continue
+        caption = text if idx == 0 else None
+        if media_type == "photo":
+            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+        elif media_type == "video":
+            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+
+    if group:
+        try:
+            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+        except Exception:
+            await bot.send_message(
+                chat_id=admin_chat_id,
+                text=text,
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+    else:
+        await bot.send_message(
+            chat_id=admin_chat_id,
+            text=text,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+
+    controls = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="Одобрить", callback_data=f"admin:approve_premium:{premium_post_id}"),
+            InlineKeyboardButton(text="Отклонить", callback_data=f"admin:reject_premium:{premium_post_id}"),
+        ],
+        [InlineKeyboardButton(text="Список заявок", callback_data="admin:list_premium")],
+    ])
+
+    await bot.send_message(
+        chat_id=admin_chat_id,
+        text=f"Управление заявкой #{premium_post_id}",
+        reply_markup=controls,
+        disable_web_page_preview=True,
+    )
 
 
 def _extract_review_links(raw: str) -> list[str]:
@@ -166,38 +288,7 @@ def _previous_interactive_index(schema, current_index: int):
 
 
 def _confirmation_text(payload: dict) -> str:
-    rows = [
-        ("Название и адрес", payload.get("place_name_and_address")),
-        ("Описание", payload.get("description")),
-        ("Ссылки", payload.get("social_links")),
-        ("Отзывы", payload.get("review_links")),
-        ("Telegram", payload.get("telegram")),
-        ("Телефон", payload.get("phone_main")),
-        ("WhatsApp", payload.get("phone_whatsapp")),
-        ("Контакт", payload.get("contact_name")),
-    ]
-
-    lines = ["Проверьте объявление перед публикацией:", "Раздел: Рестораны", ""]
-    for label, value in rows:
-        if value is None:
-            continue
-        clean = str(value).strip()
-        if not clean:
-            continue
-        if clean.lower() in {"нет", "no", "none"} and label != "Описание":
-            continue
-
-        if label in {"Ссылки", "Отзывы"}:
-            links = [part.strip() for part in clean.splitlines() if part.strip()]
-            if not links:
-                continue
-            lines.append(f"{label}:")
-            lines.extend(links)
-            continue
-
-        lines.append(f"{label}: {clean}")
-
-    return "\n".join(lines).strip()
+    return _render_html(payload)
 
 
 def _render_html(payload: dict) -> str:
@@ -318,13 +409,15 @@ async def _go_after_telegram_gate(target, actor_user, state: FSMContext, schema,
             await target.edit_text(
                 text,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+            parse_mode="HTML"
             )
         else:
             await target.answer(
                 text,
                 reply_markup=reply_markup,
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+            parse_mode="HTML"
             )
 
     ctx = _make_ctx(payload)
@@ -349,6 +442,7 @@ async def _go_after_telegram_gate(target, actor_user, state: FSMContext, schema,
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await _show_text(
@@ -499,12 +593,14 @@ async def restaurants_geo_custom_input(message: Message, state: FSMContext):
     if next_index >= len(schema.steps):
         b = InlineKeyboardBuilder()
         b.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        b.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
         b.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         b.adjust(1)
         await message.answer(
             _confirmation_text(ctx.data),
             reply_markup=b.as_markup(),
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
+            parse_mode="HTML"
 )
         await state.set_state(STATE_CONFIRM)
         return
@@ -565,13 +661,15 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
         if next_index >= len(schema.steps):
             builder = InlineKeyboardBuilder()
             builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+            builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
             builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
             builder.adjust(1)
 
             await callback.message.edit_text(
                 _confirmation_text(ctx.data),
                 reply_markup=builder.as_markup(),
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+            parse_mode="HTML"
 )
             await state.set_state(STATE_CONFIRM)
             await callback.answer()
@@ -626,12 +724,14 @@ async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(ctx.data),
             reply_markup=builder.as_markup(),
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
+            parse_mode="HTML"
 )
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
@@ -669,12 +769,14 @@ async def restaurants_wa_none(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(ctx.data),
             reply_markup=builder.as_markup(),
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
+            parse_mode="HTML"
 )
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
@@ -756,12 +858,14 @@ async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(payload),
             reply_markup=builder.as_markup(),
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
+            parse_mode="HTML"
 )
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
@@ -806,12 +910,14 @@ async def restaurants_reviews_none(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
             _confirmation_text(payload),
             reply_markup=builder.as_markup(),
-            disable_web_page_preview=True
+            disable_web_page_preview=True,
+            parse_mode="HTML"
 )
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
@@ -864,12 +970,14 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                 if next_index >= len(schema.steps):
                     builder = InlineKeyboardBuilder()
                     builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+                    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
                     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
                     builder.adjust(1)
                     await message.answer(
                         _confirmation_text(payload),
                         reply_markup=builder.as_markup(),
-                        disable_web_page_preview=True
+                        disable_web_page_preview=True,
+            parse_mode="HTML"
 )
                     await state.set_state(STATE_CONFIRM)
                     return
@@ -909,12 +1017,14 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             if next_index >= len(schema.steps):
                 builder = InlineKeyboardBuilder()
                 builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+                builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
                 builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
                 builder.adjust(1)
                 await message.answer(
                     _confirmation_text(payload),
                     reply_markup=builder.as_markup(),
-                    disable_web_page_preview=True
+                    disable_web_page_preview=True,
+            parse_mode="HTML"
 )
                 await state.set_state(STATE_CONFIRM)
                 return
@@ -949,12 +1059,14 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                 if next_index >= len(schema.steps):
                     builder = InlineKeyboardBuilder()
                     builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+                    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
                     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
                     builder.adjust(1)
                     await message.answer(
                         _confirmation_text(ctx.data),
                         reply_markup=builder.as_markup(),
-                        disable_web_page_preview=True
+                        disable_web_page_preview=True,
+            parse_mode="HTML"
 )
                     await state.set_state(STATE_CONFIRM)
                     return
@@ -1020,13 +1132,15 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
         if next_index >= len(schema.steps):
             builder = InlineKeyboardBuilder()
             builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+            builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
             builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
             builder.adjust(1)
 
             await message.answer(
                 _confirmation_text(payload),
                 reply_markup=builder.as_markup(),
-                disable_web_page_preview=True
+                disable_web_page_preview=True,
+            parse_mode="HTML"
 )
             await state.set_state(STATE_CONFIRM)
             return
@@ -1045,6 +1159,150 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             "Ошибка при обработке формы. Вернитесь в меню и попробуйте снова.",
             reply_markup=get_back_button("restaurants:back")
         )
+
+@router.callback_query(F.data == "restaurants:premium")
+async def restaurants_premium_start(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    if not data.get("restaurants_schema_active"):
+        await callback.answer("Сессия публикации не найдена.")
+        return
+
+    payload = dict(data.get("restaurants_schema_payload", {}))
+    await state.update_data(
+        restaurants_schema_active=True,
+        restaurants_schema_payload=payload,
+        restaurants_premium_media=[],
+        restaurants_premium_status_message_id=callback.message.message_id,
+    )
+    await state.set_state(STATE_PREMIUM_MEDIA)
+
+    await callback.message.edit_text(
+        "Отправьте фото или видео для премиум-публикации. Можно отправить несколько файлов подряд.\n\nКогда закончите, нажмите «Готово, отправить на модерацию».",
+        reply_markup=_premium_media_keyboard(),
+        disable_web_page_preview=True,
+    )
+    await callback.answer()
+
+
+@router.message(StateFilter(STATE_PREMIUM_MEDIA), F.photo | F.video)
+async def restaurants_premium_media_input(message: Message, state: FSMContext):
+    media_item = _media_payload_from_message(message)
+    if not media_item:
+        await _upsert_premium_media_status(message, state, "Поддерживаются только фото или видео.")
+        return
+
+    data = await state.get_data()
+    media_list = list(data.get("restaurants_premium_media", []))
+
+    if len(media_list) >= 10:
+        await _upsert_premium_media_status(message, state, "Можно добавить максимум 10 файлов.")
+        return
+
+    media_list.append(media_item)
+    await state.update_data(restaurants_premium_media=media_list)
+
+    await _upsert_premium_media_status(
+        message,
+        state,
+        f"Добавлено файлов: {len(media_list)}. Можно отправить ещё или нажать «Готово, отправить на модерацию».",
+    )
+
+
+@router.message(StateFilter(STATE_PREMIUM_MEDIA))
+async def restaurants_premium_wrong_input(message: Message, state: FSMContext):
+    await _upsert_premium_media_status(
+        message,
+        state,
+        "Нужно отправить фото или видео. Когда закончите, нажмите «Готово, отправить на модерацию».",
+    )
+
+
+@router.callback_query(F.data == "restaurants:premium_cancel")
+async def restaurants_premium_cancel(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    payload = dict(data.get("restaurants_schema_payload", {}))
+
+    await state.update_data(
+        restaurants_premium_media=[],
+        restaurants_premium_status_message_id=None,
+    )
+    await state.set_state(STATE_CONFIRM)
+
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
+    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+    builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
+    builder.adjust(1)
+
+    await callback.message.edit_text(
+        _confirmation_text(payload),
+        reply_markup=builder.as_markup(),
+        disable_web_page_preview=True,
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "restaurants:premium_submit")
+async def restaurants_premium_submit(callback: CallbackQuery, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state != STATE_PREMIUM_MEDIA:
+        await callback.answer()
+        return
+
+    data = await state.get_data()
+    if not data.get("restaurants_schema_active"):
+        await callback.answer("Сессия публикации не найдена.", show_alert=True)
+        return
+
+    payload = dict(data.get("restaurants_schema_payload", {}))
+    media_list = list(data.get("restaurants_premium_media", []))
+
+    if not media_list:
+        await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
+        return
+
+    first_media = media_list[0]
+
+    try:
+        user_db_id = db.create_user(
+            telegram_id=callback.from_user.id,
+            username=callback.from_user.username,
+            first_name=callback.from_user.first_name,
+            last_name=callback.from_user.last_name,
+        )
+
+        premium_post_id = db.create_premium_post(
+            user_id=user_db_id,
+            mode="restaurants",
+            cities=_normalize_geo_tags_for_db(payload.get("geo_tags")),
+            description=payload.get("description", ""),
+            social_media=payload.get("social_links", ""),
+            telegram_username=payload.get("telegram", ""),
+            phone_main=payload.get("phone_main", ""),
+            phone_whatsapp=payload.get("phone_whatsapp", ""),
+            name=payload.get("contact_name", ""),
+            media_file_id=first_media.get("file_id"),
+            media_type=first_media.get("type"),
+            media_list=media_list,
+            admin_notes=json.dumps({
+                "review_links": payload.get("review_links", "")
+            }, ensure_ascii=False),
+        )
+
+        await _premium_notify_admin(callback.bot, premium_post_id, payload, media_list)
+
+        await state.clear()
+        await callback.message.edit_text(
+            "Премиум-заявка отправлена на модерацию. Администратор проверит публикацию и свяжется с вами.",
+            reply_markup=get_back_button("restaurants:back"),
+            disable_web_page_preview=True,
+        )
+        await callback.answer()
+
+    except Exception as e:
+        logger.exception("Failed to submit restaurants premium posting: %s", e)
+        await callback.answer("Ошибка при отправке премиум-заявки.", show_alert=True)
+
 
 @router.callback_query(F.data == "confirm:restaurants_post")
 async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state: FSMContext):
@@ -1081,7 +1339,9 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
             message_link = None
 
         success_text = f"Объявление опубликовано. Ссылка: {message_link}" if message_link else "Объявление опубликовано."
-        await callback.message.edit_text(success_text, reply_markup=get_back_button("restaurants:back"))
+        builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="В главное меню", callback_data="go:main"))
+        await callback.message.edit_text(success_text, reply_markup=builder.as_markup())
         await callback.answer()
 
     except Exception as e:

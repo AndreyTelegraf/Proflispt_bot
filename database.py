@@ -832,13 +832,14 @@ class Database:
                 INSERT INTO premium_posts (
                     user_id, mode, cities, description, social_media, 
                     telegram_username, phone_main, phone_whatsapp, name,
-                    media_file_id, media_type, media_list, payment_status, payment_amount
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    media_file_id, media_type, media_list, payment_status, payment_amount, admin_notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id, data.get('mode'), data.get('cities'), data.get('description'),
                 data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
                 data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
-                data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending', 50.00
+                data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending', 50.00,
+                data.get('admin_notes')
             ))
             
             post_id = cursor.lastrowid

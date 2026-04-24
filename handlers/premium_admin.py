@@ -4,7 +4,7 @@
 
 import logging
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
 from services.formatting import format_premium_posting, format_premium_posting_html
 
@@ -75,6 +75,16 @@ async def admin_approve_premium(callback: CallbackQuery):
                             f"#{p.lstrip('#').lower()}" for p in parts if p
                         )
 
+            import json
+
+            review_links = ""
+            if post.get("admin_notes"):
+                try:
+                    notes = json.loads(post["admin_notes"])
+                    review_links = notes.get("review_links", "")
+                except Exception:
+                    pass
+
             restaurants_payload = {
                 "geo_tags": geo_tags,
                 "description": post.get("description", ""),
@@ -83,6 +93,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 "phone_main": post.get("phone_main", ""),
                 "phone_whatsapp": post.get("phone_whatsapp", ""),
                 "contact_name": post.get("name", ""),
+                "review_links": review_links,
             }
             post_text = _render_html(restaurants_payload)
         else:
@@ -102,14 +113,16 @@ async def admin_approve_premium(callback: CallbackQuery):
         # Publish with media
         published_message = None
         
-        # Parse media_list from JSON string
+        # Parse media_list from DB. get_premium_post() may already return a list.
         import json
         media_list = []
-        if post.get('media_list'):
+        raw_media_list = post.get('media_list')
+        if isinstance(raw_media_list, list):
+            media_list = raw_media_list
+        elif raw_media_list:
             try:
-                media_list = json.loads(post['media_list'])
+                media_list = json.loads(raw_media_list)
             except (json.JSONDecodeError, TypeError):
-                # Fallback to empty list if parsing fails
                 media_list = []
         
         if media_list:
@@ -188,17 +201,36 @@ async def admin_approve_premium(callback: CallbackQuery):
             logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
         
         # Notify user
-        user_text = (
-            f"✅ <b>Ваш премиум-пост #{post_id} одобрен и опубликован!</b>\n\n"
-            "Оплата подтверждена администратором.\n"
-            "Пост успешно опубликован в канале.\n"
-            "Спасибо за использование премиум-услуги!"
-        )
-        
+        message_link = None
+        if published_message:
+            try:
+                chat_info = await callback.bot.get_chat(Config.CHANNEL_ID)
+                if chat_info.username:
+                    message_link = f"https://t.me/{chat_info.username}/{published_message.message_id}"
+            except Exception as e:
+                logger.warning(f"Could not build premium post link: {e}")
+
+        if message_link:
+            user_text = (
+                "Ваше объявление с медиа опубликовано!\n"
+                f"Ссылка: {message_link}\n\n"
+                "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
+            )
+        else:
+            user_text = (
+                "Ваше объявление с медиа опубликовано!\n\n"
+                "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
+            )
+
+        main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+        ])
+
         await callback.bot.send_message(
             chat_id=user['telegram_id'],
             text=user_text,
-            parse_mode="HTML"
+            reply_markup=main_menu_keyboard,
+            disable_web_page_preview=True,
         )
         
         # Update admin message
