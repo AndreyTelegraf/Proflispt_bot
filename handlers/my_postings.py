@@ -95,8 +95,9 @@ async def show_my_postings(callback: CallbackQuery):
     
     user_id_db = user['id']
     postings = db.get_user_active_postings(user_id_db)
-    
-    if not postings:
+    restaurant_posts = db.get_user_published_restaurant_premium_posts(user_id_db)
+
+    if not postings and not restaurant_posts:
         await callback.message.edit_text(
             "📋 Мои объявления\n\n"
             "У вас пока нет активных объявлений\\.\n"
@@ -110,16 +111,16 @@ async def show_my_postings(callback: CallbackQuery):
         except:
             pass
         return
-    
+
     # Create posting cards
     cards = []
     for posting in postings[:3]:
         card_content = format_posting_card(posting)
         cards.append(card_content)
-    
+
     # Join cards with separators
     cards_text = "\n\n_____________\n\n".join(cards)
-    
+
     # Create keyboard with management buttons
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
     for i, posting in enumerate(postings[:3], 1):
@@ -127,16 +128,32 @@ async def show_my_postings(callback: CallbackQuery):
             text=f"Управлять объявлением {i}",
             callback_data=f"posting_{posting['id']}"
         )])
-    
+
+    # Restaurant premium posts section
+    restaurant_section = ""
+    if restaurant_posts:
+        restaurant_section = "\n\n_____________\n\n🍽 Рестораны (опубликованные)\n"
+        for post in restaurant_posts:
+            cities = post['cities']
+            if isinstance(cities, list):
+                cities_str = ", ".join(str(c) for c in cities)
+            else:
+                cities_str = str(cities)
+            restaurant_section += f"\n{post['name']} ({cities_str})"
+            keyboard.inline_keyboard.append([InlineKeyboardButton(
+                text="Переопубликовать — 10 €",
+                callback_data=f"repost_premium_{post['id']}"
+            )])
+
     # Add back button
     keyboard.inline_keyboard.append([InlineKeyboardButton(
         text="← Назад",
         callback_data="go:main"
     )])
-    
+
     await callback.message.edit_text(
         f"📋 Мои объявления\n\n"
-        f"{cards_text}",
+        f"{cards_text}{restaurant_section}",
         reply_markup=keyboard
     )
     try:
@@ -712,3 +729,57 @@ async def handle_edit_text_input(message: Message, state: FSMContext):
                 ]])
             )
         await state.clear()
+
+
+@router.callback_query(F.data.startswith("repost_premium_"))
+async def request_repost_premium(callback: CallbackQuery):
+    post_id = int(callback.data.split("_")[2])
+
+    post = db.get_premium_post(post_id)
+    if not post:
+        await callback.answer("Объявление не найдено.", show_alert=True)
+        return
+
+    user = db.get_user(callback.from_user.id)
+    if not user or post['user_id'] != user['id']:
+        await callback.answer("Нет доступа.", show_alert=True)
+        return
+
+    if post.get('status') != 'published':
+        await callback.answer("Объявление уже не активно.", show_alert=True)
+        return
+
+    new_post_id = db.create_premium_post(
+        user_id=user['id'],
+        mode='restaurants',
+        cities=json.dumps(post['cities']),
+        description=post['description'],
+        social_media=post.get('social_media'),
+        telegram_username=post.get('telegram_username'),
+        phone_main=post.get('phone_main'),
+        phone_whatsapp=post.get('phone_whatsapp'),
+        name=post.get('name'),
+        media_file_id=None,
+        media_type=None,
+        media_list=[],
+        payment_amount=10.00,
+        action_type='repost',
+        admin_notes=json.dumps({
+            "old_post_id": post['id'],
+            "old_message_id": post.get('message_id'),
+            "old_chat_id": post.get('chat_id'),
+            "old_topic_id": post.get('topic_id'),
+        }),
+    )
+
+    try:
+        await callback.bot.send_message(
+            Config.ADMIN_IDS[0],
+            f"🔁 Repost request #{new_post_id}\n\n"
+            f"Restaurant: {post['name']}\n"
+            f"User: {callback.from_user.id}",
+        )
+    except Exception:
+        pass
+
+    await callback.answer("Заявка на переопубликацию отправлена", show_alert=True)
