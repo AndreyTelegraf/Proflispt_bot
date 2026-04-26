@@ -442,7 +442,7 @@ async def _go_after_telegram_gate(target, actor_user, state: FSMContext, schema,
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await _show_text(
@@ -593,7 +593,7 @@ async def restaurants_geo_custom_input(message: Message, state: FSMContext):
     if next_index >= len(schema.steps):
         b = InlineKeyboardBuilder()
         b.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        b.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+        b.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
         b.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         b.adjust(1)
         await message.answer(
@@ -661,7 +661,7 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
         if next_index >= len(schema.steps):
             builder = InlineKeyboardBuilder()
             builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-            builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+            builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
             builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
             builder.adjust(1)
 
@@ -724,7 +724,7 @@ async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
@@ -769,7 +769,7 @@ async def restaurants_wa_none(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
@@ -858,7 +858,7 @@ async def restaurants_social_none(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
@@ -910,7 +910,7 @@ async def restaurants_reviews_none(callback: CallbackQuery, state: FSMContext):
     if next_index >= len(schema.steps):
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
         builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
         builder.adjust(1)
         await callback.message.edit_text(
@@ -970,7 +970,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                 if next_index >= len(schema.steps):
                     builder = InlineKeyboardBuilder()
                     builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-                    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+                    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
                     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
                     builder.adjust(1)
                     await message.answer(
@@ -1017,7 +1017,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             if next_index >= len(schema.steps):
                 builder = InlineKeyboardBuilder()
                 builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-                builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+                builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
                 builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
                 builder.adjust(1)
                 await message.answer(
@@ -1059,7 +1059,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                 if next_index >= len(schema.steps):
                     builder = InlineKeyboardBuilder()
                     builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-                    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+                    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
                     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
                     builder.adjust(1)
                     await message.answer(
@@ -1132,7 +1132,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
         if next_index >= len(schema.steps):
             builder = InlineKeyboardBuilder()
             builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-            builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+            builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
             builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
             builder.adjust(1)
 
@@ -1177,7 +1177,7 @@ async def restaurants_premium_start(callback: CallbackQuery, state: FSMContext):
     await state.set_state(STATE_PREMIUM_MEDIA)
 
     await callback.message.edit_text(
-        "Добро пожаловать в платные публикации!\n\nПосле загрузки медиа с вами свяжется админ Справочника для получения оплаты и апрува вашего объявления.\n\nЗдесь можно привычным способом добавить к объявлению фото и/или видео по одному за раз или сразу несколько. Когда закончите, нажмите «Готово, отправить на модерацию».\n\nЕсли вам пока достаточно бесплатного размещения без картинок, вернитесь на шаг назад и нажмите \"Опубликовать\".",
+        "Публикация с фото/видео — 20 €\n\nДобавьте до 10 фото или видео к объявлению. Администратор проверит заявку и свяжется с вами для оплаты.\n\nКогда закончите — нажмите «Готово, отправить на модерацию».",
         reply_markup=_premium_media_keyboard(),
         disable_web_page_preview=True,
     )
@@ -1230,7 +1230,7 @@ async def restaurants_premium_cancel(callback: CallbackQuery, state: FSMContext)
 
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео", callback_data="restaurants:premium"))
+    builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
     builder.adjust(1)
 
@@ -1315,6 +1315,13 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
         return
 
     payload = data.get("restaurants_schema_payload", {})
+
+    if data.get("restaurants_premium_media"):
+        await callback.answer(
+            "Публикация с фото/видео доступна только через платный вариант — 20 €.",
+            show_alert=True,
+        )
+        return
 
     try:
         registry = load_sections_registry()
