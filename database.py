@@ -120,7 +120,8 @@ class Database:
                     media_type TEXT CHECK (media_type IN ('photo', 'video')),
                     media_list TEXT,  -- JSON array of media objects
                     payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'approved', 'rejected')),
-                    payment_amount DECIMAL(10,2) DEFAULT 50.00,
+                    payment_amount DECIMAL(10,2) DEFAULT 20.00,
+                    action_type TEXT DEFAULT 'post' CHECK (action_type IN ('post', 'repost', 'pin')),
                     admin_notes TEXT,
                     message_id INTEGER,
                     chat_id INTEGER,
@@ -141,6 +142,16 @@ class Database:
                     logger.info("media_list column already exists")
                 else:
                     logger.warning(f"Could not add media_list column: {e}")
+
+            # Add action_type column if it doesn't exist (migration)
+            try:
+                cursor.execute("ALTER TABLE premium_posts ADD COLUMN action_type TEXT DEFAULT 'post' CHECK (action_type IN ('post', 'repost', 'pin'))")
+                logger.info("Added action_type column to premium_posts table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" in str(e):
+                    logger.info("action_type column already exists")
+                else:
+                    logger.warning(f"Could not add action_type column: {e}")
 
             # Payments table
             cursor.execute("""
@@ -830,15 +841,17 @@ class Database:
             
             cursor.execute("""
                 INSERT INTO premium_posts (
-                    user_id, mode, cities, description, social_media, 
+                    user_id, mode, cities, description, social_media,
                     telegram_username, phone_main, phone_whatsapp, name,
-                    media_file_id, media_type, media_list, payment_status, payment_amount, admin_notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    media_file_id, media_type, media_list, payment_status, payment_amount,
+                    action_type, admin_notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id, data.get('mode'), data.get('cities'), data.get('description'),
                 data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
                 data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
-                data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending', 50.00,
+                data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
+                data.get('payment_amount', 20.00), data.get('action_type', 'post'),
                 data.get('admin_notes')
             ))
             

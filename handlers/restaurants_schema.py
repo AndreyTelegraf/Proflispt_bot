@@ -1284,6 +1284,8 @@ async def restaurants_premium_submit(callback: CallbackQuery, state: FSMContext)
             media_file_id=first_media.get("file_id"),
             media_type=first_media.get("type"),
             media_list=media_list,
+            action_type="post",
+            payment_amount=20.00,
             admin_notes=json.dumps({
                 "review_links": payload.get("review_links", "")
             }, ensure_ascii=False),
