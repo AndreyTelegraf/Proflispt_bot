@@ -145,8 +145,72 @@ async def show_help(callback: CallbackQuery):
     await callback.message.edit_text(help_text, reply_markup=builder.as_markup())
 
 
+def _job_mode_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.add(InlineKeyboardButton(text="Ищу работу", callback_data="mode:seeking"))
+    builder.add(InlineKeyboardButton(text="Предлагаю работу", callback_data="mode:offering"))
+    builder.add(InlineKeyboardButton(text="← Назад", callback_data="catalog:group:housing_work"))
+    builder.adjust(1)
+    return builder.as_markup()
+
+
+def _job_cities_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    cities = [
+        ("Lisboa", "city:lisboa"),
+        ("Porto", "city:porto"),
+        ("Algarve", "city:algarve"),
+        ("Coimbra", "city:coimbra"),
+        ("Braga", "city:braga"),
+        ("Faro", "city:faro"),
+        ("Sintra", "city:sintra"),
+        ("Cascais", "city:cascais"),
+        ("Leiria", "city:leiria"),
+        ("Madeira", "city:madeira"),
+        ("Онлайн", "city:online"),
+        ("Другие города", "city:custom"),
+    ]
+    for text, callback_data in cities:
+        builder.add(InlineKeyboardButton(text=text, callback_data=callback_data))
+    builder.add(InlineKeyboardButton(text="← Назад", callback_data="back_to_mode"))
+    builder.adjust(3)
+    return builder.as_markup()
+
+
+def _job_cities_prompt(mode: str) -> str:
+    if mode == "seeking":
+        return "Отлично, давайте найдём вам работу.\nГде вы её ищите?"
+    return "Отлично, давайте закроем вашу вакансию.\nГде вы ищите сотрудников?"
+
+
+def _job_description_prompt(mode: str, cities_text: str) -> str:
+    if mode == "seeking":
+        return (
+            f"Города: {cities_text}\n\n"
+            "Теперь отправьте описание работы, которую вы ищите, начинающееся например с фразы:\n\n"
+            "- Ищу подработку в сфере услуг\n"
+            "- Ищу парт-тайм официантом\n"
+            "- Ищу работу на стройке...\n\n"
+            "...дальше опишите свои навыки и опыт.\n\n"
+            "Контактов и ссылок в описании быть не должно, они вводятся на следующих шагах."
+        )
+    return (
+        f"Города: {cities_text}\n\n"
+        "Теперь отправьте описание вашей вакансии.\n"
+        "Если вакансий несколько, сформируйте описание так, чтобы это было понятно.\n"
+        "Начните с ключевых слов, например:\n\n"
+        "- Предлагаю работу водителю с личным авто\n"
+        "- Требуется официант в кафе-ресторан\n"
+        "- Нужны разнорабочие на стройку\n"
+        "- Ищем уборщицу на парт-тайм...\n\n"
+        "Контактов и ссылок в описании быть не должно, они вводятся в отдельные поля. "
+        "Публикация одной и той же вакансии допускается не чаще раза в месяц. "
+        "При наличии нескольких вакансий рекомендуется объединить их в одно объявление."
+    )
+
+
 @router.callback_query(F.data.in_(["mode:seeking", "mode:offering"]))
-async def check_posting_limits(callback: CallbackQuery):
+async def check_posting_limits(callback: CallbackQuery, state: FSMContext):
     """Check posting limits before starting flow."""
     user = callback.from_user
     mode = callback.data.split(":")[1]
@@ -174,7 +238,7 @@ async def check_posting_limits(callback: CallbackQuery):
         date_str = earliest_next_post_date.strftime("%d.%m.%Y")
 
         limit_message = (
-            "⚠️ Лимит публикаций превышен\n\n"
+            "Лимит публикаций превышен\n\n"
             "У вас уже есть 3 активных объявления за последние 30 дней.\n\n"
             f"Чтобы опубликовать ещё одно объявление, удалите минимум одно старое или подождите до {date_str}\n\n"
             "Управляйте своими объявлениями в разделе 'Мои объявления'."
@@ -182,8 +246,8 @@ async def check_posting_limits(callback: CallbackQuery):
 
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="📋 Мои объявления", callback_data="my_postings")],
-                [InlineKeyboardButton(text="← Назад", callback_data="go:main")],
+                [InlineKeyboardButton(text="Мои объявления", callback_data="my_postings")],
+                [InlineKeyboardButton(text="← Назад", callback_data="catalog:group:housing_work")],
             ]
         )
 
@@ -191,6 +255,52 @@ async def check_posting_limits(callback: CallbackQuery):
         await callback.answer()
         return
 
+    await state.clear()
+    await state.update_data(mode=mode)
+    await callback.message.edit_text(_job_cities_prompt(mode), reply_markup=_job_cities_keyboard())
+    await callback.answer()
+
+
+@router.callback_query(F.data == "back_to_mode")
+async def back_to_job_mode(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.edit_text(
+        "Выберите раздел:",
+        reply_markup=_job_mode_keyboard(),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("city:"))
+async def handle_job_city(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    mode = data.get("mode")
+    if mode not in {"seeking", "offering"}:
+        await callback.answer("Сессия публикации не найдена.", show_alert=True)
+        return
+
+    city = callback.data.split(":", 1)[1]
+
+    if city == "custom":
+        await callback.message.edit_text(
+            "Введите город или несколько городов через запятую:",
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[[InlineKeyboardButton(text="← Назад", callback_data="back_to_cities")]]
+            ),
+        )
+        await state.set_state("waiting_for_custom_city")
+        await callback.answer()
+        return
+
+    await state.update_data(cities=[city])
+    cities_text = Config.CITIES.get(city, city)
+    await callback.message.edit_text(
+        _job_description_prompt(mode, cities_text),
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(text="← Назад", callback_data="back_to_cities")]]
+        ),
+    )
+    await state.set_state("waiting_for_description")
     await callback.answer()
 
 
