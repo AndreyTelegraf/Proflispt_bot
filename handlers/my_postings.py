@@ -158,12 +158,16 @@ async def show_my_postings(callback: CallbackQuery):
 
         await callback.message.answer(
             f"🍽 {post['name']} ({cities_str})\n\n{desc_preview}",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(
                     text="Переопубликовать — 10 €",
                     callback_data=f"repost_premium_{post['id']}",
-                )
-            ]]),
+                )],
+                [InlineKeyboardButton(
+                    text="Закрепить — 5 €",
+                    callback_data=f"pin_premium_{post['id']}",
+                )],
+            ]),
         )
 
     if restaurant_posts:
@@ -839,3 +843,95 @@ async def request_repost_premium(callback: CallbackQuery):
         pass
 
     await callback.answer("Заявка на переопубликацию отправлена", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("pin_premium_"))
+async def request_pin_premium(callback: CallbackQuery):
+    post_id = int(callback.data.split("_")[2])
+
+    post = db.get_premium_post(post_id)
+    if not post:
+        await callback.answer("Объявление не найдено.", show_alert=True)
+        return
+
+    user = db.get_user(callback.from_user.id)
+    if not user or post['user_id'] != user['id']:
+        await callback.answer("Нет доступа.", show_alert=True)
+        return
+
+    if post.get('status') != 'published':
+        await callback.answer("Объявление уже не активно.", show_alert=True)
+        return
+
+    new_post_id = db.create_premium_post(
+        user_id=user['id'],
+        mode='restaurants',
+        cities=json.dumps(post['cities']),
+        description=post['description'],
+        social_media=post.get('social_media'),
+        telegram_username=post.get('telegram_username'),
+        phone_main=post.get('phone_main'),
+        phone_whatsapp=post.get('phone_whatsapp'),
+        name=post.get('name'),
+        media_file_id=None,
+        media_type=None,
+        media_list=[],
+        payment_amount=5.00,
+        action_type='pin',
+        admin_notes=json.dumps({
+            "old_post_id": post['id'],
+            "old_message_id": post.get('message_id'),
+            "old_chat_id": post.get('chat_id'),
+            "old_topic_id": post.get('topic_id'),
+        }),
+    )
+
+    try:
+        cities = post.get('cities') or []
+        if isinstance(cities, list):
+            cities_str = ", ".join(str(c) for c in cities)
+        else:
+            cities_str = str(cities)
+
+        post_link = ""
+        if post.get('message_id') and post.get('topic_id'):
+            post_link = f"\nПост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
+
+        import html
+        desc = html.escape((post.get('description') or "").strip().replace("\n", " "))
+        name = html.escape(str(post.get('name') or ""))
+        cities_safe = html.escape(cities_str)
+
+        if len(desc) > 120:
+            desc = desc[:120].rstrip() + "…"
+
+        admin_text = (
+            f"📌 <b>Pin #{new_post_id}</b> — 5 €\n\n"
+            f"<b>{name}</b> ({cities_safe})\n"
+            f"{desc}"
+            f"{post_link}\n\n"
+            f"User: {callback.from_user.id}"
+        )
+
+        await callback.bot.send_message(
+            Config.ADMIN_IDS[0],
+            admin_text,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="✅ Одобрить",
+                        callback_data=f"admin:approve_premium:{new_post_id}",
+                    ),
+                    InlineKeyboardButton(
+                        text="❌ Отклонить",
+                        callback_data=f"admin:reject_premium:{new_post_id}",
+                    ),
+                ]
+            ]),
+        )
+    except Exception:
+        pass
+
+    await callback.answer("Заявка на закрепление отправлена", show_alert=True)
