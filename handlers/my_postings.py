@@ -100,8 +100,8 @@ async def show_my_postings(callback: CallbackQuery):
     if not postings and not restaurant_posts:
         await callback.message.edit_text(
             "📋 Мои объявления\n\n"
-            "У вас пока нет активных объявлений\\.\n"
-            "Создайте первое объявление в разделе 'Ищу работу' или 'Предлагаю работу'\\!",
+            "У вас пока нет активных объявлений.\n"
+            "Подайте первое объявление нажав кнопку \"Опубликовать\" в главном меню:",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(text="← Назад", callback_data="go:main")
             ]])
