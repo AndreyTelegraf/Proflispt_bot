@@ -161,6 +161,14 @@ class Database:
                 if "duplicate column name" not in str(e):
                     logger.warning(f"Could not add pinned_until column: {e}")
 
+            # Add published_message_ids column if it doesn't exist (migration)
+            try:
+                cursor.execute("ALTER TABLE premium_posts ADD COLUMN published_message_ids TEXT")
+                logger.info("Added published_message_ids column to premium_posts table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e):
+                    logger.warning(f"Could not add published_message_ids column: {e}")
+
             # Payments table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS payments (
@@ -898,7 +906,16 @@ class Database:
                         post_data['media_list'] = []
                 else:
                     post_data['media_list'] = []
-                
+
+                # Parse published_message_ids from JSON
+                if post_data.get('published_message_ids'):
+                    try:
+                        post_data['published_message_ids'] = json.loads(post_data['published_message_ids'])
+                    except (json.JSONDecodeError, TypeError):
+                        post_data['published_message_ids'] = []
+                else:
+                    post_data['published_message_ids'] = []
+
                 # Parse cities from JSON
                 if post_data.get('cities'):
                     try:
@@ -979,28 +996,42 @@ class Database:
             conn.commit()
             return cursor.rowcount > 0
 
-    def update_premium_post_publication(self, post_id: int, message_id: int, chat_id: int, topic_id: int = None) -> bool:
+    def update_premium_post_publication(
+        self,
+        post_id: int,
+        message_id: int,
+        chat_id: int,
+        topic_id: int = None,
+        published_message_ids: list = None,
+    ) -> bool:
         """
         Обновляет информацию о публикации премиум-поста.
-        
+
         Args:
             post_id: ID поста
-            message_id: ID сообщения в канале
+            message_id: ID первого сообщения в канале
             chat_id: ID чата
             topic_id: ID топика (опционально)
-            
+            published_message_ids: все message_id группы (опционально)
+
         Returns:
             bool: True если успешно
         """
+        if published_message_ids is not None:
+            ids_json = json.dumps(published_message_ids)
+        else:
+            ids_json = json.dumps([message_id]) if message_id else json.dumps([])
+
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             cursor.execute("""
-                UPDATE premium_posts 
-                SET message_id = ?, chat_id = ?, topic_id = ?, status = 'published', updated_at = ?
+                UPDATE premium_posts
+                SET message_id = ?, chat_id = ?, topic_id = ?,
+                    status = 'published', published_message_ids = ?, updated_at = ?
                 WHERE id = ?
-            """, (message_id, chat_id, topic_id, datetime.now(), post_id))
-            
+            """, (message_id, chat_id, topic_id, ids_json, datetime.now(), post_id))
+
             conn.commit()
             return cursor.rowcount > 0
 
