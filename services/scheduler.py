@@ -157,7 +157,20 @@ class CleanupScheduler:
                 db.clear_premium_post_pin(post['id'])
                 logger.info(f"Unpinned premium post #{post['id']} (message {post['message_id']})")
             except Exception as e:
-                logger.warning(f"Failed to unpin premium post #{post['id']}: {e}")
+                err = str(e).lower()
+                if (
+                    "message to unpin not found" in err
+                    or "message to edit not found" in err
+                    or "message_id_invalid" in err
+                    or "message not found" in err
+                ):
+                    db.clear_premium_post_pin(post['id'])
+                    logger.warning(
+                        f"Cleared expired premium pin marker for post #{post['id']} "
+                        f"after Telegram reported missing/unpinned message: {e}"
+                    )
+                else:
+                    logger.warning(f"Failed to unpin premium post #{post['id']}: {e}")
 
     async def run_cleanup_now(self):
         """Run cleanup immediately (for testing)."""
