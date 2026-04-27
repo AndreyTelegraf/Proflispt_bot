@@ -36,7 +36,21 @@ async def admin_approve_premium(callback: CallbackQuery):
     
     # Approve premium post
     db.approve_premium_post(post_id, callback.from_user.id)
-    
+
+    old_post_id_to_supersede = None
+    repost_old_chat_id = None
+    repost_old_message_id = None
+
+    if post.get("action_type") == "repost":
+        import json
+        try:
+            repost_notes = json.loads(post.get("admin_notes") or "{}")
+        except Exception:
+            repost_notes = {}
+        old_post_id_to_supersede = repost_notes.get("old_post_id")
+        repost_old_chat_id = repost_notes.get("old_chat_id")
+        repost_old_message_id = repost_notes.get("old_message_id")
+
     try:
         # Publish premium post to channel
         from services.formatting import format_premium_posting, format_premium_posting_html
@@ -110,6 +124,22 @@ async def admin_approve_premium(callback: CallbackQuery):
             registry = load_sections_registry()
             topic_id = int(registry.get_topic_id("Рестораны"))
         
+        if post.get("action_type") == "repost" and repost_old_chat_id and repost_old_message_id:
+            try:
+                await callback.bot.delete_message(
+                    chat_id=int(repost_old_chat_id),
+                    message_id=int(repost_old_message_id),
+                )
+                logger.info(
+                    f"Deleted old restaurant repost message {repost_old_message_id} "
+                    f"from chat {repost_old_chat_id}"
+                )
+            except Exception as delete_error:
+                logger.warning(
+                    f"Could not delete old restaurant repost message "
+                    f"{repost_old_message_id}: {delete_error}"
+                )
+
         # Publish with media
         published_message = None
         
@@ -194,12 +224,22 @@ async def admin_approve_premium(callback: CallbackQuery):
                     message_thread_id=topic_id,
                     parse_mode="HTML"
                 )
-        
+            elif post.get("action_type") == "repost":
+                published_message = await callback.bot.send_message(
+                    chat_id=Config.CHANNEL_ID,
+                    text=post_text,
+                    message_thread_id=topic_id,
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                )
+
         # Update post with publication info
         if published_message:
             db.update_premium_post_publication(post_id, published_message.message_id, Config.CHANNEL_ID, topic_id)
             logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
-        
+            if post.get("action_type") == "repost" and old_post_id_to_supersede:
+                db.mark_premium_post_superseded(int(old_post_id_to_supersede))
+
         # Notify user
         message_link = None
         if published_message:
