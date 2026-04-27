@@ -771,6 +771,11 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Объявление уже не активно.", show_alert=True)
         return
 
+    if not post.get('message_id') or not post.get('chat_id'):
+        db.delete_premium_post(post_id)
+        await callback.answer("Объявление удалено из канала и недоступно.", show_alert=True)
+        return
+
     review_links = post.get("review_links") or ""
 
     new_post_id = db.create_premium_post(
@@ -874,6 +879,11 @@ async def request_pin_premium(callback: CallbackQuery):
 
     if post.get('status') != 'published':
         await callback.answer("Объявление уже не активно.", show_alert=True)
+        return
+
+    if not post.get('message_id') or not post.get('chat_id'):
+        db.delete_premium_post(post_id)
+        await callback.answer("Объявление удалено из канала и недоступно.", show_alert=True)
         return
 
     review_links = post.get("review_links") or ""
