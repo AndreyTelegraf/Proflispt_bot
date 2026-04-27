@@ -50,6 +50,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         old_post_id_to_supersede = repost_notes.get("old_post_id")
         repost_old_chat_id = repost_notes.get("old_chat_id")
         repost_old_message_id = repost_notes.get("old_message_id")
+        repost_old_published_message_ids = repost_notes.get("old_published_message_ids") or []
 
     pin_old_chat_id = None
     pin_old_message_id = None
@@ -190,21 +191,19 @@ async def admin_approve_premium(callback: CallbackQuery):
             registry = load_sections_registry()
             topic_id = int(registry.get_topic_id("Рестораны"))
         
-        if post.get("action_type") == "repost" and repost_old_chat_id and repost_old_message_id:
-            try:
-                await callback.bot.delete_message(
-                    chat_id=int(repost_old_chat_id),
-                    message_id=int(repost_old_message_id),
-                )
-                logger.info(
-                    f"Deleted old restaurant repost message {repost_old_message_id} "
-                    f"from chat {repost_old_chat_id}"
-                )
-            except Exception as delete_error:
-                logger.warning(
-                    f"Could not delete old restaurant repost message "
-                    f"{repost_old_message_id}: {delete_error}"
-                )
+        if post.get("action_type") == "repost" and repost_old_chat_id:
+            ids_to_delete = repost_old_published_message_ids if repost_old_published_message_ids else (
+                [repost_old_message_id] if repost_old_message_id else []
+            )
+            for mid in ids_to_delete:
+                try:
+                    await callback.bot.delete_message(
+                        chat_id=int(repost_old_chat_id),
+                        message_id=int(mid),
+                    )
+                    logger.info(f"Deleted old repost message {mid} from chat {repost_old_chat_id}")
+                except Exception as delete_error:
+                    logger.warning(f"Could not delete old repost message {mid}: {delete_error}")
 
         # Publish with media
         published_message = None

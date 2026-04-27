@@ -799,6 +799,7 @@ async def request_repost_premium(callback: CallbackQuery):
             "old_chat_id": post.get('chat_id'),
             "old_topic_id": post.get('topic_id'),
             "review_links": review_links,
+            "old_published_message_ids": post.get('published_message_ids') or [],
         }),
     )
 
