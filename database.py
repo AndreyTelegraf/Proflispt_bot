@@ -1040,6 +1040,17 @@ class Database:
             conn.commit()
             return cursor.rowcount > 0
 
+    def delete_premium_post(self, post_id: int) -> bool:
+        """Soft-deletes premium post by marking status='deleted'."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE premium_posts SET status = 'deleted', updated_at = ? WHERE id = ?",
+                (datetime.now(), post_id)
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+
     def check_phone_number_exists(self, phone_main: str, user_id: int = None) -> bool:
         """
         Проверяет, используется ли номер телефона в другом активном объявлении.
