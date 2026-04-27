@@ -142,6 +142,9 @@ async def show_my_postings(callback: CallbackQuery):
     )
 
     for post in restaurant_posts:
+        if post.get('action_type') == 'pin':
+            continue
+
         cities = post['cities']
         if isinstance(cities, list):
             cities_str = ", ".join(str(c) for c in cities)

@@ -115,6 +115,9 @@ async def admin_approve_premium(callback: CallbackQuery):
                 chat_id=user['telegram_id'],
                 text=f"Ваше объявление закреплено на 24 часа!\nСсылка: {post_link}",
                 disable_web_page_preview=True,
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
+                ]),
             )
             await callback.message.edit_text(
                 f"✅ <b>Закреп #{post_id} одобрен.</b>",
@@ -322,21 +325,35 @@ async def admin_approve_premium(callback: CallbackQuery):
             except Exception as e:
                 logger.warning(f"Could not build premium post link: {e}")
 
-        if message_link:
-            user_text = (
-                "Ваше объявление с медиа опубликовано!\n"
-                f"Ссылка: {message_link}\n\n"
-                "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
-            )
+        if post.get("action_type") == "repost":
+            if message_link:
+                user_text = (
+                    f"Ваше объявление теперь самое новое в разделе: {message_link}\n\n"
+                    "Закрепить или удалить его можно через раздел \"Мои объявления\"."
+                )
+            else:
+                user_text = (
+                    "Ваше объявление теперь самое новое в разделе.\n\n"
+                    "Закрепить или удалить его можно через раздел \"Мои объявления\"."
+                )
+            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
+            ])
         else:
-            user_text = (
-                "Ваше объявление с медиа опубликовано!\n\n"
-                "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
-            )
-
-        main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-        ])
+            if message_link:
+                user_text = (
+                    "Ваше объявление с медиа опубликовано!\n"
+                    f"Ссылка: {message_link}\n\n"
+                    "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
+                )
+            else:
+                user_text = (
+                    "Ваше объявление с медиа опубликовано!\n\n"
+                    "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
+                )
+            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+            ])
 
         await callback.bot.send_message(
             chat_id=user['telegram_id'],
