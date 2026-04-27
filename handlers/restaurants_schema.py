@@ -177,10 +177,10 @@ async def _premium_notify_admin(bot, premium_post_id: int, payload: dict, media_
 
     controls = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="Одобрить", callback_data=f"admin:approve_premium:{premium_post_id}"),
-            InlineKeyboardButton(text="Отклонить", callback_data=f"admin:reject_premium:{premium_post_id}"),
+            InlineKeyboardButton(text="✅ Одобрить", callback_data=f"admin:approve_premium:{premium_post_id}"),
+            InlineKeyboardButton(text="❌ Отклонить", callback_data=f"admin:reject_premium:{premium_post_id}"),
         ],
-        [InlineKeyboardButton(text="Список заявок", callback_data="admin:list_premium")],
+        [InlineKeyboardButton(text="📋 Список заявок", callback_data="admin:list_premium")],
     ])
 
     await bot.send_message(

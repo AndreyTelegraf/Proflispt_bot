@@ -836,7 +836,8 @@ async def request_repost_premium(callback: CallbackQuery):
                         text="❌ Отклонить",
                         callback_data=f"admin:reject_premium:{new_post_id}",
                     ),
-                ]
+                ],
+                [InlineKeyboardButton(text="📋 Список заявок", callback_data="admin:list_premium")],
             ]),
         )
     except Exception:
@@ -928,7 +929,8 @@ async def request_pin_premium(callback: CallbackQuery):
                         text="❌ Отклонить",
                         callback_data=f"admin:reject_premium:{new_post_id}",
                     ),
-                ]
+                ],
+                [InlineKeyboardButton(text="📋 Список заявок", callback_data="admin:list_premium")],
             ]),
         )
     except Exception:
