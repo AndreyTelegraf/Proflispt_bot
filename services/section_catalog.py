@@ -69,7 +69,7 @@ def load_section_catalog() -> SectionCatalog:
 
         groups.append(CatalogGroup(key=key, title=title, sections=sections))
 
-    manual_only_sections = {"Отзывы", "Поговори"}
+    manual_only_sections = {"Отзывы", "Поговори", "Фермеры"}
     missing = registry_sections - covered_sections - manual_only_sections
     if missing:
         raise SectionCatalogError(f"registry sections missing from catalog: {sorted(missing)}")
