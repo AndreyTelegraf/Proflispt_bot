@@ -816,12 +816,17 @@ async def request_repost_premium(callback: CallbackQuery):
         if len(desc) > 120:
             desc = desc[:120].rstrip() + "…"
 
+        if callback.from_user.username:
+            user_ref = f'<a href="https://t.me/{callback.from_user.username}">@{callback.from_user.username}</a>'
+        else:
+            user_ref = f'<a href="tg://user?id={callback.from_user.id}">{html.escape(callback.from_user.first_name or str(callback.from_user.id))}</a>'
+
         admin_text = (
             f"🔁 <b>Repost #{new_post_id}</b> — 10 €\n\n"
             f"<b>{name}</b> ({cities_safe})\n"
             f"{desc}"
             f"{old_link}\n\n"
-            f"User: {callback.from_user.id}"
+            f"Пользователь: {user_ref}"
         )
 
         await callback.bot.send_message(
@@ -912,12 +917,17 @@ async def request_pin_premium(callback: CallbackQuery):
         if len(desc) > 120:
             desc = desc[:120].rstrip() + "…"
 
+        if callback.from_user.username:
+            user_ref = f'<a href="https://t.me/{callback.from_user.username}">@{callback.from_user.username}</a>'
+        else:
+            user_ref = f'<a href="tg://user?id={callback.from_user.id}">{html.escape(callback.from_user.first_name or str(callback.from_user.id))}</a>'
+
         admin_text = (
             f"📌 <b>Pin #{new_post_id}</b> — 5 €\n\n"
             f"<b>{name}</b> ({cities_safe})\n"
             f"{desc}"
             f"{post_link}\n\n"
-            f"User: {callback.from_user.id}"
+            f"Пользователь: {user_ref}"
         )
 
         await callback.bot.send_message(
