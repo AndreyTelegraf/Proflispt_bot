@@ -143,17 +143,7 @@ async def _premium_notify_admin(bot, premium_post_id: int, payload: dict, media_
 
     admin_chat_id = 336224597
 
-    lines = [
-        "<b>Новая премиум-заявка</b>",
-        "",
-        f"ID: {premium_post_id}",
-        "Раздел: Рестораны",
-        "",
-        _render_html(payload),
-        "",
-        f"Медиа: {len(media_list)}",
-    ]
-    text = "\n".join(lines).strip()
+    post_text = _render_html(payload)
 
     group = []
     for idx, item in enumerate(media_list[:10]):
@@ -161,7 +151,7 @@ async def _premium_notify_admin(bot, premium_post_id: int, payload: dict, media_
         file_id = item.get("file_id")
         if not file_id:
             continue
-        caption = text if idx == 0 else None
+        caption = post_text if idx == 0 else None
         if media_type == "photo":
             group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
         elif media_type == "video":
@@ -173,14 +163,14 @@ async def _premium_notify_admin(bot, premium_post_id: int, payload: dict, media_
         except Exception:
             await bot.send_message(
                 chat_id=admin_chat_id,
-                text=text,
+                text=post_text,
                 parse_mode="HTML",
                 disable_web_page_preview=True,
             )
     else:
         await bot.send_message(
             chat_id=admin_chat_id,
-            text=text,
+            text=post_text,
             parse_mode="HTML",
             disable_web_page_preview=True,
         )
