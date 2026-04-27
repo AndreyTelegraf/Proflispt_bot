@@ -169,6 +169,14 @@ class Database:
                 if "duplicate column name" not in str(e):
                     logger.warning(f"Could not add published_message_ids column: {e}")
 
+            # Add review_links column if it doesn't exist (migration)
+            try:
+                cursor.execute("ALTER TABLE premium_posts ADD COLUMN review_links TEXT")
+                logger.info("Added review_links column to premium_posts table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e):
+                    logger.warning(f"Could not add review_links column: {e}")
+
             # Payments table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS payments (
@@ -860,15 +868,15 @@ class Database:
                     user_id, mode, cities, description, social_media,
                     telegram_username, phone_main, phone_whatsapp, name,
                     media_file_id, media_type, media_list, payment_status, payment_amount,
-                    action_type, admin_notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    action_type, admin_notes, review_links
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id, data.get('mode'), data.get('cities'), data.get('description'),
                 data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
                 data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
                 data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
                 data.get('payment_amount', 20.00), data.get('action_type', 'post'),
-                data.get('admin_notes')
+                data.get('admin_notes'), data.get('review_links')
             ))
             
             post_id = cursor.lastrowid
