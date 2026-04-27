@@ -771,12 +771,7 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Объявление уже не активно.", show_alert=True)
         return
 
-    review_links = ""
-    try:
-        source_notes = json.loads(post.get("admin_notes") or "{}")
-        review_links = source_notes.get("review_links", "")
-    except Exception:
-        review_links = ""
+    review_links = post.get("review_links") or ""
 
     new_post_id = db.create_premium_post(
         user_id=user['id'],
@@ -793,12 +788,12 @@ async def request_repost_premium(callback: CallbackQuery):
         media_list=post.get('media_list') or [],
         payment_amount=10.00,
         action_type='repost',
+        review_links=review_links,
         admin_notes=json.dumps({
             "old_post_id": post['id'],
             "old_message_id": post.get('message_id'),
             "old_chat_id": post.get('chat_id'),
             "old_topic_id": post.get('topic_id'),
-            "review_links": review_links,
             "old_published_message_ids": post.get('published_message_ids') or [],
         }),
     )
@@ -881,12 +876,7 @@ async def request_pin_premium(callback: CallbackQuery):
         await callback.answer("Объявление уже не активно.", show_alert=True)
         return
 
-    review_links = ""
-    try:
-        source_notes = json.loads(post.get("admin_notes") or "{}")
-        review_links = source_notes.get("review_links", "")
-    except Exception:
-        review_links = ""
+    review_links = post.get("review_links") or ""
 
     new_post_id = db.create_premium_post(
         user_id=user['id'],
@@ -903,12 +893,12 @@ async def request_pin_premium(callback: CallbackQuery):
         media_list=post.get('media_list') or [],
         payment_amount=5.00,
         action_type='pin',
+        review_links=review_links,
         admin_notes=json.dumps({
             "old_post_id": post['id'],
             "old_message_id": post.get('message_id'),
             "old_chat_id": post.get('chat_id'),
             "old_topic_id": post.get('topic_id'),
-            "review_links": review_links,
         }),
     )
 

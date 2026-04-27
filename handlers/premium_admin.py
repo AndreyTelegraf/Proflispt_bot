@@ -158,8 +158,8 @@ async def admin_approve_premium(callback: CallbackQuery):
 
             import json
 
-            review_links = ""
-            if post.get("admin_notes"):
+            review_links = post.get("review_links") or ""
+            if not review_links and post.get("admin_notes"):
                 try:
                     notes = json.loads(post["admin_notes"])
                     review_links = notes.get("review_links", "")

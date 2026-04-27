@@ -1276,9 +1276,8 @@ async def restaurants_premium_submit(callback: CallbackQuery, state: FSMContext)
             media_list=media_list,
             action_type="post",
             payment_amount=20.00,
-            admin_notes=json.dumps({
-                "review_links": payload.get("review_links", "")
-            }, ensure_ascii=False),
+            review_links=payload.get("review_links", ""),
+            admin_notes=None,
         )
 
         await _premium_notify_admin(callback.bot, premium_post_id, payload, media_list)
