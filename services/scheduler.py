@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 class CleanupScheduler:
     """Scheduler for automatic cleanup of expired postings."""
     
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot, db_instance=None):
         self.bot = bot
+        self.db = db_instance or db
         self.publisher = Publisher(bot)
         self._task: Optional[asyncio.Task] = None
         self._running = False
@@ -126,6 +127,9 @@ class CleanupScheduler:
             # Unpin expired premium pin posts
             await self._unpin_expired_premium_posts()
 
+            # Warn and expire premium posts by TTL
+            await self._expire_premium_posts()
+
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
     
@@ -171,6 +175,52 @@ class CleanupScheduler:
                     )
                 else:
                     logger.warning(f"Failed to unpin premium post #{post['id']}: {e}")
+
+    async def _expire_premium_posts(self):
+        db = self.db
+        bot = self.bot
+
+        # T-1 warning
+        posts = db.get_premium_posts_to_warn_1d()
+        for post in posts:
+            try:
+                if post.get('telegram_id'):
+                    name = post.get('name') or 'Ваше объявление'
+                    await bot.send_message(
+                        chat_id=post['telegram_id'],
+                        text=f"{name} будет автоматически удалено через 1 день."
+                    )
+            except Exception:
+                pass
+            db.mark_premium_post_warned_1d(post['id'])
+
+        # Expiry T+0
+        posts = db.get_expired_premium_posts()
+        for post in posts:
+            message_ids = post.get('published_message_ids') or []
+            if not message_ids and post.get('message_id'):
+                message_ids = [post['message_id']]
+
+            for mid in message_ids:
+                try:
+                    await bot.delete_message(
+                        chat_id=int(post['chat_id']),
+                        message_id=int(mid)
+                    )
+                except Exception:
+                    pass
+
+            db.mark_premium_post_expired(post['id'])
+
+            try:
+                if post.get('telegram_id'):
+                    name = post.get('name') or 'Ваше объявление'
+                    await bot.send_message(
+                        chat_id=post['telegram_id'],
+                        text=f"{name} удалено по истечении срока публикации."
+                    )
+            except Exception:
+                pass
 
     async def run_cleanup_now(self):
         """Run cleanup immediately (for testing)."""
