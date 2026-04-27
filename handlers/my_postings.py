@@ -802,8 +802,11 @@ async def request_repost_premium(callback: CallbackQuery):
             cities_str = str(cities)
 
         old_link = ""
-        if post.get('message_id') and post.get('topic_id'):
-            old_link = f"\nСтарый пост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
+        if post.get('message_id'):
+            if post.get('topic_id'):
+                old_link = f"\nСтарый пост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
+            else:
+                old_link = f"\nСтарый пост: https://t.me/proflistpt/{post['message_id']}"
 
         import html
         desc = html.escape((post.get('description') or "").strip().replace("\n", " "))
@@ -895,8 +898,11 @@ async def request_pin_premium(callback: CallbackQuery):
             cities_str = str(cities)
 
         post_link = ""
-        if post.get('message_id') and post.get('topic_id'):
-            post_link = f"\nПост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
+        if post.get('message_id'):
+            if post.get('topic_id'):
+                post_link = f"\nПост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
+            else:
+                post_link = f"\nПост: https://t.me/proflistpt/{post['message_id']}"
 
         import html
         desc = html.escape((post.get('description') or "").strip().replace("\n", " "))
