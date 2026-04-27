@@ -177,6 +177,19 @@ class Database:
                 if "duplicate column name" not in str(e):
                     logger.warning(f"Could not add review_links column: {e}")
 
+            # Add TTL expiration columns if they don't exist (migration)
+            for col, col_type in [
+                ("expires_at", "TIMESTAMP"),
+                ("expiry_warned_1d_at", "TIMESTAMP"),
+                ("expired_notified_at", "TIMESTAMP"),
+            ]:
+                try:
+                    cursor.execute(f"ALTER TABLE premium_posts ADD COLUMN {col} {col_type}")
+                    logger.info(f"Added {col} column to premium_posts table")
+                except sqlite3.OperationalError as e:
+                    if "duplicate column name" not in str(e):
+                        logger.warning(f"Could not add {col} column: {e}")
+
             # Payments table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS payments (
@@ -883,6 +896,14 @@ class Database:
             conn.commit()
             return post_id
 
+    def _premium_post_ttl_days(self, mode: str) -> int:
+        if mode == 'restaurants':
+            return 90
+        return 30
+
+    def _premium_post_expires_at(self, mode: str) -> datetime:
+        return datetime.now() + timedelta(days=self._premium_post_ttl_days(mode))
+
     def publish_free_restaurant_post(
         self,
         user_id: int,
@@ -903,7 +924,7 @@ class Database:
                     payment_status, payment_amount, action_type,
                     admin_notes, review_links,
                     message_id, chat_id, topic_id,
-                    status, published_message_ids
+                    status, published_message_ids, expires_at
                 ) VALUES (
                     ?, 'restaurants', ?, ?, ?,
                     ?, ?, ?, ?,
@@ -911,7 +932,7 @@ class Database:
                     'approved', 0.00, 'post',
                     NULL, ?,
                     ?, ?, ?,
-                    'published', ?
+                    'published', ?, ?
                 )
             """, (
                 user_id,
@@ -925,6 +946,7 @@ class Database:
                 payload.get("review_links", ""),
                 message_id, chat_id, topic_id,
                 json.dumps([message_id]),
+                self._premium_post_expires_at('restaurants'),
             ))
             conn.commit()
             return cursor.lastrowid
@@ -1079,12 +1101,18 @@ class Database:
         with self.get_connection() as conn:
             cursor = conn.cursor()
 
+            cursor.execute("SELECT mode FROM premium_posts WHERE id = ?", (post_id,))
+            row = cursor.fetchone()
+            mode = row['mode'] if row else 'job'
+            expires_at = self._premium_post_expires_at(mode)
+
             cursor.execute("""
                 UPDATE premium_posts
                 SET message_id = ?, chat_id = ?, topic_id = ?,
-                    status = 'published', published_message_ids = ?, updated_at = ?
+                    status = 'published', published_message_ids = ?,
+                    expires_at = ?, updated_at = ?
                 WHERE id = ?
-            """, (message_id, chat_id, topic_id, ids_json, datetime.now(), post_id))
+            """, (message_id, chat_id, topic_id, ids_json, expires_at, datetime.now(), post_id))
 
             conn.commit()
             return cursor.rowcount > 0
@@ -1176,6 +1204,80 @@ class Database:
                 SET pinned_until = NULL, updated_at = ?
                 WHERE id = ?
             """, (datetime.now(), post_id))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_premium_posts_to_warn_1d(self) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT pp.*, u.telegram_id
+                FROM premium_posts pp
+                JOIN users u ON pp.user_id = u.id
+                WHERE pp.action_type IN ('post', 'repost')
+                  AND pp.status = 'published'
+                  AND pp.expires_at IS NOT NULL
+                  AND pp.expires_at <= ?
+                  AND pp.expiry_warned_1d_at IS NULL
+            """, (datetime.now() + timedelta(days=1),))
+            rows = []
+            for row in cursor.fetchall():
+                post_data = dict(row)
+                if post_data.get('published_message_ids'):
+                    try:
+                        post_data['published_message_ids'] = json.loads(post_data['published_message_ids'])
+                    except (json.JSONDecodeError, TypeError):
+                        post_data['published_message_ids'] = []
+                else:
+                    post_data['published_message_ids'] = []
+                rows.append(post_data)
+            return rows
+
+    def mark_premium_post_warned_1d(self, post_id: int) -> bool:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE premium_posts
+                SET expiry_warned_1d_at = ?, updated_at = ?
+                WHERE id = ?
+            """, (datetime.now(), datetime.now(), post_id))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_expired_premium_posts(self) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT pp.*, u.telegram_id
+                FROM premium_posts pp
+                JOIN users u ON pp.user_id = u.id
+                WHERE pp.action_type IN ('post', 'repost')
+                  AND pp.status = 'published'
+                  AND pp.expires_at IS NOT NULL
+                  AND pp.expires_at <= ?
+                  AND pp.expired_notified_at IS NULL
+            """, (datetime.now(),))
+            rows = []
+            for row in cursor.fetchall():
+                post_data = dict(row)
+                if post_data.get('published_message_ids'):
+                    try:
+                        post_data['published_message_ids'] = json.loads(post_data['published_message_ids'])
+                    except (json.JSONDecodeError, TypeError):
+                        post_data['published_message_ids'] = []
+                else:
+                    post_data['published_message_ids'] = []
+                rows.append(post_data)
+            return rows
+
+    def mark_premium_post_expired(self, post_id: int) -> bool:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE premium_posts
+                SET status = 'deleted', expired_notified_at = ?, updated_at = ?
+                WHERE id = ?
+            """, (datetime.now(), datetime.now(), post_id))
             conn.commit()
             return cursor.rowcount > 0
 
