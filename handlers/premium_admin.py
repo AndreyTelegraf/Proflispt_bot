@@ -51,11 +51,77 @@ async def admin_approve_premium(callback: CallbackQuery):
         repost_old_chat_id = repost_notes.get("old_chat_id")
         repost_old_message_id = repost_notes.get("old_message_id")
 
+    pin_old_chat_id = None
+    pin_old_message_id = None
+    pin_old_topic_id = None
+
+    if post.get("action_type") == "pin":
+        import json
+        try:
+            pin_notes = json.loads(post.get("admin_notes") or "{}")
+        except Exception:
+            pin_notes = {}
+        pin_old_chat_id = pin_notes.get("old_chat_id")
+        pin_old_message_id = pin_notes.get("old_message_id")
+        pin_old_topic_id = pin_notes.get("old_topic_id")
+
     try:
         # Publish premium post to channel
         from services.formatting import format_premium_posting, format_premium_posting_html
         from config import Config
-        
+        from datetime import datetime, timedelta
+
+        if post.get("action_type") == "pin":
+            pin_fail_reason = None
+            if not pin_old_chat_id or not pin_old_message_id:
+                pin_fail_reason = "Нет координат поста"
+            else:
+                try:
+                    await callback.bot.pin_chat_message(
+                        chat_id=int(pin_old_chat_id),
+                        message_id=int(pin_old_message_id),
+                    )
+                except Exception as pin_error:
+                    logger.warning(f"pin_chat_message failed for post #{post_id}: {pin_error}")
+                    pin_fail_reason = str(pin_error)
+
+            if pin_fail_reason:
+                db.reject_premium_post(post_id, callback.from_user.id, f"Pin failed: {pin_fail_reason}")
+                await callback.bot.send_message(
+                    chat_id=user['telegram_id'],
+                    text="Не удалось закрепить объявление — оригинальный пост недоступен. Обратитесь к администратору.",
+                )
+                await callback.message.edit_text(
+                    f"❌ <b>Закреп #{post_id} не выполнен.</b>\n\n{pin_fail_reason}",
+                    parse_mode="HTML",
+                )
+                await callback.answer("❌ Закреп не выполнен.", show_alert=True)
+                return
+
+            pinned_until = datetime.now() + timedelta(hours=24)
+            db.set_premium_post_pinned_until(post_id, pinned_until)
+            db.update_premium_post_publication(
+                post_id,
+                int(pin_old_message_id),
+                int(pin_old_chat_id),
+                int(pin_old_topic_id) if pin_old_topic_id else None,
+            )
+            if pin_old_topic_id:
+                post_link = f"https://t.me/proflistpt/{pin_old_topic_id}/{pin_old_message_id}"
+            else:
+                post_link = f"https://t.me/proflistpt/{pin_old_message_id}"
+            await callback.bot.send_message(
+                chat_id=user['telegram_id'],
+                text=f"Ваше объявление закреплено на 24 часа!\nСсылка: {post_link}",
+                disable_web_page_preview=True,
+            )
+            await callback.message.edit_text(
+                f"✅ <b>Закреп #{post_id} одобрен.</b>",
+                parse_mode="HTML",
+            )
+            await callback.answer("✅ Закреп одобрен!")
+            return
+
         # Format the post text
         if post.get('mode') == 'restaurants':
             import json
