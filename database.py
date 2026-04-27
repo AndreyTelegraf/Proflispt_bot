@@ -883,6 +883,52 @@ class Database:
             conn.commit()
             return post_id
 
+    def publish_free_restaurant_post(
+        self,
+        user_id: int,
+        payload: dict,
+        cities: str,
+        message_id: int,
+        chat_id: int,
+        topic_id: int,
+    ) -> int:
+        """Insert a free (text-only) restaurant post directly as published."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO premium_posts (
+                    user_id, mode, cities, description, social_media,
+                    telegram_username, phone_main, phone_whatsapp, name,
+                    media_file_id, media_type, media_list,
+                    payment_status, payment_amount, action_type,
+                    admin_notes, review_links,
+                    message_id, chat_id, topic_id,
+                    status, published_message_ids
+                ) VALUES (
+                    ?, 'restaurants', ?, ?, ?,
+                    ?, ?, ?, ?,
+                    NULL, NULL, '[]',
+                    'approved', 0.00, 'post',
+                    NULL, ?,
+                    ?, ?, ?,
+                    'published', ?
+                )
+            """, (
+                user_id,
+                cities,
+                payload.get("description", ""),
+                payload.get("social_links", ""),
+                payload.get("telegram", ""),
+                payload.get("phone_main", ""),
+                payload.get("phone_whatsapp", ""),
+                payload.get("contact_name", ""),
+                payload.get("review_links", ""),
+                message_id, chat_id, topic_id,
+                json.dumps([message_id]),
+            ))
+            conn.commit()
+            return cursor.lastrowid
+
     def get_premium_post(self, post_id: int) -> Optional[Dict[str, Any]]:
         """
         Получает премиум-пост по ID.

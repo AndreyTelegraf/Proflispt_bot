@@ -1327,6 +1327,20 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
         await state.clear()
 
         try:
+            user = db.get_user(callback.from_user.id)
+            if user:
+                db.publish_free_restaurant_post(
+                    user_id=user['id'],
+                    payload=payload,
+                    cities=_normalize_geo_tags_for_db(payload.get("geo_tags")),
+                    message_id=published_message.message_id,
+                    chat_id=channel_id,
+                    topic_id=topic_id,
+                )
+        except Exception as db_err:
+            logger.warning("Could not persist free restaurant post to DB: %s", db_err)
+
+        try:
             chat_info = await callback.bot.get_chat(channel_id)
             if chat_info.username:
                 message_link = f"https://t.me/{chat_info.username}/{published_message.message_id}"
