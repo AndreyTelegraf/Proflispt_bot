@@ -153,6 +153,14 @@ class Database:
                 else:
                     logger.warning(f"Could not add action_type column: {e}")
 
+            # Add pinned_until column if it doesn't exist (migration)
+            try:
+                cursor.execute("ALTER TABLE premium_posts ADD COLUMN pinned_until TIMESTAMP")
+                logger.info("Added pinned_until column to premium_posts table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e):
+                    logger.warning(f"Could not add pinned_until column: {e}")
+
             # Payments table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS payments (
@@ -1048,6 +1056,41 @@ class Database:
                 "UPDATE premium_posts SET status = 'deleted', updated_at = ? WHERE id = ?",
                 (datetime.now(), post_id)
             )
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def set_premium_post_pinned_until(self, post_id: int, pinned_until: datetime) -> bool:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE premium_posts
+                SET pinned_until = ?, updated_at = ?
+                WHERE id = ?
+            """, (pinned_until, datetime.now(), post_id))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def get_premium_posts_to_unpin(self) -> List[Dict[str, Any]]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, message_id, chat_id, topic_id, pinned_until
+                FROM premium_posts
+                WHERE action_type = 'pin'
+                  AND status = 'published'
+                  AND pinned_until IS NOT NULL
+                  AND pinned_until <= ?
+            """, (datetime.now(),))
+            return [dict(row) for row in cursor.fetchall()]
+
+    def clear_premium_post_pin(self, post_id: int) -> bool:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE premium_posts
+                SET pinned_until = NULL, updated_at = ?
+                WHERE id = ?
+            """, (datetime.now(), post_id))
             conn.commit()
             return cursor.rowcount > 0
 
