@@ -96,6 +96,10 @@ async def show_my_postings(callback: CallbackQuery):
     user_id_db = user['id']
     postings = db.get_user_active_postings(user_id_db)
     restaurant_posts = db.get_user_published_restaurant_premium_posts(user_id_db)
+    restaurant_posts = [
+        post for post in restaurant_posts
+        if post.get('action_type') in ('post', 'repost')
+    ]
 
     if not postings and not restaurant_posts:
         await callback.message.edit_text(
@@ -142,9 +146,6 @@ async def show_my_postings(callback: CallbackQuery):
     )
 
     for post in restaurant_posts:
-        if post.get('action_type') == 'pin':
-            continue
-
         cities = post['cities']
         if isinstance(cities, list):
             cities_str = ", ".join(str(c) for c in cities)
