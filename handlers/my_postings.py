@@ -791,11 +791,37 @@ async def request_repost_premium(callback: CallbackQuery):
     )
 
     try:
+        cities = post.get('cities') or []
+        if isinstance(cities, list):
+            cities_str = ", ".join(str(c) for c in cities)
+        else:
+            cities_str = str(cities)
+
+        old_link = ""
+        if post.get('message_id') and post.get('topic_id'):
+            old_link = f"\nСтарый пост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
+
+        import html
+        desc = html.escape((post.get('description') or "").strip().replace("\n", " "))
+        name = html.escape(str(post.get('name') or ""))
+        cities_safe = html.escape(cities_str)
+
+        if len(desc) > 120:
+            desc = desc[:120].rstrip() + "…"
+
+        admin_text = (
+            f"🔁 <b>Repost #{new_post_id}</b> — 10 €\n\n"
+            f"<b>{name}</b> ({cities_safe})\n"
+            f"{desc}"
+            f"{old_link}\n\n"
+            f"User: {callback.from_user.id}"
+        )
+
         await callback.bot.send_message(
             Config.ADMIN_IDS[0],
-            f"🔁 Repost request #{new_post_id}\n\n"
-            f"Restaurant: {post['name']}\n"
-            f"User: {callback.from_user.id}",
+            admin_text,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(
