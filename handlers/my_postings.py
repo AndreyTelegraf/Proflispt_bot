@@ -167,6 +167,10 @@ async def show_my_postings(callback: CallbackQuery):
                     text="Закрепить — 5 €",
                     callback_data=f"pin_premium_{post['id']}",
                 )],
+                [InlineKeyboardButton(
+                    text="🗑 Удалить",
+                    callback_data=f"delete_premium_{post['id']}",
+                )],
             ]),
         )
 
@@ -970,3 +974,71 @@ async def request_pin_premium(callback: CallbackQuery):
         pass
 
     await callback.answer("Заявка на закрепление отправлена", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("delete_premium_"))
+async def confirm_delete_premium(callback: CallbackQuery):
+    post_id = int(callback.data.split("_")[2])
+
+    post = db.get_premium_post(post_id)
+    if not post:
+        await callback.answer("Объявление не найдено.", show_alert=True)
+        return
+
+    user = db.get_user(callback.from_user.id)
+    if not user or post['user_id'] != user['id']:
+        await callback.answer("Нет доступа.", show_alert=True)
+        return
+
+    await callback.message.answer(
+        "Удалить объявление? Это действие нельзя отменить.",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"do_delete_premium_{post_id}"),
+                InlineKeyboardButton(text="❌ Отмена", callback_data="back_to_my_postings"),
+            ],
+        ]),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("do_delete_premium_"))
+async def execute_delete_premium(callback: CallbackQuery):
+    post_id = int(callback.data.split("_")[3])
+
+    post = db.get_premium_post(post_id)
+    if not post:
+        await callback.answer("Объявление не найдено.", show_alert=True)
+        return
+
+    user = db.get_user(callback.from_user.id)
+    if not user or post['user_id'] != user['id']:
+        await callback.answer("Нет доступа.", show_alert=True)
+        return
+
+    message_ids = post.get('published_message_ids') or []
+    if not message_ids and post.get('message_id'):
+        message_ids = [post['message_id']]
+
+    chat_id = post.get('chat_id')
+    if chat_id:
+        for mid in message_ids:
+            try:
+                await callback.bot.delete_message(chat_id=int(chat_id), message_id=int(mid))
+            except Exception as e:
+                err = str(e).lower()
+                if (
+                    "message to delete not found" in err
+                    or "message_id_invalid" in err
+                    or "chat not found" in err
+                    or "message not found" in err
+                ):
+                    pass
+                else:
+                    logger.warning(f"Could not delete premium post message {mid}: {e}")
+
+    db.delete_premium_post(post_id)
+
+    await callback.message.answer("Объявление удалено.")
+    await callback.answer()
+    await show_my_postings(callback)
