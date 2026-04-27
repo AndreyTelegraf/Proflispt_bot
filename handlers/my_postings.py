@@ -778,6 +778,18 @@ async def request_repost_premium(callback: CallbackQuery):
             f"🔁 Repost request #{new_post_id}\n\n"
             f"Restaurant: {post['name']}\n"
             f"User: {callback.from_user.id}",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="✅ Одобрить",
+                        callback_data=f"admin:approve_premium:{new_post_id}",
+                    ),
+                    InlineKeyboardButton(
+                        text="❌ Отклонить",
+                        callback_data=f"admin:reject_premium:{new_post_id}",
+                    ),
+                ]
+            ]),
         )
     except Exception:
         pass
