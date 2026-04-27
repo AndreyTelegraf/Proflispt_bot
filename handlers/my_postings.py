@@ -129,33 +129,51 @@ async def show_my_postings(callback: CallbackQuery):
             callback_data=f"posting_{posting['id']}"
         )])
 
-    # Restaurant premium posts section
-    restaurant_section = ""
-    if restaurant_posts:
-        restaurant_section = "\n\n_____________\n\n🍽 Рестораны (опубликованные)\n"
-        for post in restaurant_posts:
-            cities = post['cities']
-            if isinstance(cities, list):
-                cities_str = ", ".join(str(c) for c in cities)
-            else:
-                cities_str = str(cities)
-            restaurant_section += f"\n{post['name']} ({cities_str})"
-            keyboard.inline_keyboard.append([InlineKeyboardButton(
-                text="Переопубликовать — 10 €",
-                callback_data=f"repost_premium_{post['id']}"
-            )])
-
-    # Add back button
-    keyboard.inline_keyboard.append([InlineKeyboardButton(
-        text="← Назад",
-        callback_data="go:main"
-    )])
+    if not restaurant_posts:
+        keyboard.inline_keyboard.append([InlineKeyboardButton(
+            text="← Назад",
+            callback_data="go:main"
+        )])
 
     await callback.message.edit_text(
         f"📋 Мои объявления\n\n"
-        f"{cards_text}{restaurant_section}",
-        reply_markup=keyboard
+        f"{cards_text}",
+        reply_markup=keyboard,
     )
+
+    for post in restaurant_posts:
+        cities = post['cities']
+        if isinstance(cities, list):
+            cities_str = ", ".join(str(c) for c in cities)
+        else:
+            cities_str = str(cities)
+
+        desc = post.get('description') or ""
+        desc = desc.strip().replace("\n", " ")
+
+        if len(desc) > 100:
+            desc_preview = desc[:100].rstrip() + "…"
+        else:
+            desc_preview = desc
+
+        await callback.message.answer(
+            f"🍽 {post['name']} ({cities_str})\n\n{desc_preview}",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(
+                    text="Переопубликовать — 10 €",
+                    callback_data=f"repost_premium_{post['id']}",
+                )
+            ]]),
+        )
+
+    if restaurant_posts:
+        await callback.message.answer(
+            "─",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="← Назад", callback_data="go:main")
+            ]]),
+        )
+
     try:
         await callback.answer()
     except:
