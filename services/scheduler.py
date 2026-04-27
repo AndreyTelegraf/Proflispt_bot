@@ -122,7 +122,10 @@ class CleanupScheduler:
                     logger.info("No expired bans found")
             except Exception as e:
                 logger.error(f"Error cleaning up expired bans: {e}")
-                
+
+            # Unpin expired premium pin posts
+            await self._unpin_expired_premium_posts()
+
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
     
@@ -138,7 +141,24 @@ class CleanupScheduler:
                     logger.info(f"Deleted Telegram message {posting['message_id']} for posting {posting['id']}")
             except Exception as e:
                 logger.warning(f"Failed to delete Telegram message for posting {posting['id']}: {e}")
-    
+
+    async def _unpin_expired_premium_posts(self):
+        """Unpin premium pin posts whose pinned_until has passed."""
+        posts = db.get_premium_posts_to_unpin()
+        if not posts:
+            logger.info("No expired premium pins found")
+            return
+        for post in posts:
+            try:
+                await self.bot.unpin_chat_message(
+                    chat_id=post['chat_id'],
+                    message_id=post['message_id'],
+                )
+                db.clear_premium_post_pin(post['id'])
+                logger.info(f"Unpinned premium post #{post['id']} (message {post['message_id']})")
+            except Exception as e:
+                logger.warning(f"Failed to unpin premium post #{post['id']}: {e}")
+
     async def run_cleanup_now(self):
         """Run cleanup immediately (for testing)."""
         logger.info("Running immediate cleanup...")
