@@ -771,6 +771,13 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Объявление уже не активно.", show_alert=True)
         return
 
+    review_links = ""
+    try:
+        source_notes = json.loads(post.get("admin_notes") or "{}")
+        review_links = source_notes.get("review_links", "")
+    except Exception:
+        review_links = ""
+
     new_post_id = db.create_premium_post(
         user_id=user['id'],
         mode='restaurants',
@@ -781,9 +788,9 @@ async def request_repost_premium(callback: CallbackQuery):
         phone_main=post.get('phone_main'),
         phone_whatsapp=post.get('phone_whatsapp'),
         name=post.get('name'),
-        media_file_id=None,
-        media_type=None,
-        media_list=[],
+        media_file_id=post.get('media_file_id'),
+        media_type=post.get('media_type'),
+        media_list=post.get('media_list') or [],
         payment_amount=10.00,
         action_type='repost',
         admin_notes=json.dumps({
@@ -791,6 +798,7 @@ async def request_repost_premium(callback: CallbackQuery):
             "old_message_id": post.get('message_id'),
             "old_chat_id": post.get('chat_id'),
             "old_topic_id": post.get('topic_id'),
+            "review_links": review_links,
         }),
     )
 
@@ -872,6 +880,13 @@ async def request_pin_premium(callback: CallbackQuery):
         await callback.answer("Объявление уже не активно.", show_alert=True)
         return
 
+    review_links = ""
+    try:
+        source_notes = json.loads(post.get("admin_notes") or "{}")
+        review_links = source_notes.get("review_links", "")
+    except Exception:
+        review_links = ""
+
     new_post_id = db.create_premium_post(
         user_id=user['id'],
         mode='restaurants',
@@ -882,9 +897,9 @@ async def request_pin_premium(callback: CallbackQuery):
         phone_main=post.get('phone_main'),
         phone_whatsapp=post.get('phone_whatsapp'),
         name=post.get('name'),
-        media_file_id=None,
-        media_type=None,
-        media_list=[],
+        media_file_id=post.get('media_file_id'),
+        media_type=post.get('media_type'),
+        media_list=post.get('media_list') or [],
         payment_amount=5.00,
         action_type='pin',
         admin_notes=json.dumps({
@@ -892,6 +907,7 @@ async def request_pin_premium(callback: CallbackQuery):
             "old_message_id": post.get('message_id'),
             "old_chat_id": post.get('chat_id'),
             "old_topic_id": post.get('topic_id'),
+            "review_links": review_links,
         }),
     )
 
