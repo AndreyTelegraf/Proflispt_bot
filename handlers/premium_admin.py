@@ -182,6 +182,40 @@ async def admin_approve_premium(callback: CallbackQuery):
             post_text = _render_html(restaurants_payload)
         elif post.get('mode') in ('job_seeker', 'job_offer'):
             post_text = format_premium_posting_html(post)
+        elif post.get('mode') in ('housing_wanted', 'owner_real_estate'):
+            from handlers.housing_schema_flow import _hs_render_html
+            import json as _json_hs
+            cities_raw = post.get('cities')
+            geo_tags = ""
+            if cities_raw:
+                _cities = cities_raw if isinstance(cities_raw, list) else []
+                if not _cities and isinstance(cities_raw, str):
+                    try:
+                        _cities = _json_hs.loads(cities_raw)
+                    except Exception:
+                        _cities = [cities_raw]
+                if isinstance(_cities, list):
+                    geo_tags = " ".join(
+                        f"#{str(x).strip().lstrip('#').lower()}"
+                        for x in _cities if str(x).strip()
+                    )
+            _rental_term = ""
+            try:
+                _hn = _json_hs.loads(post.get('admin_notes') or '{}')
+                _rental_term = _hn.get('rental_term', '')
+            except Exception:
+                pass
+            _hs_payload = {
+                "geo_tags": geo_tags,
+                "rental_term": _rental_term,
+                "description": post.get("description", ""),
+                "social_links": post.get("social_media", ""),
+                "telegram": post.get("telegram_username", ""),
+                "phone_main": post.get("phone_main", ""),
+                "phone_whatsapp": post.get("phone_whatsapp", ""),
+                "contact_name": post.get("name", ""),
+            }
+            post_text = _hs_render_html(_hs_payload)
         else:
             from handlers.generic_schema_flow import _render_html as _gs_render_html, SLUG_TO_SECTION as _GS_SLUGS
             import json as _json
@@ -231,6 +265,7 @@ async def admin_approve_premium(callback: CallbackQuery):
 
         # Determine topic ID based on mode
         topic_id = None
+        _baraholka_publish = False
         if post['mode'] == 'job_seeker':
             topic_id = Config.JOB_SEEKING_TOPIC_ID
         elif post['mode'] == 'job_offer':
@@ -239,6 +274,24 @@ async def admin_approve_premium(callback: CallbackQuery):
             from services.sections_registry import load_sections_registry
             registry = load_sections_registry()
             topic_id = int(registry.get_topic_id("Рестораны"))
+        elif post['mode'] in ('housing_wanted', 'owner_real_estate'):
+            import json as _json_hn
+            try:
+                _hn = _json_hn.loads(post.get('admin_notes') or '{}')
+                _baraholka_publish = bool(_hn.get('baraholka_repost_target'))
+            except Exception:
+                pass
+            if _baraholka_publish:
+                topic_id = Config.BARAHOLKA_HOUSING_TOPIC_ID
+            else:
+                from services.sections_registry import load_sections_registry
+                _hs_sec = {
+                    'housing_wanted': 'Ищу жильё',
+                    'owner_real_estate': 'Недвижимость от хозяев',
+                }.get(post['mode'])
+                if _hs_sec:
+                    registry = load_sections_registry()
+                    topic_id = int(registry.get_topic_id(_hs_sec))
         else:
             from services.sections_registry import load_sections_registry
             from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
@@ -246,6 +299,7 @@ async def admin_approve_premium(callback: CallbackQuery):
             if _section_name:
                 registry = load_sections_registry()
                 topic_id = int(registry.get_topic_id(_section_name))
+        publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID
         
         if post.get("action_type") == "repost" and repost_old_chat_id:
             ids_to_delete = repost_old_published_message_ids if repost_old_published_message_ids else (
@@ -304,7 +358,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                             media_group.append(InputMediaVideo(media=media['file_id']))
                 
                 published_messages = await callback.bot.send_media_group(
-                    chat_id=Config.CHANNEL_ID,
+                    chat_id=publish_chat_id,
                     media=media_group,
                     message_thread_id=topic_id
                 )
@@ -315,7 +369,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 media = media_list[0]
                 if media['type'] == 'photo':
                     published_message = await callback.bot.send_photo(
-                        chat_id=Config.CHANNEL_ID,
+                        chat_id=publish_chat_id,
                         photo=media['file_id'],
                         caption=post_text,
                         message_thread_id=topic_id,
@@ -324,7 +378,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                     published_message_ids = [published_message.message_id]
                 else:
                     published_message = await callback.bot.send_video(
-                        chat_id=Config.CHANNEL_ID,
+                        chat_id=publish_chat_id,
                         video=media['file_id'],
                         caption=post_text,
                         message_thread_id=topic_id,
@@ -335,7 +389,7 @@ async def admin_approve_premium(callback: CallbackQuery):
             # Fallback to old format
             if post['media_type'] == 'photo':
                 published_message = await callback.bot.send_photo(
-                    chat_id=Config.CHANNEL_ID,
+                    chat_id=publish_chat_id,
                     photo=post['media_file_id'],
                     caption=post_text,
                     message_thread_id=topic_id,
@@ -344,7 +398,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 published_message_ids = [published_message.message_id]
             elif post['media_type'] == 'video':
                 published_message = await callback.bot.send_video(
-                    chat_id=Config.CHANNEL_ID,
+                    chat_id=publish_chat_id,
                     video=post['media_file_id'],
                     caption=post_text,
                     message_thread_id=topic_id,
@@ -353,7 +407,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 published_message_ids = [published_message.message_id]
             elif post.get("action_type") == "repost":
                 published_message = await callback.bot.send_message(
-                    chat_id=Config.CHANNEL_ID,
+                    chat_id=publish_chat_id,
                     text=post_text,
                     message_thread_id=topic_id,
                     parse_mode="HTML",
@@ -363,7 +417,7 @@ async def admin_approve_premium(callback: CallbackQuery):
 
         # Update post with publication info
         if published_message:
-            db.update_premium_post_publication(post_id, published_message.message_id, Config.CHANNEL_ID, topic_id, published_message_ids=published_message_ids)
+            db.update_premium_post_publication(post_id, published_message.message_id, publish_chat_id, topic_id, published_message_ids=published_message_ids)
             logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
             if post.get("action_type") == "repost" and old_post_id_to_supersede:
                 db.mark_premium_post_superseded(int(old_post_id_to_supersede))
@@ -372,13 +426,27 @@ async def admin_approve_premium(callback: CallbackQuery):
         message_link = None
         if published_message:
             try:
-                chat_info = await callback.bot.get_chat(Config.CHANNEL_ID)
+                chat_info = await callback.bot.get_chat(publish_chat_id)
                 if chat_info.username:
                     message_link = f"https://t.me/{chat_info.username}/{published_message.message_id}"
             except Exception as e:
                 logger.warning(f"Could not build premium post link: {e}")
 
-        if post.get("action_type") == "repost":
+        if post.get("action_type") == "repost" and _baraholka_publish:
+            if message_link:
+                user_text = (
+                    f"Ваше объявление опубликовано в Барахолке: {message_link}\n\n"
+                    "Удалить его можно через администратора @baraholka_pt"
+                )
+            else:
+                user_text = (
+                    "Ваше объявление опубликовано в Барахолке.\n\n"
+                    "Удалить его можно через администратора @baraholka_pt"
+                )
+            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+            ])
+        elif post.get("action_type") == "repost":
             if message_link:
                 user_text = (
                     f"Ваше объявление теперь самое новое в разделе: {message_link}\n\n"

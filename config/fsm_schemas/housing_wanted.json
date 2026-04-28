@@ -1,7 +1,7 @@
 {
-  "schema_id": "housing_wanted_v1",
+  "schema_id": "housing_wanted_v2",
   "section_name": "Ищу жильё",
-  "version": 1,
+  "version": 2,
   "steps": [
     {
       "step_id": "residency_gate",
@@ -10,22 +10,8 @@
       "prompt": "Вы или ваш бизнес находитесь в Португалии?",
       "required": true,
       "options": [
-        {
-          "value": "yes",
-          "aliases": [
-            "да",
-            "yes",
-            "y"
-          ]
-        },
-        {
-          "value": "no",
-          "aliases": [
-            "нет",
-            "no",
-            "n"
-          ]
-        }
+        {"value": "yes", "aliases": ["да", "yes", "y"]},
+        {"value": "no",  "aliases": ["нет", "no", "n"]}
       ],
       "stop_if_negative": true
     },
@@ -33,67 +19,41 @@
       "step_id": "geo_tags",
       "kind": "choice",
       "field_name": "geo_tags",
-      "prompt": "Выберите город, где вы работаете.\n\nМожно указать несколько городов через запятую или #online:",
+      "prompt": "Выберите город, где вы ищете жильё.\n\nМожно указать несколько городов через запятую:",
       "required": true,
       "options": [
-        {
-          "value": "lisboa",
-          "label": "Lisboa"
-        },
-        {
-          "value": "porto",
-          "label": "Porto"
-        },
-        {
-          "value": "coimbra",
-          "label": "Coimbra"
-        },
-        {
-          "value": "braga",
-          "label": "Braga"
-        },
-        {
-          "value": "faro",
-          "label": "Faro"
-        },
-        {
-          "value": "sintra",
-          "label": "Sintra"
-        },
-        {
-          "value": "cascais",
-          "label": "Cascais"
-        },
-        {
-          "value": "leiria",
-          "label": "Leiria"
-        },
-        {
-          "value": "setubal",
-          "label": "Setúbal"
-        },
-        {
-          "value": "online",
-          "label": "Онлайн"
-        },
-        {
-          "value": "custom",
-          "label": "Другие города"
-        }
+        {"value": "lisboa",  "label": "Lisboa"},
+        {"value": "porto",   "label": "Porto"},
+        {"value": "coimbra", "label": "Coimbra"},
+        {"value": "braga",   "label": "Braga"},
+        {"value": "faro",    "label": "Faro"},
+        {"value": "sintra",  "label": "Sintra"},
+        {"value": "cascais", "label": "Cascais"},
+        {"value": "leiria",  "label": "Leiria"},
+        {"value": "setubal", "label": "Setúbal"},
+        {"value": "online",  "label": "Онлайн"},
+        {"value": "custom",  "label": "Другие города"}
       ],
-      "validation": {
-        "max_len": 200
-      }
+      "validation": {"max_len": 200}
+    },
+    {
+      "step_id": "rental_term",
+      "kind": "choice",
+      "field_name": "rental_term",
+      "prompt": "Укажите срок аренды:",
+      "required": true,
+      "options": [
+        {"value": "short_term", "label": "Короткосрок < 12 мес"},
+        {"value": "long_term",  "label": "Долгосрок > 1 года"}
+      ]
     },
     {
       "step_id": "description",
       "kind": "text",
       "field_name": "description",
-      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 1.200 знаков:",
+      "prompt": "Опишите, какое жильё вы ищете.",
       "required": true,
-      "validation": {
-        "max_len": 1200
-      }
+      "validation": {"max_len": 1200}
     },
     {
       "step_id": "social_links",
@@ -101,19 +61,7 @@
       "field_name": "social_links",
       "prompt": "Вставьте ссылки на соцсети или сайты, если они есть:",
       "required": false,
-      "validation": {
-        "max_len": 1200
-      }
-    },
-    {
-      "step_id": "review_links",
-      "kind": "text",
-      "field_name": "review_links",
-      "prompt": "Добавьте ссылки на отзывы о ваших услугах (только из раздела Отзывы Справочника):",
-      "required": false,
-      "validation": {
-        "max_len": 1200
-      }
+      "validation": {"max_len": 1200}
     },
     {
       "step_id": "phone_main",
@@ -121,9 +69,7 @@
       "field_name": "phone_main",
       "prompt": "Укажите португальский номер телефона для основной связи, начиная с +351.",
       "required": true,
-      "validation": {
-        "regex": "^\\+351\\d{9}$"
-      }
+      "validation": {"regex": "^\\+351\\d{9}$"}
     },
     {
       "step_id": "phone_whatsapp",
@@ -131,19 +77,15 @@
       "field_name": "phone_whatsapp",
       "prompt": "Укажите номер телефона, к которому привязан WhatsApp для резервной связи, если отличается от основного. Можно оставить пустым.",
       "required": false,
-      "validation": {
-        "regex": "^\\+351\\d{9}$"
-      }
+      "validation": {"regex": "^\\+351\\d{9}$"}
     },
     {
       "step_id": "contact_name",
       "kind": "text",
       "field_name": "contact_name",
-      "prompt": "Укажите имя, название компании или имя представителя:",
+      "prompt": "Укажите имя или название:",
       "required": true,
-      "validation": {
-        "max_len": 300
-      }
+      "validation": {"max_len": 300}
     }
   ]
 }

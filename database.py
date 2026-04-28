@@ -1000,6 +1000,109 @@ class Database:
             conn.commit()
             return cursor.lastrowid
 
+    def publish_free_housing_post(
+        self,
+        user_id: int,
+        mode: str,
+        payload: dict,
+        cities: str,
+        message_id: int,
+        chat_id: int,
+        topic_id: int,
+        media_list: list,
+        published_message_ids: list,
+    ) -> int:
+        """Insert a free housing post (with or without media) directly as published."""
+        first_media = media_list[0] if media_list else None
+        admin_notes_val = json.dumps({"rental_term": payload.get("rental_term", "")})
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO premium_posts (
+                    user_id, mode, cities, description, social_media,
+                    telegram_username, phone_main, phone_whatsapp, name,
+                    media_file_id, media_type, media_list,
+                    payment_status, payment_amount, action_type,
+                    admin_notes, review_links,
+                    message_id, chat_id, topic_id,
+                    status, published_message_ids, expires_at
+                ) VALUES (
+                    ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?,
+                    ?, ?, ?,
+                    'approved', 0.00, 'post',
+                    ?, ?,
+                    ?, ?, ?,
+                    'published', ?, ?
+                )
+            """, (
+                user_id,
+                mode,
+                cities,
+                payload.get("description", ""),
+                payload.get("social_links", ""),
+                payload.get("telegram", ""),
+                payload.get("phone_main", ""),
+                payload.get("phone_whatsapp", ""),
+                payload.get("contact_name", ""),
+                first_media.get("file_id") if first_media else None,
+                first_media.get("type") if first_media else None,
+                json.dumps(media_list),
+                admin_notes_val,
+                payload.get("review_links", ""),
+                message_id, chat_id, topic_id,
+                json.dumps(published_message_ids),
+                self._premium_post_expires_at(mode),
+            ))
+            conn.commit()
+            return cursor.lastrowid
+
+    def create_baraholka_housing_repost_from_post(self, source_post_id: int, user_id: int) -> int:
+        """Create a pending Baraholka repost from an already-published free housing post."""
+        source = self.get_premium_post(source_post_id)
+        if not source:
+            raise ValueError(f"Source post {source_post_id} not found")
+
+        rental_term = ""
+        try:
+            src_notes = json.loads(source.get("admin_notes") or "{}")
+            rental_term = src_notes.get("rental_term", "")
+        except Exception:
+            pass
+
+        cities_val = source.get("cities")
+        if isinstance(cities_val, list):
+            cities_val = json.dumps(cities_val)
+
+        pub_ids = source.get("published_message_ids") or []
+
+        admin_notes = json.dumps({
+            "baraholka_repost_target": True,
+            "rental_term": rental_term,
+            "source_post_id": source["id"],
+            "source_chat_id": source.get("chat_id"),
+            "source_message_id": source.get("message_id"),
+            "source_published_message_ids": pub_ids,
+        })
+
+        return self.create_premium_post(
+            user_id=user_id,
+            mode=source["mode"],
+            cities=cities_val,
+            description=source.get("description", ""),
+            social_media=source.get("social_media", ""),
+            telegram_username=source.get("telegram_username", ""),
+            phone_main=source.get("phone_main", ""),
+            phone_whatsapp=source.get("phone_whatsapp", ""),
+            name=source.get("name", ""),
+            media_file_id=source.get("media_file_id"),
+            media_type=source.get("media_type"),
+            media_list=source.get("media_list") or [],
+            payment_amount=10.00,
+            action_type="repost",
+            admin_notes=admin_notes,
+        )
+
     def get_premium_post(self, post_id: int) -> Optional[Dict[str, Any]]:
         """
         Получает премиум-пост по ID.
@@ -1073,26 +1176,25 @@ class Database:
             results = cursor.fetchall()
             return [dict(row) for row in results]
 
-    def approve_premium_post(self, post_id: int, admin_id: int, admin_notes: str = None) -> bool:
+    def approve_premium_post(self, post_id: int, admin_id: int) -> bool:
         """
         Подтверждает оплату премиум-поста.
-        
+
         Args:
             post_id: ID поста
             admin_id: ID администратора
-            admin_notes: Заметки администратора
-            
+
         Returns:
             bool: True если успешно
         """
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             cursor.execute("""
-                UPDATE premium_posts 
-                SET payment_status = 'approved', admin_notes = ?, updated_at = ?
+                UPDATE premium_posts
+                SET payment_status = 'approved', updated_at = ?
                 WHERE id = ?
-            """, (admin_notes, datetime.now(), post_id))
+            """, (datetime.now(), post_id))
             
             conn.commit()
             return cursor.rowcount > 0

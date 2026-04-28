@@ -77,11 +77,8 @@ def get_delete_confirmation_keyboard(posting_id: int) -> InlineKeyboardMarkup:
 
 
 @router.callback_query(F.data == "my_postings")
-async def show_my_postings(callback: CallbackQuery):
-    """Show user's postings."""
+async def show_my_postings(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
-    
-    # Get user from database
     user = db.get_user(user_id)
     if not user:
         await callback.message.edit_text(
@@ -92,7 +89,7 @@ async def show_my_postings(callback: CallbackQuery):
         )
         await callback.answer()
         return
-    
+
     user_id_db = user['id']
     postings = db.get_user_active_postings(user_id_db)
     restaurant_posts = db.get_user_published_restaurant_premium_posts(user_id_db)
@@ -107,95 +104,131 @@ async def show_my_postings(callback: CallbackQuery):
         reverse=True,
     )
 
-    if not postings and not all_posts:
+    ids = [f"posting:{p['id']}" for p in postings[:3]] + [f"premium:{p['id']}" for p in all_posts]
+
+    if not ids:
         await callback.message.edit_text(
             "📋 Мои объявления\n\n"
             "У вас пока нет активных объявлений.\n"
-            "Подайте первое объявление нажав кнопку \"Опубликовать\" в главном меню:",
+            "Подайте первое объявление нажав кнопку \"\u041eпубликовать\" в главном меню:",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(text="← Назад", callback_data="go:main")
             ]])
         )
         try:
             await callback.answer()
-        except:
+        except Exception:
             pass
         return
 
-    # Create posting cards
-    cards = []
-    for posting in postings[:3]:
-        card_content = format_posting_card(posting)
-        cards.append(card_content)
+    await state.update_data(my_postings_ids=ids, my_postings_index=0)
+    await render_my_posting(callback, state)
+    try:
+        await callback.answer()
+    except Exception:
+        pass
 
-    # Join cards with separators
-    cards_text = "\n\n_____________\n\n".join(cards)
 
-    # Create keyboard with management buttons
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[])
-    for i, posting in enumerate(postings[:3], 1):
-        keyboard.inline_keyboard.append([InlineKeyboardButton(
-            text=f"Управлять объявлением {i}",
-            callback_data=f"posting_{posting['id']}"
-        )])
+async def render_my_posting(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    ids = data.get("my_postings_ids", [])
+    index = data.get("my_postings_index", 0)
 
-    if not all_posts:
-        keyboard.inline_keyboard.append([InlineKeyboardButton(
-            text="← Назад",
-            callback_data="go:main"
-        )])
+    if not ids:
+        await callback.message.edit_text(
+            "У вас нет объявлений.",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="← Назад", callback_data="go:main")
+            ]])
+        )
+        return
 
-    await callback.message.edit_text(
-        f"📋 Мои объявления\n\n"
-        f"{cards_text}",
-        reply_markup=keyboard,
-    )
+    index = max(0, min(index, len(ids) - 1))
+    await state.update_data(my_postings_index=index)
 
-    for post in all_posts:
-        cities = post['cities']
+    item_key = ids[index]
+    post_type, post_id_str = item_key.split(":", 1)
+    post_id = int(post_id_str)
+    counter = f"({index + 1}/{len(ids)})"
+
+    nav_row = []
+    if index > 0:
+        nav_row.append(InlineKeyboardButton(text="←", callback_data="myprev"))
+    if index < len(ids) - 1:
+        nav_row.append(InlineKeyboardButton(text="→", callback_data="mynext"))
+
+    if post_type == "posting":
+        posting = db.get_posting_by_id(post_id)
+        if not posting:
+            new_ids = [x for x in ids if x != item_key]
+            new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
+            await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
+            if not new_ids:
+                await callback.message.edit_text(
+                    "У вас нет объявлений.",
+                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                        InlineKeyboardButton(text="← Назад", callback_data="go:main")
+                    ]])
+                )
+                return
+            return await render_my_posting(callback, state)
+
+        text = f"📋 Мои объявления {counter}\n\n{format_posting_card(posting)}"
+        action_rows = [
+            [InlineKeyboardButton(text="Управлять объявлением", callback_data=f"posting_{post_id}")]
+        ]
+    else:
+        post = db.get_premium_post(post_id)
+        if not post:
+            new_ids = [x for x in ids if x != item_key]
+            new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
+            await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
+            if not new_ids:
+                await callback.message.edit_text(
+                    "У вас нет объявлений.",
+                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                        InlineKeyboardButton(text="← Назад", callback_data="go:main")
+                    ]])
+                )
+                return
+            return await render_my_posting(callback, state)
+
+        cities = post.get('cities') or []
         if isinstance(cities, list):
             cities_str = ", ".join(str(c) for c in cities)
         else:
             cities_str = str(cities)
 
-        desc = post.get('description') or ""
-        desc = desc.strip().replace("\n", " ")
-
+        desc = (post.get('description') or "").strip().replace("\n", " ")
         if len(desc) > 100:
-            desc_preview = desc[:100].rstrip() + "…"
+            desc = desc[:100].rstrip() + "…"
+
+        text = f"📋 Мои объявления {counter}\n\n{post.get('name', '')} ({cities_str})\n\n{desc}"
+
+        is_housing = post.get('mode') in ('housing_wanted', 'owner_real_estate') and post.get('action_type') == 'post'
+        if is_housing:
+            action_rows = [
+                [InlineKeyboardButton(text="Платный перепост в Барахолку — €10", callback_data=f"hs:baraholka_mypostings:{post_id}")],
+                [InlineKeyboardButton(text="Закрепить — 5 €", callback_data=f"pin_premium_{post_id}")],
+                [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_premium_{post_id}")],
+            ]
         else:
-            desc_preview = desc
+            action_rows = [
+                [InlineKeyboardButton(text="Переопубликовать — 10 €", callback_data=f"repost_premium_{post_id}")],
+                [InlineKeyboardButton(text="Закрепить — 5 €", callback_data=f"pin_premium_{post_id}")],
+                [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_premium_{post_id}")],
+            ]
 
-        await callback.message.answer(
-            f"🍽 {post['name']} ({cities_str})\n\n{desc_preview}",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(
-                    text="Переопубликовать — 10 €",
-                    callback_data=f"repost_premium_{post['id']}",
-                )],
-                [InlineKeyboardButton(
-                    text="Закрепить — 5 €",
-                    callback_data=f"pin_premium_{post['id']}",
-                )],
-                [InlineKeyboardButton(
-                    text="🗑 Удалить",
-                    callback_data=f"delete_premium_{post['id']}",
-                )],
-            ]),
-        )
+    inline_keyboard = []
+    if nav_row:
+        inline_keyboard.append(nav_row)
+    inline_keyboard.extend(action_rows)
+    inline_keyboard.append([InlineKeyboardButton(text="← Назад", callback_data="go:main")])
 
-    if all_posts:
-        await callback.message.answer(
-            "─",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text="← Назад", callback_data="go:main")
-            ]]),
-        )
-
-    try:
-        await callback.answer()
-    except:
-        pass
+    await callback.message.edit_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+    )
 
 
 @router.callback_query(F.data.startswith("posting_"))
@@ -544,13 +577,32 @@ async def cancel_delete_posting(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(F.data == "back_to_my_postings")
-async def back_to_my_postings(callback: CallbackQuery):
+async def back_to_my_postings(callback: CallbackQuery, state: FSMContext):
     """Go back to my postings list."""
-    await show_my_postings(callback)
+    await show_my_postings(callback, state)
     try:
         await callback.answer()
     except:
         pass
+
+
+@router.callback_query(F.data == "myprev")
+async def my_postings_prev(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    index = max(0, data.get("my_postings_index", 0) - 1)
+    await state.update_data(my_postings_index=index)
+    await render_my_posting(callback, state)
+    await callback.answer()
+
+
+@router.callback_query(F.data == "mynext")
+async def my_postings_next(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    ids = data.get("my_postings_ids", [])
+    index = min(len(ids) - 1, data.get("my_postings_index", 0) + 1)
+    await state.update_data(my_postings_index=index)
+    await render_my_posting(callback, state)
+    await callback.answer()
 
 
 @router.callback_query(F.data.startswith("edit_posting_"))
@@ -1000,7 +1052,7 @@ async def confirm_delete_premium(callback: CallbackQuery):
         await callback.answer("Нет доступа.", show_alert=True)
         return
 
-    await callback.message.answer(
+    await callback.message.edit_text(
         "Удалить объявление? Это действие нельзя отменить.",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [
@@ -1013,7 +1065,7 @@ async def confirm_delete_premium(callback: CallbackQuery):
 
 
 @router.callback_query(F.data.startswith("do_delete_premium_"))
-async def execute_delete_premium(callback: CallbackQuery):
+async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     post_id = int(callback.data.split("_")[3])
 
     post = db.get_premium_post(post_id)
@@ -1049,6 +1101,57 @@ async def execute_delete_premium(callback: CallbackQuery):
 
     db.delete_premium_post(post_id)
 
-    await callback.message.answer("Объявление удалено.")
+    _del_data = await state.get_data()
+    _del_ids = _del_data.get("my_postings_ids", [])
+    _del_key = f"premium:{post_id}"
+    _del_new_ids = [x for x in _del_ids if x != _del_key]
+    _del_new_idx = min(_del_data.get("my_postings_index", 0), max(0, len(_del_new_ids) - 1))
+    await state.update_data(my_postings_ids=_del_new_ids, my_postings_index=_del_new_idx)
+
+    if _del_new_ids:
+        await render_my_posting(callback, state)
+    else:
+        await callback.message.edit_text(
+            "Объявление удалено.",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")],
+            ]),
+        )
     await callback.answer()
-    await show_my_postings(callback)
+
+
+@router.callback_query(F.data.startswith("hs:baraholka_mypostings:"))
+async def hs_baraholka_mypostings(callback: CallbackQuery):
+    import logging
+    logger = logging.getLogger(__name__)
+
+    raw_id = callback.data.split(":", 2)[2]
+    try:
+        post_id = int(raw_id)
+    except ValueError:
+        await callback.answer("Ошибка.", show_alert=True)
+        return
+
+    user = db.get_user(callback.from_user.id)
+    if not user:
+        await callback.answer("Пользователь не найден.", show_alert=True)
+        return
+
+    post = db.get_premium_post(post_id)
+    if not post or post["user_id"] != user["id"]:
+        await callback.answer("Объявление не найдено.", show_alert=True)
+        return
+
+    try:
+        from handlers.housing_schema_flow import _notify_admin_baraholka_from_post
+        repost_id = db.create_baraholka_housing_repost_from_post(post_id, user["id"])
+        await _notify_admin_baraholka_from_post(callback.bot, repost_id, post)
+    except Exception as e:
+        logger.exception("Baraholka my_postings repost failed: %s", e)
+        await callback.answer("Ошибка при отправке заявки.", show_alert=True)
+        return
+
+    await callback.message.edit_text(
+        "Заявка на перепост в Барахолку отправлена на модерацию. Администратор проверит и свяжется с вами."
+    )
+    await callback.answer()
