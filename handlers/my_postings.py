@@ -100,8 +100,14 @@ async def show_my_postings(callback: CallbackQuery):
         post for post in restaurant_posts
         if post.get('action_type') in ('post', 'repost')
     ]
+    generic_posts = db.get_user_published_generic_premium_posts(user_id_db)
+    all_posts = sorted(
+        restaurant_posts + generic_posts,
+        key=lambda p: p.get('created_at') or '',
+        reverse=True,
+    )
 
-    if not postings and not restaurant_posts:
+    if not postings and not all_posts:
         await callback.message.edit_text(
             "📋 Мои объявления\n\n"
             "У вас пока нет активных объявлений.\n"
@@ -133,7 +139,7 @@ async def show_my_postings(callback: CallbackQuery):
             callback_data=f"posting_{posting['id']}"
         )])
 
-    if not restaurant_posts:
+    if not all_posts:
         keyboard.inline_keyboard.append([InlineKeyboardButton(
             text="← Назад",
             callback_data="go:main"
@@ -145,7 +151,7 @@ async def show_my_postings(callback: CallbackQuery):
         reply_markup=keyboard,
     )
 
-    for post in restaurant_posts:
+    for post in all_posts:
         cities = post['cities']
         if isinstance(cities, list):
             cities_str = ", ".join(str(c) for c in cities)
@@ -178,7 +184,7 @@ async def show_my_postings(callback: CallbackQuery):
             ]),
         )
 
-    if restaurant_posts:
+    if all_posts:
         await callback.message.answer(
             "─",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
