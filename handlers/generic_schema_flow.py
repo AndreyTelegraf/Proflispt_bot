@@ -1,10 +1,12 @@
 """Generic schema flow handler for all catalogue sections except restaurants/jobs."""
 from __future__ import annotations
 
+import functools
 import html
 import json
 import logging
 import re
+from pathlib import Path
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -23,6 +25,23 @@ from services.sections_registry import load_sections_registry
 
 logger = logging.getLogger(__name__)
 router = Router()
+
+# ── description prompt overrides ─────────────────────────────────────────────
+
+@functools.lru_cache(maxsize=1)
+def _load_description_prompts() -> dict:
+    path = Path(__file__).resolve().parent.parent / "config" / "generic_description_prompts.json"
+    if not path.exists():
+        return {}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _resolve_prompt(step, slug: str) -> str:
+    """Return step prompt, substituting custom description text for known slugs."""
+    if getattr(step, "field_name", "") == "description":
+        return _load_description_prompts().get(slug, step.prompt)
+    return step.prompt
+
 
 # ── slug ↔ section name ───────────────────────────────────────────────────────
 
@@ -344,9 +363,9 @@ async def _advance(
     step = schema.steps[next_index]
     await state.set_state(GS_INPUT)
     if is_message:
-        await target.answer(step.prompt, reply_markup=_step_kb(step, slug))
+        await target.answer(_resolve_prompt(step, slug), reply_markup=_step_kb(step, slug))
     else:
-        await target.edit_text(step.prompt, reply_markup=_step_kb(step, slug))
+        await target.edit_text(_resolve_prompt(step, slug), reply_markup=_step_kb(step, slug))
 
 # ── admin notify ──────────────────────────────────────────────────────────────
 
@@ -419,7 +438,7 @@ async def gs_entry(callback: CallbackQuery, state: FSMContext):
     await state.set_state(GS_INPUT)
 
     step = schema.steps[0]
-    await callback.message.edit_text(step.prompt, reply_markup=_step_kb(step, slug))
+    await callback.message.edit_text(_resolve_prompt(step, slug), reply_markup=_step_kb(step, slug))
     await callback.answer()
 
 # ── choice input ──────────────────────────────────────────────────────────────
@@ -573,7 +592,7 @@ async def gs_tg_created(callback: CallbackQuery, state: FSMContext):
 
     schema = build_schema_registry().get_by_section(section_name)
     step = schema.steps[step_idx]
-    await callback.message.edit_text(step.prompt, reply_markup=_step_kb(step, slug))
+    await callback.message.edit_text(_resolve_prompt(step, slug), reply_markup=_step_kb(step, slug))
     await callback.answer()
 
 # ── back ──────────────────────────────────────────────────────────────────────
@@ -608,7 +627,7 @@ async def gs_back(callback: CallbackQuery, state: FSMContext):
     await state.set_state(GS_INPUT)
 
     step = schema.steps[prev_idx]
-    await callback.message.edit_text(step.prompt, reply_markup=_step_kb(step, slug))
+    await callback.message.edit_text(_resolve_prompt(step, slug), reply_markup=_step_kb(step, slug))
     await callback.answer()
 
 # ── text input ────────────────────────────────────────────────────────────────
