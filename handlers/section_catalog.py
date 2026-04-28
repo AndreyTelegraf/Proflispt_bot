@@ -19,8 +19,8 @@ ACTIVE_SECTION_CALLBACKS = {
     "Предлагаю работу":              "mode:offering",
     "Рестораны":                     "section:restaurants",
     # generic sections
-    "Ищу жильё":                     "section:generic:housing_wanted",
-    "Недвижимость от хозяев":        "section:generic:owner_real_estate",
+    "Ищу жильё":                     "section:housing:housing_wanted",
+    "Недвижимость от хозяев":        "section:housing:owner_real_estate",
     "Риелторы":                      "section:generic:realtors",
     "Строительство и ремонт":        "section:generic:construction_repair",
     "Бытовой ремонт и обустройство": "section:generic:home_repair",
