@@ -64,7 +64,7 @@ def _groups_keyboard() -> InlineKeyboardMarkup:
     for group in catalog.list_groups():
         builder.add(
             InlineKeyboardButton(
-                text=group.title,
+                text=f"{group.title} ›",
                 callback_data=f"catalog:group:{group.key}",
             )
         )
