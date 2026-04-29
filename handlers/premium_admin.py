@@ -419,6 +419,15 @@ async def admin_approve_premium(callback: CallbackQuery):
                     disable_web_page_preview=True,
                 )
                 published_message_ids = [published_message.message_id]
+            elif post.get('mode') == 'reviews':
+                published_message = await callback.bot.send_message(
+                    chat_id=publish_chat_id,
+                    text=post_text,
+                    message_thread_id=topic_id,
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                )
+                published_message_ids = [published_message.message_id]
 
         # Update post with publication info
         if published_message:

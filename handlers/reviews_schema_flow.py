@@ -75,6 +75,11 @@ def _rv_render_html(payload: dict) -> str:
     if contacts:
         lines.append(html.escape(contacts))
 
+    author = str(payload.get("author_telegram") or "").strip()
+    if author:
+        uname = author if author.startswith("@") else f"@{author.lstrip('@')}"
+        lines.append(f"Автор: {html.escape(uname)}")
+
     return "\n".join(lines).strip()
 
 
@@ -98,6 +103,7 @@ def _rv_render_html_from_post(post: dict) -> str:
         "geo_tags": geo_tags,
         "description": post.get("description", ""),
         "performer_contacts": post.get("social_media", ""),
+        "author_telegram": post.get("telegram_username", ""),
     })
 
 
@@ -136,6 +142,7 @@ def _back_kb() -> InlineKeyboardMarkup:
 
 def _confirm_kb() -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
+    b.add(InlineKeyboardButton(text="Отправить без медиа", callback_data="rv:submit_no_media"))
     b.add(InlineKeyboardButton(text="Добавить фото/видео", callback_data="rv:add_media"))
     b.add(InlineKeyboardButton(text="← Назад", callback_data="rv:back"))
     b.adjust(1)
@@ -210,6 +217,8 @@ async def _rv_notify_admin(bot, post_id: int, payload: dict, media_list: list) -
 # ── submit helper ──────────────────────────────────────────────────────────────
 
 async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dict, media_list: list) -> None:
+    author_username = callback.from_user.username or ""
+    payload["author_telegram"] = author_username
     first = media_list[0] if media_list else None
     try:
         user_db_id = db.create_user(
@@ -224,7 +233,7 @@ async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dic
             cities=_normalize_geo(payload.get("geo_tags", "")),
             description=payload.get("description", ""),
             social_media=payload.get("performer_contacts", ""),
-            telegram_username="",
+            telegram_username=author_username,
             phone_main="",
             phone_whatsapp="",
             name="",
@@ -392,6 +401,17 @@ async def rv_text_input(message: Message, state: FSMContext):
         return
 
 
+# ── no-media submit ────────────────────────────────────────────────────────────
+
+@router.callback_query(F.data == "rv:submit_no_media")
+async def rv_submit_no_media(callback: CallbackQuery, state: FSMContext):
+    if await state.get_state() != RV_CONFIRM:
+        await callback.answer()
+        return
+    _, payload, _ = await _get_rv(state)
+    await _rv_do_submit(callback, state, payload, [])
+
+
 # ── media start ────────────────────────────────────────────────────────────────
 
 @router.callback_query(F.data == "rv:add_media")
@@ -456,9 +476,6 @@ async def rv_media_submit(callback: CallbackQuery, state: FSMContext):
         await callback.answer()
         return
     _, payload, media = await _get_rv(state)
-    if not media:
-        await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
-        return
     await _rv_do_submit(callback, state, payload, media)
 
 
