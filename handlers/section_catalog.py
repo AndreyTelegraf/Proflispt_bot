@@ -10,6 +10,7 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from services.section_catalog import load_section_catalog
+from handlers.reviews_schema_flow import rv_entry
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -125,6 +126,11 @@ async def cb_catalog_groups(callback: CallbackQuery, state: FSMContext):
 async def cb_catalog_group(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     group_key = callback.data.split(":", 2)[2]
+
+    if group_key == "reviews":
+        await rv_entry(callback, state)
+        return
+
     catalog = load_section_catalog()
     group = catalog.get_group(group_key)
 

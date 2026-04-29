@@ -896,13 +896,68 @@ class Database:
             conn.commit()
             return post_id
 
-    def _premium_post_ttl_days(self, mode: str) -> int:
-        if mode == 'restaurants':
-            return 90
-        return 30
+    def _premium_post_ttl_days(self, mode: str):
+        ttl_by_mode = {
+            "job_seeker": 30,
+            "job_offer": 90,
+            "housing_wanted": 30,
+            "owner_real_estate": 90,
+            "realtors": 90,
+            "translators": 90,
+            "legal": None,
+            "residence_lawyers": None,
 
-    def _premium_post_expires_at(self, mode: str) -> datetime:
-        return datetime.now() + timedelta(days=self._premium_post_ttl_days(mode))
+            "construction_repair": 30,
+            "home_repair": 30,
+            "tech_repair": None,
+            "device_repair": None,
+            "furniture": None,
+            "cleaning": 90,
+            "domestic_staff": 90,
+            "home_staff": 90,
+            "tailoring": 90,
+            "cooking": 90,
+
+            "passenger_transport": 90,
+            "cargo_transport": 30,
+            "car_rental": None,
+            "auto_services": 90,
+            "auto_service": 90,
+
+            "business_marketing": 90,
+            "marketing": 90,
+            "it_smm": 90,
+            "finance": 90,
+            "money_credit": 90,
+            "insurance": None,
+            "accounting": None,
+            "accountants": None,
+            "printing": 90,
+
+            "health": 90,
+            "medicine": None,
+            "beauty": 90,
+            "teaching": 90,
+            "sport": 90,
+            "animals": 90,
+
+            "restaurants": 90,
+            "leisure": 90,
+            "tourism": 90,
+            "photo_video": 90,
+            "art": 90,
+
+            "reviews": None,
+        }
+        return ttl_by_mode.get(mode, 90)
+
+
+    def _premium_post_expires_at(self, mode: str):
+        ttl_days = self._premium_post_ttl_days(mode)
+        if ttl_days is None:
+            return None
+        return datetime.now() + timedelta(days=ttl_days)
+
 
     def publish_free_restaurant_post(
         self,

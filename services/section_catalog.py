@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -14,6 +14,7 @@ class CatalogGroup:
     key: str
     title: str
     sections: list[str]
+    extra_buttons: list = field(default_factory=list)
 
 
 class SectionCatalog:
@@ -67,9 +68,14 @@ def load_section_catalog() -> SectionCatalog:
                 raise SectionCatalogError(f"section not found in registry: {section}")
             covered_sections.add(section)
 
-        groups.append(CatalogGroup(key=key, title=title, sections=sections))
+        extra_buttons = [
+            {"title": str(b["title"]), "url": str(b["url"])}
+            for b in (item.get("extra_buttons") or [])
+            if "title" in b and "url" in b
+        ]
+        groups.append(CatalogGroup(key=key, title=title, sections=sections, extra_buttons=extra_buttons))
 
-    manual_only_sections = {"Отзывы", "Поговори", "Фермеры"}
+    manual_only_sections = {"Поговори", "Фермеры"}
     missing = registry_sections - covered_sections - manual_only_sections
     if missing:
         raise SectionCatalogError(f"registry sections missing from catalog: {sorted(missing)}")

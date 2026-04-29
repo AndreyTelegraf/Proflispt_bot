@@ -4,6 +4,7 @@ from __future__ import annotations
 import html
 import json
 import logging
+import re
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -49,7 +50,7 @@ _GEO_OPTIONS = [
 _PROMPTS = [
     "Вы сейчас находитесь в Португалии?",
     "Выберите город или регион:",
-    "Укажите контакты специалиста, которому вы хотите оставить отзыв (имя, ссылка, номер телефона):",
+    "Укажите @username специалиста, которому вы хотите оставить отзыв:",
     "Напишите ваш отзыв:",
 ]
 
@@ -64,6 +65,11 @@ def _rv_render_html(payload: dict) -> str:
         tag = geo if geo.startswith("#") else f"#{geo.lstrip('#').lower()}"
         lines.append(html.escape(tag))
 
+    performer = str(payload.get("performer_contacts") or "").strip()
+    if performer:
+        uname = performer if performer.startswith("@") else f"@{performer.lstrip('@')}"
+        lines.append(f"Исполнитель: {html.escape(uname)}")
+
     description = str(payload.get("description") or "").strip()
     if description:
         dlines = [p.strip() for p in description.splitlines() if p.strip()]
@@ -71,10 +77,6 @@ def _rv_render_html(payload: dict) -> str:
             lines.append("- " + html.escape(dlines[0]))
             for p in dlines[1:]:
                 lines.append(html.escape(p))
-
-    contacts = str(payload.get("performer_contacts") or "").strip()
-    if contacts:
-        lines.append(html.escape(contacts))
 
     author = str(payload.get("author_telegram") or "").strip()
     if author:
@@ -373,8 +375,8 @@ async def rv_text_input(message: Message, state: FSMContext):
 
     if step == _STEP_CONTACTS:
         raw = str(message.text or "").strip()
-        if not raw:
-            await message.answer("Пожалуйста, укажите контакты специалиста.", reply_markup=_back_kb())
+        if not re.fullmatch(r"@[A-Za-z0-9_]{5,32}", raw):
+            await message.answer("Укажите Telegram username специалиста в формате @username.", reply_markup=_back_kb())
             return
         payload["performer_contacts"] = raw
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
