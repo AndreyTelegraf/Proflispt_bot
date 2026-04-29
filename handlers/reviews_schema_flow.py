@@ -389,6 +389,7 @@ async def rv_text_input(message: Message, state: FSMContext):
             )
             return
         payload["description"] = raw
+        payload["author_telegram"] = message.from_user.username or ""
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
         await state.set_state(RV_CONFIRM)
         text = _rv_render_html(payload) + "\n\nТеперь добавьте фото или видео к отзыву."
