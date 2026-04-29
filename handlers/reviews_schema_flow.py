@@ -48,7 +48,7 @@ _GEO_OPTIONS = [
 ]
 
 _PROMPTS = [
-    "Вы сейчас находитесь в Португалии?",
+    "Вы находитесь в Португалии?",
     "Выберите город или регион:",
     "Укажите @username специалиста, которому вы хотите оставить отзыв:",
     "Напишите ваш отзыв:",
@@ -376,7 +376,7 @@ async def rv_text_input(message: Message, state: FSMContext):
     if step == _STEP_CONTACTS:
         raw = str(message.text or "").strip()
         if not re.fullmatch(r"@[A-Za-z0-9_]{5,32}", raw):
-            await message.answer("Укажите Telegram username специалиста в формате @username.", reply_markup=_back_kb())
+            await message.answer("Укажите Telegram username специалиста в формате @username. Минимум 5 символов после @, только латиница, цифры и подчёркивание.", reply_markup=_back_kb())
             return
         payload["performer_contacts"] = raw
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
@@ -395,7 +395,7 @@ async def rv_text_input(message: Message, state: FSMContext):
         payload["author_telegram"] = message.from_user.username or ""
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
         await state.set_state(RV_CONFIRM)
-        text = _rv_render_html(payload) + "\n\nТеперь добавьте фото или видео к отзыву."
+        text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
         await message.answer(
             text,
             reply_markup=_confirm_kb(),
@@ -491,7 +491,7 @@ async def rv_media_cancel(callback: CallbackQuery, state: FSMContext):
     _, payload, _ = await _get_rv(state)
     await state.update_data(rv_media=[], rv_media_status_id=None)
     await state.set_state(RV_CONFIRM)
-    text = _rv_render_html(payload) + "\n\nТеперь добавьте фото или видео к отзыву."
+    text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
     await callback.message.edit_text(
         text,
         reply_markup=_confirm_kb(),

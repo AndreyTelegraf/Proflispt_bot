@@ -110,7 +110,7 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(
             "📋 Мои объявления\n\n"
             "У вас пока нет активных объявлений.\n"
-            "Подайте первое объявление нажав кнопку \"\u041eпубликовать\" в главном меню:",
+            "Подайте первое объявление нажав на кнопку «Опубликовать» в главном меню:",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(text="← Назад", callback_data="go:main")
             ]])
@@ -276,7 +276,7 @@ async def show_posting_menu(callback: CallbackQuery):
     await callback.message.edit_text(
         f"📋 Управление объявлением\n\n"
         f"*{escape_markdown(title)}*\n"
-        f"Тип: {escape_markdown('Ищу работу' if posting['mode'] == 'seeking' else 'Предлагаю работу')}\n"
+        f"Тип: {escape_markdown('Ищу работу' if posting['mode'] in ('seeking', 'job_seeker') else 'Предлагаю работу')}\n"
         f"Города: {escape_markdown(posting['cities'])}\n"
         f"Создано: {escape_markdown(posting['created_at'].strftime('%d.%m.%Y %H:%M') if isinstance(posting['created_at'], datetime) else str(posting['created_at']))}\n\n"
         f"Выберите действие:",
@@ -567,7 +567,7 @@ async def cancel_delete_posting(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
         f"📋 Управление объявлением\n\n"
         f"{title}\n"
-        f"Тип: {'Ищу работу' if posting['mode'] == 'seeking' else 'Предлагаю работу'}\n"
+        f"Тип: {'Ищу работу' if posting['mode'] in ('seeking', 'job_seeker') else 'Предлагаю работу'}\n"
         f"Города: {posting['cities']}\n"
         f"Создано: {posting['created_at'].strftime('%d.%m.%Y %H:%M') if hasattr(posting['created_at'], 'strftime') else posting['created_at']}\n\n"
         f"Выберите действие:",

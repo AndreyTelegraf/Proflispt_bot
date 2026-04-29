@@ -634,7 +634,7 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
         if result.stop_flow:
             await state.clear()
             await callback.message.edit_text(
-                "Справочник работает только с резидентами Португалии.",
+                "Справочник работает только для объявлений, связанных с Португалией.",
                 reply_markup=get_back_button("go:main")
             )
             await callback.answer()
@@ -1099,8 +1099,8 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
         if result.stop_flow:
             await state.clear()
             await message.answer(
-                "Мы работаем с резидентами Португалии. Возвращайтесь после переезда.",
-                reply_markup=get_back_button("restaurants:back")
+                "Справочник работает только для объявлений, связанных с Португалией.",
+                reply_markup=get_back_button("go:main")
             )
             return
 
@@ -1284,7 +1284,7 @@ async def restaurants_premium_submit(callback: CallbackQuery, state: FSMContext)
 
         await state.clear()
         await callback.message.edit_text(
-            "Премиум-заявка отправлена на модерацию. Администратор проверит публикацию и свяжется с вами.",
+            "Премиум-заявка отправлена на модерацию.\n\nСтоимость публикации с медиа: 20 €. Администратор свяжется с вами для подтверждения оплаты.",
             reply_markup=get_back_button("restaurants:back"),
             disable_web_page_preview=True,
         )
@@ -1369,7 +1369,7 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
             logger.warning("Could not get channel info: %s", e)
             message_link = None
 
-        success_text = f"Объявление опубликовано. Ссылка: {message_link}" if message_link else "Объявление опубликовано."
+        success_text = f"Объявление опубликовано в Справочнике.\n\nСсылка: {message_link}" if message_link else "Объявление опубликовано в Справочнике."
         builder = InlineKeyboardBuilder()
         builder.add(InlineKeyboardButton(text="В главное меню", callback_data="go:main"))
         await callback.message.edit_text(success_text, reply_markup=builder.as_markup())
