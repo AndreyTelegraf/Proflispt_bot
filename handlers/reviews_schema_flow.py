@@ -33,16 +33,17 @@ _STEP_CONTACTS    = 2
 _STEP_DESCRIPTION = 3
 
 _GEO_OPTIONS = [
-    ("lisboa",  "#lisboa"),
-    ("porto",   "#porto"),
-    ("algarve", "#algarve"),
-    ("setubal", "#setubal"),
-    ("braga",   "#braga"),
-    ("coimbra", "#coimbra"),
-    ("faro",    "#faro"),
-    ("aveiro",  "#aveiro"),
-    ("online",  "#online"),
-    ("custom",  "Другое"),
+    ("lisboa",  "Lisboa"),
+    ("porto",   "Porto"),
+    ("coimbra", "Coimbra"),
+    ("braga",   "Braga"),
+    ("faro",    "Faro"),
+    ("sintra",  "Sintra"),
+    ("cascais", "Cascais"),
+    ("leiria",  "Leiria"),
+    ("setubal", "Setúbal"),
+    ("online",  "Онлайн"),
+    ("custom",  "Другие города"),
 ]
 
 _PROMPTS = [
@@ -130,7 +131,7 @@ def _geo_kb() -> InlineKeyboardMarkup:
     for val, label in _GEO_OPTIONS:
         b.add(InlineKeyboardButton(text=label, callback_data=f"rv:geo:{val}"))
     b.add(InlineKeyboardButton(text="← Назад", callback_data="rv:back"))
-    b.adjust(3, 3, 3, 1, 1)
+    b.adjust(3, 3, 3, 2, 1)
     return b.as_markup()
 
 
