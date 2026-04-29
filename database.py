@@ -1050,6 +1050,64 @@ class Database:
         return datetime.now() + timedelta(days=ttl_days)
 
 
+
+    def check_premium_post_monthly_limit(
+        self,
+        user_id: int,
+        mode: str,
+        *,
+        per_mode_limit: int = 5,
+        total_limit: int = 10,
+    ) -> tuple[bool, str | None]:
+        """Check free directory posting limits in premium_posts for rolling 30 days."""
+        if mode == "reviews":
+            return True, None
+
+        since = (datetime.now() - timedelta(days=30)).isoformat()
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT COUNT(*) AS cnt
+                FROM premium_posts
+                WHERE user_id = ?
+                  AND mode = ?
+                  AND mode != 'reviews'
+                  AND action_type = 'post'
+                  AND datetime(created_at) > datetime(?)
+                  AND status IN ('published', 'pending')
+                  AND payment_status IN ('approved', 'pending')
+            """, (user_id, mode, since))
+            per_mode_count = int(cursor.fetchone()["cnt"])
+
+            if per_mode_count >= per_mode_limit:
+                return False, (
+                    f"Лимит публикаций в этом разделе превышен. "
+                    f"Можно опубликовать не больше {per_mode_limit} объявлений в одном разделе за 30 дней."
+                )
+
+            cursor.execute("""
+                SELECT COUNT(*) AS cnt
+                FROM premium_posts
+                WHERE user_id = ?
+                  AND mode != 'reviews'
+                  AND action_type = 'post'
+                  AND datetime(created_at) > datetime(?)
+                  AND status IN ('published', 'pending')
+                  AND payment_status IN ('approved', 'pending')
+            """, (user_id, since))
+            total_count = int(cursor.fetchone()["cnt"])
+
+            if total_count >= total_limit:
+                return False, (
+                    f"Общий лимит публикаций превышен. "
+                    f"Можно опубликовать не больше {total_limit} объявлений во всём справочнике за 30 дней."
+                )
+
+            return True, None
+
+
     def publish_free_restaurant_post(
         self,
         user_id: int,

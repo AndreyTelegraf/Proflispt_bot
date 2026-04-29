@@ -708,6 +708,26 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
     section_name, _, _, payload, _ = await _get_gs(state)
 
     try:
+        user = db.get_user(callback.from_user.id)
+        if not user:
+            user_db_id = db.create_user(
+                telegram_id=callback.from_user.id,
+                username=callback.from_user.username,
+                first_name=callback.from_user.first_name,
+                last_name=callback.from_user.last_name,
+            )
+            user = db.get_user(callback.from_user.id)
+
+        can_post, limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
+        if not can_post:
+            b = InlineKeyboardBuilder()
+            b.add(InlineKeyboardButton(text="Мои объявления", callback_data="my_postings"))
+            b.add(InlineKeyboardButton(text="← Назад", callback_data=f"catalog:group:home_life"))
+            b.adjust(1)
+            await callback.message.edit_text(limit_message, reply_markup=b.as_markup())
+            await callback.answer()
+            return
+
         registry = load_sections_registry()
         channel_id = int(registry.channel_id)
         topic_id = int(registry.get_topic_id(section_name))
@@ -723,7 +743,6 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
         await state.clear()
 
         try:
-            user = db.get_user(callback.from_user.id)
             if user:
                 db.publish_free_generic_post(
                     user_id=user["id"],

@@ -490,7 +490,7 @@ async def handle_confirmation(callback: CallbackQuery, state: FSMContext):
     phone_whatsapp = data.get('phone_whatsapp', '')
     
     if phone_main:
-        can_post, earliest_next_post_date = db.check_phone_posting_limit(phone_main, phone_whatsapp)
+        can_post, earliest_next_post_date = True, None  # legacy limit disabled; new limit uses premium_posts
         
         if not can_post:
             # Format the date for display
@@ -516,7 +516,7 @@ async def handle_confirmation(callback: CallbackQuery, state: FSMContext):
     # Fallback: only check by user_id when there is no phone number in the draft.
     # If a phone number is present, the phone-based limit above is the source of truth.
     if not phone_main:
-        can_post, earliest_next_post_date = db.check_user_posting_limit(user_id)
+        can_post, earliest_next_post_date = True, None  # legacy limit disabled; new limit uses premium_posts
         
         if not can_post:
             # Format the date for display

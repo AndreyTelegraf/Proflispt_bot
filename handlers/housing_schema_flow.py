@@ -612,6 +612,26 @@ async def hs_media_preview_back(callback: CallbackQuery, state: FSMContext):
 async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str, media: list) -> None:
     section_name, _, _, payload, _ = await _get_hs(state)
 
+    user = db.get_user(callback.from_user.id)
+    if not user:
+        db.create_user(
+            telegram_id=callback.from_user.id,
+            username=callback.from_user.username,
+            first_name=callback.from_user.first_name,
+            last_name=callback.from_user.last_name,
+        )
+        user = db.get_user(callback.from_user.id)
+
+    can_post, limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
+    if not can_post:
+        b = InlineKeyboardBuilder()
+        b.add(InlineKeyboardButton(text="Мои объявления", callback_data="my_postings"))
+        b.add(InlineKeyboardButton(text="← Назад", callback_data="catalog:group:housing_work"))
+        b.adjust(1)
+        await callback.message.edit_text(limit_message, reply_markup=b.as_markup())
+        await callback.answer()
+        return
+
     registry = load_sections_registry()
     channel_id = int(registry.channel_id)
     topic_id = int(registry.get_topic_id(section_name))
@@ -662,7 +682,6 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
 
     source_post_id = None
     try:
-        user = db.get_user(callback.from_user.id)
         if user:
             source_post_id = db.publish_free_housing_post(
                 user_id=user["id"],
