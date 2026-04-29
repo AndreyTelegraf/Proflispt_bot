@@ -309,103 +309,109 @@ async def handle_job_city(callback: CallbackQuery, state: FSMContext):
 
 @router.message(Command("ban"))
 async def cmd_ban(message: Message):
-    """Handle /ban command (admin only)."""
+    """Handle /ban command by @username, +351 phone, or numeric Telegram id."""
     admin_ids = Config.ADMIN_IDS
-
-    logger.info("[MAIN] Команда /ban получена: %s от пользователя %s", message.text, message.from_user.id)
-
     if message.from_user.id not in admin_ids:
-        await message.answer("🚫 У вас нет прав для выполнения этой команды.")
+        await message.answer("У вас нет прав для выполнения этой команды.")
         return
 
     args = message.text.split()[1:]
     if len(args) < 2:
-        await message.answer("📝 Использование: /ban <user_id> <причина>")
+        await message.answer("Использование: /ban <@username|+351xxxxxxxxx|user_id> <причина>")
+        return
+
+    target = args[0].strip()
+    reason = " ".join(args[1:]).strip()
+
+    if target.startswith("@"):
+        ok = db.ban_identity("username", target, message.from_user.id, reason)
+        await message.answer(f"Username {target} забанен.\n\nПричина: {reason}" if ok else "Ошибка при бане username.")
+        return
+
+    if target.startswith("+"):
+        ok = db.ban_identity("phone", target, message.from_user.id, reason)
+        await message.answer(f"Телефон {target} забанен.\n\nПричина: {reason}" if ok else "Ошибка при бане телефона.")
         return
 
     try:
-        target_user_id = int(args[0])
-        reason = " ".join(args[1:])
-
-        target_user = db.get_user(target_user_id)
-        if not target_user:
-            await message.answer(f"🚫 Пользователь с ID {target_user_id} не найден в базе данных.")
-            return
-
-        is_banned, _ = db.is_user_banned(target_user_id)
-        if is_banned:
-            await message.answer(f"ℹ️ Пользователь {target_user_id} уже забанен.")
-            return
-
-        admin_user = db.get_user(message.from_user.id)
-        if not admin_user:
-            admin_user_id = db.create_user(
-                telegram_id=message.from_user.id,
-                username=message.from_user.username,
-                first_name=message.from_user.first_name,
-                last_name=message.from_user.last_name,
-            )
-        else:
-            admin_user_id = admin_user["id"]
-
-        success = db.ban_user(target_user_id, admin_user_id, reason)
-
-        if success:
-            await message.answer(f"✅ Пользователь {target_user_id} забанен.\n\nПричина: {reason}")
-        else:
-            await message.answer("🚫 Ошибка при бане пользователя.")
-
+        target_user_id = int(target)
     except ValueError:
-        await message.answer("🚫 Неверный формат user_id. Используйте число.")
+        await message.answer("Неверный target. Используйте @username, +351xxxxxxxxx или user_id.")
+        return
+
+    target_user = db.get_user(target_user_id)
+    if not target_user:
+        await message.answer(f"Пользователь с ID {target_user_id} не найден в базе данных.")
+        return
+
+    is_banned, _ = db.is_user_banned(target_user_id)
+    if is_banned:
+        await message.answer(f"Пользователь {target_user_id} уже забанен.")
+        return
+
+    admin_user = db.get_user(message.from_user.id)
+    admin_user_id = admin_user["id"] if admin_user else db.create_user(
+        telegram_id=message.from_user.id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name,
+    )
+
+    success = db.ban_user(target_user_id, admin_user_id, reason)
+    await message.answer(f"Пользователь {target_user_id} забанен.\n\nПричина: {reason}" if success else "Ошибка при бане пользователя.")
 
 
 @router.message(Command("unban"))
 async def cmd_unban(message: Message):
-    """Handle /unban command (admin only)."""
+    """Handle /unban command by @username, +351 phone, or numeric Telegram id."""
     admin_ids = Config.ADMIN_IDS
-
     if message.from_user.id not in admin_ids:
-        await message.answer("🚫 У вас нет прав для выполнения этой команды.")
+        await message.answer("У вас нет прав для выполнения этой команды.")
         return
 
     args = message.text.split()[1:]
     if len(args) != 1:
-        await message.answer("📝 Использование: /unban <user_id>")
+        await message.answer("Использование: /unban <@username|+351xxxxxxxxx|user_id>")
+        return
+
+    target = args[0].strip()
+
+    if target.startswith("@"):
+        ok = db.unban_identity("username", target)
+        await message.answer(f"Username {target} разбанен." if ok else f"Активный бан для {target} не найден.")
+        return
+
+    if target.startswith("+"):
+        ok = db.unban_identity("phone", target)
+        await message.answer(f"Телефон {target} разбанен." if ok else f"Активный бан для {target} не найден.")
         return
 
     try:
-        target_user_id = int(args[0])
-
-        target_user = db.get_user(target_user_id)
-        if not target_user:
-            await message.answer(f"🚫 Пользователь с ID {target_user_id} не найден в базе данных.")
-            return
-
-        is_banned, _ = db.is_user_banned(target_user_id)
-        if not is_banned:
-            await message.answer(f"ℹ️ Пользователь {target_user_id} не забанен.")
-            return
-
-        admin_user = db.get_user(message.from_user.id)
-        if not admin_user:
-            admin_user_id = db.create_user(
-                telegram_id=message.from_user.id,
-                username=message.from_user.username,
-                first_name=message.from_user.first_name,
-                last_name=message.from_user.last_name,
-            )
-        else:
-            admin_user_id = admin_user["id"]
-
-        success = db.unban_user(target_user_id, admin_user_id)
-
-        if success:
-            await message.answer(f"✅ Пользователь {target_user_id} разбанен.")
-        else:
-            await message.answer("🚫 Ошибка при разбане пользователя.")
-
+        target_user_id = int(target)
     except ValueError:
-        await message.answer("🚫 Неверный формат user_id. Используйте число.")
+        await message.answer("Неверный target. Используйте @username, +351xxxxxxxxx или user_id.")
+        return
+
+    target_user = db.get_user(target_user_id)
+    if not target_user:
+        await message.answer(f"Пользователь с ID {target_user_id} не найден в базе данных.")
+        return
+
+    is_banned, _ = db.is_user_banned(target_user_id)
+    if not is_banned:
+        await message.answer(f"Пользователь {target_user_id} не забанен.")
+        return
+
+    admin_user = db.get_user(message.from_user.id)
+    admin_user_id = admin_user["id"] if admin_user else db.create_user(
+        telegram_id=message.from_user.id,
+        username=message.from_user.username,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name,
+    )
+
+    success = db.unban_user(target_user_id, admin_user_id)
+    await message.answer(f"Пользователь {target_user_id} разбанен." if success else "Ошибка при разбане пользователя.")
 
 
 @router.message(Command("premium_posts"))

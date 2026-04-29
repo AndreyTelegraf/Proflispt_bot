@@ -1,6 +1,7 @@
 """Database module for Work in Portugal Bot."""
 
 import sqlite3
+import re
 import json
 import logging
 from datetime import datetime, timedelta
@@ -101,6 +102,24 @@ class Database:
                     FOREIGN KEY (user_id) REFERENCES users (id),
                     FOREIGN KEY (banned_by) REFERENCES users (id)
                 )
+            """)
+
+            # Identity bans table: username / phone bans independent from Telegram uid
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS identity_bans (
+                    id INTEGER PRIMARY KEY,
+                    target_type TEXT NOT NULL CHECK (target_type IN ('username', 'phone')),
+                    target_value TEXT NOT NULL,
+                    banned_by INTEGER NOT NULL,
+                    reason TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    FOREIGN KEY (banned_by) REFERENCES users (id)
+                )
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_identity_bans_active
+                ON identity_bans(target_type, target_value, is_active)
             """)
 
             # Premium posts table
@@ -678,6 +697,78 @@ class Database:
             
             conn.commit()
             return True
+
+
+    def _normalize_identity_ban_target(self, target_type: str, target_value: str) -> str:
+        value = str(target_value or "").strip()
+        if target_type == "username":
+            return value.lstrip("@").lower()
+        if target_type == "phone":
+            return re.sub(r"\s+", "", value)
+        raise ValueError(f"Unsupported identity ban target_type: {target_type}")
+
+    def _admin_db_id(self, admin_telegram_id: int, username: str | None = None, first_name: str | None = None, last_name: str | None = None) -> int:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM users WHERE telegram_id = ?", (admin_telegram_id,))
+            row = cursor.fetchone()
+            if row:
+                return row["id"]
+            cursor.execute("""
+                INSERT INTO users (telegram_id, username, first_name, last_name, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (admin_telegram_id, username or "admin", first_name or "Admin", last_name, datetime.now(), datetime.now()))
+            conn.commit()
+            return cursor.lastrowid
+
+    def ban_identity(self, target_type: str, target_value: str, banned_by_telegram_id: int, reason: str) -> bool:
+        normalized = self._normalize_identity_ban_target(target_type, target_value)
+        if not normalized:
+            return False
+        admin_id = self._admin_db_id(banned_by_telegram_id)
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE identity_bans
+                SET is_active = FALSE
+                WHERE target_type = ? AND target_value = ? AND is_active = TRUE
+            """, (target_type, normalized))
+            cursor.execute("""
+                INSERT INTO identity_bans (target_type, target_value, banned_by, reason, created_at, is_active)
+                VALUES (?, ?, ?, ?, ?, TRUE)
+            """, (target_type, normalized, admin_id, reason, datetime.now()))
+            conn.commit()
+            return True
+
+    def unban_identity(self, target_type: str, target_value: str) -> bool:
+        normalized = self._normalize_identity_ban_target(target_type, target_value)
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE identity_bans
+                SET is_active = FALSE
+                WHERE target_type = ? AND target_value = ? AND is_active = TRUE
+            """, (target_type, normalized))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def is_identity_banned(self, target_type: str, target_value: str) -> tuple[bool, dict | None]:
+        normalized = self._normalize_identity_ban_target(target_type, target_value)
+        if not normalized:
+            return False, None
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT ib.*, u.telegram_id AS admin_telegram_id, u.username AS admin_username
+                FROM identity_bans ib
+                JOIN users u ON ib.banned_by = u.id
+                WHERE ib.target_type = ? AND ib.target_value = ? AND ib.is_active = TRUE
+                ORDER BY ib.created_at DESC
+                LIMIT 1
+            """, (target_type, normalized))
+            row = cursor.fetchone()
+            return (True, dict(row)) if row else (False, None)
+
 
     def unban_user(self, user_id: int, unbanned_by: int) -> bool:
         """

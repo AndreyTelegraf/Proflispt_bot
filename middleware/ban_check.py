@@ -42,8 +42,14 @@ class BanCheckMiddleware(BaseMiddleware):
         if is_admin(user_id):
             return await handler(event, data)
         
-        # Проверяем, забанен ли пользователь
+        # Проверяем, забанен ли пользователь по Telegram uid
         is_banned, ban_info = db.is_user_banned(user_id)
+
+        # Проверяем identity-ban по Telegram username
+        if not is_banned:
+            username = getattr(event.from_user, "username", None)
+            if username:
+                is_banned, ban_info = db.is_identity_banned("username", username)
         
         if is_banned and ban_info:
             ban_type = "временный" if ban_info['ban_type'] == 'temporary' else "постоянный"

@@ -670,6 +670,11 @@ async def gs_text_input(message: Message, state: FSMContext):
             await message.answer("Неверный номер, перепроверьте.", reply_markup=_step_kb(step, slug))
             return
 
+        is_phone_banned, phone_ban = db.is_identity_banned("phone", raw)
+        if is_phone_banned:
+            await message.answer("Этот номер телефона заблокирован для публикаций.", reply_markup=_step_kb(step, slug))
+            return
+
     # phone_whatsapp: accept skip words as empty
     if field == "phone_whatsapp":
         if raw.lower() in {"нет", "no", "none", "-", "—"}:
