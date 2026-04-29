@@ -52,6 +52,7 @@ ACTIVE_SECTION_CALLBACKS = {
     "Туризм":                        "section:generic:tourism",
     "Фото/видео":                    "section:generic:photo_video",
     "Искусство":                     "section:generic:art",
+    "Отзывы":                        "section:reviews",
 }
 
 
@@ -93,6 +94,9 @@ def _sections_keyboard(group_key: str) -> InlineKeyboardMarkup:
                     callback_data="catalog:inactive",
                 )
             )
+
+    for btn in group.extra_buttons:
+        builder.add(InlineKeyboardButton(text=btn["title"], url=btn["url"]))
 
     builder.add(InlineKeyboardButton(text="← Назад", callback_data="catalog:groups"))
     builder.adjust(1)

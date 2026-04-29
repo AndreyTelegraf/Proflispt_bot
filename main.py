@@ -27,6 +27,7 @@ from handlers.housing_schema_flow import router as housing_schema_flow_router
 from handlers.generic_schema_flow import router as generic_schema_flow_router
 from handlers.restaurants_schema import router as restaurants_schema_router
 from handlers.section_catalog import router as section_catalog_router
+from handlers.reviews_schema_flow import router as reviews_schema_flow_router
 from services.scheduler import start_scheduler
 from middleware.ban_check import BanCheckMiddleware
 from keyboards.main import get_main_menu, get_back_button
@@ -597,6 +598,7 @@ async def main():
             dp.include_router(router)
             dp.include_router(premium_posting_router)
             dp.include_router(premium_admin_router)
+            dp.include_router(reviews_schema_flow_router)
             dp.include_router(section_catalog_router)
             dp.include_router(housing_schema_flow_router)
             dp.include_router(generic_schema_flow_router)

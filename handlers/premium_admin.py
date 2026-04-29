@@ -216,6 +216,9 @@ async def admin_approve_premium(callback: CallbackQuery):
                 "contact_name": post.get("name", ""),
             }
             post_text = _hs_render_html(_hs_payload)
+        elif post.get('mode') == 'reviews':
+            from handlers.reviews_schema_flow import _rv_render_html_from_post
+            post_text = _rv_render_html_from_post(post)
         else:
             from handlers.generic_schema_flow import _render_html as _gs_render_html, SLUG_TO_SECTION as _GS_SLUGS
             import json as _json
@@ -292,6 +295,8 @@ async def admin_approve_premium(callback: CallbackQuery):
                 if _hs_sec:
                     registry = load_sections_registry()
                     topic_id = int(registry.get_topic_id(_hs_sec))
+        elif post['mode'] == 'reviews':
+            topic_id = 12860
         else:
             from services.sections_registry import load_sections_registry
             from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
@@ -460,6 +465,14 @@ async def admin_approve_premium(callback: CallbackQuery):
             main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
             ])
+        elif post.get('mode') == 'reviews':
+            if message_link:
+                user_text = f"Ваш отзыв опубликован!\nСсылка: {message_link}"
+            else:
+                user_text = "Ваш отзыв опубликован!"
+            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+            ])
         else:
             if message_link:
                 user_text = (
@@ -522,13 +535,20 @@ async def admin_reject_premium(callback: CallbackQuery):
     
     # Reject premium post
     db.reject_premium_post(post_id, callback.from_user.id, "Отклонено администратором")
-    
+
     # Notify user
-    user_text = (
-        "🚫 **Ваш премиум-пост отклонен :(**\n\n"
-        "Возможно его содержание не соответствует требованиям Справочника или всё ещё не подтверждена оплата.\n\n"
-        "Обратитесь к [администратору](https://t.me/andreytelegraf)."
-    )
+    if post.get('mode') == 'reviews':
+        user_text = (
+            "🚫 **Ваш отзыв отклонён.**\n\n"
+            "Возможно содержание не соответствует требованиям Справочника.\n\n"
+            "Обратитесь к [администратору](https://t.me/andreytelegraf)."
+        )
+    else:
+        user_text = (
+            "🚫 **Ваш премиум-пост отклонен :(**\n\n"
+            "Возможно его содержание не соответствует требованиям Справочника или всё ещё не подтверждена оплата.\n\n"
+            "Обратитесь к [администратору](https://t.me/andreytelegraf)."
+        )
     
     try:
         await callback.bot.send_message(
