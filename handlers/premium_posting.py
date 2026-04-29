@@ -40,41 +40,15 @@ def get_back_button(back_to: str = "go:main") -> InlineKeyboardMarkup:
 
 @router.callback_query(F.data == "premium_posting")
 async def start_premium_posting(callback: CallbackQuery, state: FSMContext):
-    """Start premium posting process."""
     await state.clear()
-    
-    welcome_text = (
-        "💎 *Премиум\\-пост с медиа*\n\n"
-        "Создайте привлекательное объявление с фото или видео\\!\n\n"
-        "*Стоимость:* €50\n"
-        "*Что включено:*\n"
-        "• Публикация с медиа в канале\n"
-        "• Приоритетное размещение\n"
-        "• Увеличенная видимость\n\n"
-        "Выберите раздел для публикации:"
-    )
-    
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(
-        text="🔍 Ищу работу",
-        callback_data="premium:section_job_seeker"
-    ))
-    builder.add(InlineKeyboardButton(
-        text="💰 Предлагаю работу",
-        callback_data="premium:section_job_offer"
-    ))
-    builder.add(InlineKeyboardButton(
-        text="← Назад",
-        callback_data="go:main"
-    ))
-    builder.adjust(2, 1)
-    
+    builder.add(InlineKeyboardButton(text="Открыть каталог", callback_data="catalog:groups"))
+    builder.add(InlineKeyboardButton(text="← Главное меню", callback_data="go:main"))
+    builder.adjust(1)
     await callback.message.edit_text(
-        welcome_text,
+        "Этот раздел обновился. Выберите нужный раздел через каталог.",
         reply_markup=builder.as_markup(),
-        parse_mode="MarkdownV2"
     )
-    await state.set_state(PremiumPostingStates.waiting_for_section_choice)
     await callback.answer()
 
 @router.message(PremiumPostingStates.waiting_for_media, F.photo | F.video)
