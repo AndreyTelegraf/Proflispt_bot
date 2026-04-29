@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 ACTIVE_SECTION_CALLBACKS = {
-    "Ищу работу":                    "mode:seeking",
-    "Предлагаю работу":              "mode:offering",
+    "Ищу работу":                    "section:generic:job_seeker",
+    "Предлагаю работу":              "section:generic:job_offer",
     "Рестораны":                     "section:restaurants",
     # generic sections
     "Ищу жильё":                     "section:housing:housing_wanted",

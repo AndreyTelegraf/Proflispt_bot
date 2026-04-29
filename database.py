@@ -1310,10 +1310,11 @@ class Database:
                 FROM premium_posts pp
                 JOIN users u ON pp.user_id = u.id
                 WHERE pp.user_id = ?
-                  AND pp.mode NOT IN ('restaurants', 'job_seeker', 'job_offer')
+                  AND pp.mode != 'restaurants'
                   AND pp.status = 'published'
                   AND pp.payment_status = 'approved'
                   AND pp.action_type IN ('post', 'repost')
+                  AND INSTR(COALESCE(pp.admin_notes, ''), 'baraholka_repost_target') = 0
                 ORDER BY pp.created_at DESC
             """, (user_id,))
             results = cursor.fetchall()

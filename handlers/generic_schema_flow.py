@@ -46,6 +46,8 @@ def _resolve_prompt(step, slug: str) -> str:
 # ── slug ↔ section name ───────────────────────────────────────────────────────
 
 SLUG_TO_SECTION: dict[str, str] = {
+    "job_seeker":           "Ищу работу",
+    "job_offer":            "Предлагаю работу",
     "realtors":             "Риелторы",
     "construction_repair":  "Строительство и ремонт",
     "home_repair":          "Бытовой ремонт и обустройство",
