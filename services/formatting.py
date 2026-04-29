@@ -219,13 +219,8 @@ def format_premium_posting(post: dict) -> str:
             hashtags.append(f"#{city}")
     
     lines.append(" ".join(hashtags))
-    
-    # 2. Premium badge and section
-    section_emoji = "🔍" if post['mode'] == 'job_seeker' else "💰"
-    section_text = "Ищу работу" if post['mode'] == 'job_seeker' else "Предлагаю работу"
-    lines.append(f"💎 {section_emoji} *{section_text}*")
-    
-    # 3. Description (cleaned for publication)
+
+    # 2. Description (cleaned for publication)
     from utils import clean_text_advanced
     cleaned_description = clean_text_advanced(post['description'])
     lines.append(escape_markdown(cleaned_description))
@@ -280,13 +275,8 @@ def format_premium_posting_html(post: dict) -> str:
             hashtags.append(f"#{city}")
     
     lines.append(" ".join(hashtags))
-    
-    # 2. Premium badge and section
-    section_emoji = "🔍" if post['mode'] == 'job_seeker' else "💰"
-    section_text = "Ищу работу" if post['mode'] == 'job_seeker' else "Предлагаю работу"
-    lines.append(f"💎 {section_emoji} <b>{section_text}</b>")
-    
-    # 3. Description (cleaned for publication)
+
+    # 2. Description (cleaned for publication)
     from utils import clean_text_advanced
     cleaned_description = clean_text_advanced(post['description'])
     lines.append(escape_html(cleaned_description))
