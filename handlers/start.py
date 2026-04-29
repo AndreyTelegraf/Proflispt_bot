@@ -57,8 +57,7 @@ async def show_main_menu(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data == "help")
 async def show_help(callback: CallbackQuery):
     help_text = (
-        "Удалить объявление можно через раздел \"Мои объявления\" в главном меню.\n\n"
-        "В случае сомнений:"
+        "Если сомневаетесь, куда публиковать объявление, напишите администратору."
     )
     await callback.message.edit_text(help_text, reply_markup=_help_keyboard("go:main"))
     await callback.answer()
@@ -68,10 +67,9 @@ async def show_help(callback: CallbackQuery):
 async def show_rules(callback: CallbackQuery):
     rules_text = (
         "📜 <b>Правила:</b>\n"
-        "- Выбирайте правильный раздел, это влияет на видимость объявления.  \n"
-        "- Описание должно чётко объяснять, что вы предлагаете или ищете. \n"
-        "- Контакты в описании указывать не нужно, бот запросит их отдельно.   \n"
-        "- Запрещёны спам, дубли и вводящая в заблуждение информация. \n"
+        "- Выбирайте правильный раздел, это влияет на видимость объявления.\n"
+        "- Описание должно чётко объяснять, что вы предлагаете или ищете.\n"
+        "- Контакты в описании указывать не нужно, бот запросит их отдельно.\n"
         "\n"
         "💰 <b>Форматы размещения:</b>\n"
         "- Стандартная публикация — без медиа, только ссылки и отзывы.\n"
@@ -86,22 +84,12 @@ async def show_rules(callback: CallbackQuery):
         "\n"
         "📊 <b>Лимиты:</b>\n"
         "- Посты с медиа, репосты и закрепы — без ограничений. \n"
-        "- Посты без медиа: до 3 в месяц на раздел и до 5 в месяц на весь Справочник.  \n"
-        "- Лимиты распространяются сразу и на номер телефона и на юзернейм.\n"
+        "- Посты без медиа: до 5 объявлений в одном разделе и до 10 объявлений во всём Справочнике за 30 дней.\n"
+        "- Лимиты учитывают и номер телефона, и Telegram username.\n"
         "\n"
         "⚠️ <b>Модерация:</b>\n"
         "- Запрещён спам, дубли и вводящая в заблуждение информация  \n"
         "- Посты с нарушениями удаляются, частые нарушения могут привести к бану."
     )
     await callback.message.edit_text(rules_text, reply_markup=_help_keyboard("help"), parse_mode="HTML")
-    await callback.answer()
-
-
-@router.callback_query(F.data == "help:support")
-async def show_support(callback: CallbackQuery):
-    help_text = (
-        "Удалить объявление можно через раздел \"Мои объявления\" в главном меню.\n\n"
-        "В случае сомнений:"
-    )
-    await callback.message.edit_text(help_text, reply_markup=_help_keyboard("go:main"))
     await callback.answer()
