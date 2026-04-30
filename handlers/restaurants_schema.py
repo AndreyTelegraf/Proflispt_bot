@@ -13,6 +13,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from config import Config
 from database import db
+from keyboards.main import get_main_menu
 from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
@@ -554,8 +555,16 @@ async def restaurants_back(callback: CallbackQuery, state: FSMContext):
         and getattr(schema.steps[prev_index], "field_name", None) == "resides_in_portugal"
         and db.is_residency_confirmed(callback.from_user.id)
     ):
-        await callback.answer()
-        return
+        prev_index = _previous_interactive_index(schema, prev_index)
+        if prev_index is None:
+            await state.clear()
+            await callback.message.edit_text(
+                "Здравствуйте!\n\nЭтот бот поможет вам опубликовать объявления "
+                "в разделы Справочника.\n\nВыберите действие:",
+                reply_markup=get_main_menu(),
+            )
+            await callback.answer()
+            return
 
     if prev_index is None:
         await callback.answer()

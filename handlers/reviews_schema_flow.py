@@ -16,6 +16,7 @@ from aiogram.types import (
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import db
+from keyboards.main import get_main_menu
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -388,6 +389,12 @@ async def rv_back(callback: CallbackQuery, state: FSMContext):
     elif cur == RV_INPUT:
         if step == _STEP_GEO:
             if db.is_residency_confirmed(callback.from_user.id):
+                await state.clear()
+                await callback.message.edit_text(
+                    "Здравствуйте!\n\nЭтот бот поможет вам опубликовать объявления "
+                    "в разделы Справочника.\n\nВыберите действие:",
+                    reply_markup=get_main_menu(),
+                )
                 await callback.answer()
                 return
             await _save_rv(state, step=_STEP_RESIDENCY, payload=payload)
