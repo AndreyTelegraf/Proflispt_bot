@@ -414,6 +414,131 @@ async def cmd_unban(message: Message):
     await message.answer(f"Пользователь {target_user_id} разбанен." if success else "Ошибка при разбане пользователя.")
 
 
+@router.message(Command("pays"))
+async def cmd_pays(message: Message):
+    """Show approved paid services statistics since 2026-04-01."""
+    allowed_usernames = {"andreytelegraf", "kak_odin"}
+    username = (message.from_user.username or "").lower()
+
+    if username not in allowed_usernames:
+        await message.answer("Нет доступа.")
+        return
+
+    since = "2026-04-01 00:00:00"
+
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT
+                pp.id,
+                pp.user_id,
+                pp.mode,
+                pp.action_type,
+                pp.payment_amount,
+                pp.status,
+                pp.created_at,
+                pp.updated_at,
+                pp.message_id,
+                pp.topic_id,
+                pp.telegram_username,
+                pp.phone_main,
+                pp.name,
+                u.telegram_id,
+                u.username AS user_username
+            FROM premium_posts pp
+            LEFT JOIN users u ON pp.user_id = u.id
+            WHERE pp.payment_status = 'approved'
+              AND CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0
+              AND datetime(pp.created_at) >= datetime(?)
+            ORDER BY datetime(pp.created_at) ASC, pp.id ASC
+        """, (since,))
+        rows = [dict(row) for row in cursor.fetchall()]
+
+        cursor.execute("""
+            SELECT
+                pp.action_type,
+                pp.mode,
+                COUNT(*) AS cnt,
+                SUM(CAST(COALESCE(pp.payment_amount, 0) AS REAL)) AS total
+            FROM premium_posts pp
+            WHERE pp.payment_status = 'approved'
+              AND CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0
+              AND datetime(pp.created_at) >= datetime(?)
+            GROUP BY pp.action_type, pp.mode
+            ORDER BY pp.action_type, pp.mode
+        """, (since,))
+        groups = [dict(row) for row in cursor.fetchall()]
+
+    total = sum(float(row.get("payment_amount") or 0) for row in rows)
+
+    action_names = {
+        "post": "публикация",
+        "repost": "репост",
+        "pin": "закреп",
+    }
+
+    lines = [
+        "Платные услуги",
+        "Период: с 01.04.2026 включительно",
+        "",
+        f"Всего оплат: {len(rows)}",
+        f"Сумма: {total:.2f} €",
+    ]
+
+    if groups:
+        lines.append("")
+        lines.append("Итого по услугам:")
+        for group in groups:
+            action = action_names.get(group.get("action_type"), group.get("action_type") or "-")
+            mode = group.get("mode") or "-"
+            cnt = int(group.get("cnt") or 0)
+            subtotal = float(group.get("total") or 0)
+            lines.append(f"- {action} / {mode}: {cnt} шт. — {subtotal:.2f} €")
+
+    if rows:
+        lines.append("")
+        lines.append("Детализация:")
+        for row in rows:
+            amount = float(row.get("payment_amount") or 0)
+            created = str(row.get("created_at") or "")[:10]
+            action = action_names.get(row.get("action_type"), row.get("action_type") or "-")
+            mode = row.get("mode") or "-"
+            post_status = row.get("status") or "-"
+            tg = row.get("telegram_username") or "-"
+            phone = row.get("phone_main") or "-"
+            name = row.get("name") or "-"
+            post_id = row.get("id")
+            msg = row.get("message_id")
+            topic = row.get("topic_id")
+            if msg and topic:
+                link = f"https://t.me/proflistpt/{topic}/{msg}"
+            elif msg:
+                link = f"https://t.me/proflistpt/{msg}"
+            else:
+                link = "-"
+
+            lines.append(
+                f"- {created}; #{post_id}; {amount:.2f} €; {action}; {mode}; "
+                f"status={post_status}; {tg}; {phone}; {name}; {link}"
+            )
+
+    text = "\n".join(lines)
+
+    # Telegram message limit safety.
+    chunks = []
+    while len(text) > 3900:
+        cut = text.rfind("\n", 0, 3900)
+        if cut <= 0:
+            cut = 3900
+        chunks.append(text[:cut])
+        text = text[cut:].lstrip("\n")
+    chunks.append(text)
+
+    for chunk in chunks:
+        await message.answer(chunk, disable_web_page_preview=True)
+
+
 @router.message(Command("premium_posts"))
 async def cmd_premium_posts(message: Message):
     """Handle /premium_posts command (admin only)."""
