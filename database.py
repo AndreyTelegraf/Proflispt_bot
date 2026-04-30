@@ -47,6 +47,14 @@ class Database:
                 )
             """)
 
+            # Residency confirmation column (idempotent migration)
+            try:
+                cursor.execute("ALTER TABLE users ADD COLUMN residency_confirmed_at TIMESTAMP")
+                logger.info("Added residency_confirmed_at column to users table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e):
+                    logger.warning(f"Could not add residency_confirmed_at column: {e}")
+
             # Job postings table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS job_postings (
@@ -268,6 +276,36 @@ class Database:
             cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
             result = cursor.fetchone()
             return dict(result) if result else None
+
+    def is_residency_confirmed(self, telegram_id: int) -> bool:
+        """Return True if user already confirmed Portugal residency."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT residency_confirmed_at FROM users WHERE telegram_id = ?",
+                (telegram_id,),
+            )
+            row = cursor.fetchone()
+            return bool(row and row["residency_confirmed_at"])
+
+    def mark_residency_confirmed(self, telegram_id: int) -> None:
+        """Persist one-time Portugal residency confirmation by Telegram ID."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT OR IGNORE INTO users (telegram_id, updated_at) VALUES (?, ?)",
+                (telegram_id, datetime.now()),
+            )
+            cursor.execute(
+                """
+                UPDATE users
+                SET residency_confirmed_at = COALESCE(residency_confirmed_at, ?),
+                    updated_at = ?
+                WHERE telegram_id = ?
+                """,
+                (datetime.now(), datetime.now(), telegram_id),
+            )
+            conn.commit()
 
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
         """Get user by username."""

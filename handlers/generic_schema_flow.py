@@ -436,17 +436,24 @@ async def gs_entry(callback: CallbackQuery, state: FSMContext):
         return
 
     await state.clear()
+
+    payload = {}
+    step_idx = 0
+    if db.is_residency_confirmed(callback.from_user.id):
+        payload["resides_in_portugal"] = "yes"
+        step_idx = _next_content_index(schema, 1)
+
     await state.update_data(
         gs_active=True,
         gs_section_name=section_name,
         gs_slug=slug,
-        gs_step_idx=0,
-        gs_payload={},
+        gs_step_idx=step_idx,
+        gs_payload=payload,
         gs_media=[],
     )
     await state.set_state(GS_INPUT)
 
-    step = schema.steps[0]
+    step = schema.steps[step_idx]
     await callback.message.edit_text(_resolve_prompt(step, slug), reply_markup=_step_kb(step, slug))
     await callback.answer()
 
@@ -491,6 +498,9 @@ async def gs_choice(callback: CallbackQuery, state: FSMContext):
     if not result.accepted:
         await callback.answer(result.error_message or "Неверный ответ.", show_alert=True)
         return
+
+    if getattr(step, "field_name", "") == "resides_in_portugal" and raw_value == "yes":
+        db.mark_residency_confirmed(callback.from_user.id)
 
     if result.stop_flow:
         await state.clear()
@@ -653,6 +663,14 @@ async def gs_back(callback: CallbackQuery, state: FSMContext):
         prev_idx = _previous_interactive_index(schema, len(schema.steps))
     else:
         prev_idx = _previous_interactive_index(schema, step_idx)
+
+    if (
+        prev_idx is not None
+        and getattr(schema.steps[prev_idx], "field_name", None) == "resides_in_portugal"
+        and db.is_residency_confirmed(callback.from_user.id)
+    ):
+        await callback.answer()
+        return
 
     if prev_idx is None:
         await callback.answer()

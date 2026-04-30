@@ -477,11 +477,18 @@ async def _start_flow(target, state: FSMContext, is_callback: bool = False):
     if step_index >= len(schema.steps):
         raise RuntimeError("restaurants schema has no interactive steps")
 
+    payload = {}
+    if db.is_residency_confirmed(target.from_user.id):
+        payload["resides_in_portugal"] = "yes"
+        step_index += 1
+        while step_index < len(schema.steps) and schema.steps[step_index].kind == "info":
+            step_index += 1
+
     await state.clear()
     await state.update_data(
         restaurants_schema_active=True,
         restaurants_schema_step_index=step_index,
-        restaurants_schema_payload={},
+        restaurants_schema_payload=payload,
     )
     await state.set_state(STATE_INPUT)
 
@@ -541,6 +548,14 @@ async def restaurants_back(callback: CallbackQuery, state: FSMContext):
         prev_index = _previous_interactive_index(schema, len(schema.steps))
     else:
         prev_index = _previous_interactive_index(schema, current_index)
+
+    if (
+        prev_index is not None
+        and getattr(schema.steps[prev_index], "field_name", None) == "resides_in_portugal"
+        and db.is_residency_confirmed(callback.from_user.id)
+    ):
+        await callback.answer()
+        return
 
     if prev_index is None:
         await callback.answer()
@@ -651,6 +666,9 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
         if not result.accepted:
             await callback.answer(result.error_message or "Неверный ответ.", show_alert=True)
             return
+
+        if getattr(step, "field_name", "") == "resides_in_portugal" and raw_value == "yes":
+            db.mark_residency_confirmed(callback.from_user.id)
 
         if result.stop_flow:
             await state.clear()

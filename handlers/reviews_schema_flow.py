@@ -279,6 +279,15 @@ async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dic
 @router.callback_query(F.data == "section:reviews")
 async def rv_entry(callback: CallbackQuery, state: FSMContext):
     await state.clear()
+
+    if db.is_residency_confirmed(callback.from_user.id):
+        payload = {"resides_in_portugal": "yes"}
+        await state.update_data(rv_step=_STEP_GEO, rv_payload=payload, rv_media=[])
+        await state.set_state(RV_INPUT)
+        await callback.message.edit_text(_PROMPTS[_STEP_GEO], reply_markup=_geo_kb())
+        await callback.answer()
+        return
+
     await state.update_data(rv_step=_STEP_RESIDENCY, rv_payload={}, rv_media=[])
     await state.set_state(RV_INPUT)
     await callback.message.edit_text(_PROMPTS[_STEP_RESIDENCY], reply_markup=_residency_kb())
@@ -305,6 +314,7 @@ async def rv_residency(callback: CallbackQuery, state: FSMContext):
         return
     _, payload, _ = await _get_rv(state)
     payload["resides_in_portugal"] = "yes"
+    db.mark_residency_confirmed(callback.from_user.id)
     await _save_rv(state, step=_STEP_GEO, payload=payload)
     await callback.message.edit_text(_PROMPTS[_STEP_GEO], reply_markup=_geo_kb())
     await callback.answer()
@@ -377,6 +387,9 @@ async def rv_back(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(_PROMPTS[_STEP_DESCRIPTION], reply_markup=_back_kb())
     elif cur == RV_INPUT:
         if step == _STEP_GEO:
+            if db.is_residency_confirmed(callback.from_user.id):
+                await callback.answer()
+                return
             await _save_rv(state, step=_STEP_RESIDENCY, payload=payload)
             await callback.message.edit_text(_PROMPTS[_STEP_RESIDENCY], reply_markup=_residency_kb())
         elif step == _STEP_CONTACTS:
