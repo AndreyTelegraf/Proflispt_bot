@@ -77,7 +77,7 @@
       "field_name": "phone_whatsapp",
       "prompt": "Укажите номер телефона, к которому привязан WhatsApp для резервной связи, если отличается от основного. Можно оставить пустым.",
       "required": false,
-      "validation": {"regex": "^\\+351\\d{9}$"}
+      "validation": {"regex": "^\\+\\d+$"}
     },
     {
       "step_id": "contact_name",

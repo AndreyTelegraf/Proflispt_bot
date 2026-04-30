@@ -1090,13 +1090,6 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
                 await state.set_state(STATE_INPUT)
                 return
 
-            if not _valid_pt_mobile(raw):
-                await message.answer(
-                    "Неверный номер, перепроверьте",
-                    reply_markup=_whatsapp_fast_keyboard()
-                )
-                return
-
         if field_name == "telegram":
             await _go_after_telegram_gate(message, message.from_user, state, schema, payload, step_index)
             return
