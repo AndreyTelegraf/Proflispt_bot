@@ -207,6 +207,16 @@ def _normalize_review_links(raw: str) -> str:
     return "\n".join(links)
 
 
+def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
+    if re.search(r"[\U00010000-\U0010ffff]", text):
+        return False, "В описании допускается только текст. Эмодзи использовать нельзя."
+    if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить отдельно."
+    return True, None
+
+
 def _reviews_invalid_html() -> str:
     return (
         'Неверная ссылка на отзыв. Используйте только ссылки из раздела '
@@ -915,6 +925,15 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
         step = engine.get_step(step_index)
         field_name = getattr(step, "field_name", None)
         raw = str(message.text or "").strip()
+
+        if field_name == "description":
+            ok, err = _validate_description_text(raw)
+            if not ok:
+                await message.answer(
+                    err + "\n\nПовторите отправку текстового описания:",
+                    disable_web_page_preview=True,
+                )
+                return
 
         if field_name == "review_links":
             if raw.lower() in {"нет", "no", "none", "-", "—"}:

@@ -5,6 +5,7 @@ import asyncio
 import html
 import json
 import logging
+import re
 
 _hs_media_locks: dict[str, asyncio.Lock] = {}
 
@@ -124,6 +125,16 @@ def _hs_render_html(payload: dict) -> str:
         lines.append("- " + html.escape(cn))
 
     return "\n".join(lines).strip()
+
+
+def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
+    if re.search(r"[\U00010000-\U0010ffff]", text):
+        return False, "В описании допускается только текст. Эмодзи использовать нельзя."
+    if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить отдельно."
+    return True, None
 
 
 # ── keyboards ─────────────────────────────────────────────────────────────────
@@ -539,6 +550,15 @@ async def hs_text_input(message: Message, state: FSMContext):
     step = engine.get_step(step_idx)
     field = getattr(step, "field_name", "")
     raw = str(message.text or "").strip()
+
+    if field == "description":
+        ok, err = _validate_description_text(raw)
+        if not ok:
+            await message.answer(
+                err + "\n\nПовторите отправку текстового описания:",
+                disable_web_page_preview=True,
+            )
+            return
 
     if field == "phone_main":
         if not _valid_pt_mobile(raw):

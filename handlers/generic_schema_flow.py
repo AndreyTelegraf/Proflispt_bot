@@ -122,6 +122,16 @@ def _split_lines(value) -> list[str]:
     return [p.strip() for p in c.splitlines() if p.strip()] if c else []
 
 
+def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
+    if re.search(r"[\U00010000-\U0010ffff]", text):
+        return False, "В описании допускается только текст. Эмодзи использовать нельзя."
+    if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить отдельно."
+    return True, None
+
+
 def _render_html(payload: dict) -> str:
     lines: list[str] = []
 
@@ -668,6 +678,15 @@ async def gs_text_input(message: Message, state: FSMContext):
     step = engine.get_step(step_idx)
     field = getattr(step, "field_name", "")
     raw = str(message.text or "").strip()
+
+    if field == "description":
+        ok, err = _validate_description_text(raw)
+        if not ok:
+            await message.answer(
+                err + "\n\nПовторите отправку текстового описания:",
+                disable_web_page_preview=True,
+            )
+            return
 
     # review_links: validate or skip
     if field == "review_links":

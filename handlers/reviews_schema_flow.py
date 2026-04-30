@@ -118,6 +118,16 @@ def _normalize_geo(value: str) -> str:
     return json.dumps(parts, ensure_ascii=False)
 
 
+def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
+    if re.search(r"[\U00010000-\U0010ffff]", text):
+        return False, "В описании допускается только текст. Эмодзи использовать нельзя."
+    if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
+        return False, "В описании допускается только текст. Ссылки можно будет добавить отдельно."
+    return True, None
+
+
 # ── keyboards ──────────────────────────────────────────────────────────────────
 
 def _residency_kb() -> InlineKeyboardMarkup:
@@ -396,6 +406,13 @@ async def rv_text_input(message: Message, state: FSMContext):
 
     if step == _STEP_DESCRIPTION:
         raw = str(message.text or "").strip()
+        ok, err = _validate_description_text(raw)
+        if not ok:
+            await message.answer(
+                err + "\n\nПовторите отправку текстового описания:",
+                disable_web_page_preview=True,
+            )
+            return
         if len(raw) < 20:
             await message.answer(
                 "Отзыв слишком короткий. Напишите подробнее (минимум 20 символов).",
