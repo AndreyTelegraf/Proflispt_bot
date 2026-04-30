@@ -90,6 +90,8 @@ class SchemaEngine:
 
             pattern = step.validation.get("regex") or r"^\+351\d{9}$"
             if not re.match(pattern, value):
+                if step.field_name == "phone_whatsapp":
+                    return StepResult(False, False, error_message="Неверный формат WhatsApp. Номер должен начинаться с + и содержать только цифры.")
                 return StepResult(False, False, error_message="Неверный формат номера. Используйте формат +351XXXXXXXXX.")
 
             if step.field_name:
