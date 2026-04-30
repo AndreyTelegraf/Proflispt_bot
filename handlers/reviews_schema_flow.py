@@ -341,7 +341,14 @@ async def rv_geo_custom_input(message: Message, state: FSMContext):
 
 @router.message(~F.text, StateFilter(RV_GEO_CUSTOM))
 async def rv_geo_custom_nontext(message: Message, state: FSMContext):
-    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+    if message.media_group_id:
+        data = await state.get_data()
+        seen = list(data.get("non_text_media_group_ids") or [])
+        if message.media_group_id in seen:
+            return
+        seen.append(message.media_group_id)
+        await state.update_data(non_text_media_group_ids=seen[-20:])
+    await message.answer("В описании допускается только текст. Фото, видео, ссылки и контакты можно будет добавить на следующих шагах.\n\nПовторите отправку текстового описания:")
 
 # ── back ───────────────────────────────────────────────────────────────────────
 
@@ -411,7 +418,14 @@ async def rv_text_input(message: Message, state: FSMContext):
 
 @router.message(~F.text, StateFilter(RV_INPUT))
 async def rv_text_nontext(message: Message, state: FSMContext):
-    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+    if message.media_group_id:
+        data = await state.get_data()
+        seen = list(data.get("non_text_media_group_ids") or [])
+        if message.media_group_id in seen:
+            return
+        seen.append(message.media_group_id)
+        await state.update_data(non_text_media_group_ids=seen[-20:])
+    await message.answer("В описании допускается только текст. Фото, видео, ссылки и контакты можно будет добавить на следующих шагах.\n\nПовторите отправку текстового описания:")
 
 # ── no-media submit ────────────────────────────────────────────────────────────
 
