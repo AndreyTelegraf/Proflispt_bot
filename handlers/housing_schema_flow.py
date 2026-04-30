@@ -735,6 +735,20 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
         await callback.answer()
         return
 
+    can_post, limit_message = db.check_free_repost_guard(
+        user["id"],
+        slug,
+        payload.get("phone_main", ""),
+    )
+    if not can_post:
+        b = InlineKeyboardBuilder()
+        b.add(InlineKeyboardButton(text="Мои объявления", callback_data="my_postings"))
+        b.add(InlineKeyboardButton(text="← Назад", callback_data="catalog:group:housing_work"))
+        b.adjust(1)
+        await callback.message.edit_text(limit_message, reply_markup=b.as_markup())
+        await callback.answer()
+        return
+
     registry = load_sections_registry()
     channel_id = int(registry.channel_id)
     topic_id = int(registry.get_topic_id(section_name))

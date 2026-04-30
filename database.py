@@ -1114,7 +1114,13 @@ class Database:
                   AND mode != 'reviews'
                   AND action_type = 'post'
                   AND datetime(created_at) > datetime(?)
-                  AND status IN ('published', 'pending')
+                  AND (
+    status IN ('published', 'pending')
+    OR (
+        status = 'deleted'
+        AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
+    )
+)
                   AND payment_status IN ('approved', 'pending', 'rejected')
             """, (user_id, mode, since))
             per_mode_count = int(cursor.fetchone()["cnt"])
@@ -1132,7 +1138,13 @@ class Database:
                   AND mode != 'reviews'
                   AND action_type = 'post'
                   AND datetime(created_at) > datetime(?)
-                  AND status IN ('published', 'pending')
+                  AND (
+    status IN ('published', 'pending')
+    OR (
+        status = 'deleted'
+        AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
+    )
+)
                   AND payment_status IN ('approved', 'pending', 'rejected')
             """, (user_id, since))
             total_count = int(cursor.fetchone()["cnt"])
@@ -1144,6 +1156,49 @@ class Database:
                 )
 
             return True, None
+
+
+    def check_free_repost_guard(
+        self,
+        user_id: int,
+        mode: str,
+        phone_main: str,
+        *,
+        days: int = 30,
+    ) -> tuple[bool, str | None]:
+        """Block free reposts in the same section by same user+phone within rolling period, including user-deleted posts."""
+        since = (datetime.now() - timedelta(days=days)).isoformat()
+        phone = str(phone_main or "").strip()
+
+        if not phone:
+            return True, None
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, created_at, status
+                FROM premium_posts
+                WHERE user_id = ?
+                  AND mode = ?
+                  AND mode != 'reviews'
+                  AND action_type = 'post'
+                  AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
+                  AND payment_status = 'approved'
+                  AND datetime(created_at) > datetime(?)
+                  AND status IN ('published', 'pending', 'deleted')
+                  AND (phone_main = ? OR phone_whatsapp = ?)
+                ORDER BY datetime(created_at) DESC, id DESC
+                LIMIT 1
+            """, (user_id, mode, since, phone, phone))
+            row = cursor.fetchone()
+
+        if row:
+            return False, (
+                "Похожее бесплатное объявление в этом разделе уже публиковалось за последние 30 дней. "
+                "Удаление объявления не сбрасывает срок повторной публикации."
+            )
+
+        return True, None
 
 
     def publish_free_restaurant_post(
