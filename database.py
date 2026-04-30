@@ -1115,7 +1115,7 @@ class Database:
                   AND action_type = 'post'
                   AND datetime(created_at) > datetime(?)
                   AND status IN ('published', 'pending')
-                  AND payment_status IN ('approved', 'pending')
+                  AND payment_status IN ('approved', 'pending', 'rejected')
             """, (user_id, mode, since))
             per_mode_count = int(cursor.fetchone()["cnt"])
 
@@ -1133,7 +1133,7 @@ class Database:
                   AND action_type = 'post'
                   AND datetime(created_at) > datetime(?)
                   AND status IN ('published', 'pending')
-                  AND payment_status IN ('approved', 'pending')
+                  AND payment_status IN ('approved', 'pending', 'rejected')
             """, (user_id, since))
             total_count = int(cursor.fetchone()["cnt"])
 
