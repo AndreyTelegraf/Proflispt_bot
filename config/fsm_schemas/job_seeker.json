@@ -59,14 +59,6 @@
       "validation": {"max_len": 1200}
     },
     {
-      "step_id": "review_links",
-      "kind": "text",
-      "field_name": "review_links",
-      "prompt": "Добавьте ссылки на рекомендации, портфолио или подтверждения опыта, если они есть",
-      "required": false,
-      "validation": {"max_len": 1200}
-    },
-    {
       "step_id": "phone_main",
       "kind": "phone",
       "field_name": "phone_main",
