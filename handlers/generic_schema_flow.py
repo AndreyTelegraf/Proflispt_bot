@@ -123,6 +123,45 @@ def _split_lines(value) -> list[str]:
     return [p.strip() for p in c.splitlines() if p.strip()] if c else []
 
 
+def _normalize_social_links(value) -> str:
+    raw = _norm(value)
+    if not raw:
+        return ""
+
+    parts = []
+    for chunk in re.split(r"[\n,;]+", raw):
+        item = chunk.strip()
+        item = item.strip(" \t\r\n,;")
+        item = item.rstrip(".,;:!?)]}")
+        item = item.lstrip("([{")
+        item = re.sub(r"^\s*(?:[-–—*•]|\d+[.)])\s+", "", item)
+        if not item:
+            continue
+
+        if item.startswith("@"):
+            item = "https://t.me/" + item[1:]
+        elif re.match(r"^(?:https?://|tg://)", item, re.I):
+            pass
+        elif re.match(r"^www\.", item, re.I):
+            item = "https://" + item
+        elif re.match(r"^[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}(?:/.*)?$", item):
+            item = "https://" + item
+        else:
+            continue
+
+        parts.append(item)
+
+    seen = set()
+    out = []
+    for item in parts:
+        key = item.lower()
+        if key not in seen:
+            seen.add(key)
+            out.append(item)
+
+    return "\n".join(out)
+
+
 def _validate_description_text(text: str) -> tuple[bool, str | None]:
     if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
         return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
@@ -714,6 +753,19 @@ async def gs_text_input(message: Message, state: FSMContext):
                 disable_web_page_preview=True,
             )
             return
+
+    if field == "social_links":
+        normalized = _normalize_social_links(raw)
+        if raw.lower() in {"нет", "no", "none", "-", "—"}:
+            payload["social_links"] = ""
+        elif not normalized:
+            await message.answer("Не нашёл ссылок. Вставьте сайт или соцсети, например: https://example.com или example.com", reply_markup=_step_kb(step, slug))
+            return
+        else:
+            payload["social_links"] = normalized
+        await _advance(message, message.from_user, state, schema, payload,
+                       step_idx + 1, slug, is_message=True)
+        return
 
     # review_links: validate or skip
     if field == "review_links":

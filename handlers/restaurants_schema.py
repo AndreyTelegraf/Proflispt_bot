@@ -287,6 +287,45 @@ def _previous_interactive_index(schema, current_index: int):
     return None
 
 
+def _normalize_social_links(value) -> str:
+    raw = str(value or "").strip()
+    if not raw or raw.lower() in {"нет", "no", "none"}:
+        return ""
+
+    parts = []
+    for chunk in re.split(r"[\n,;]+", raw):
+        item = chunk.strip()
+        item = item.strip(" \t\r\n,;")
+        item = item.rstrip(".,;:!?)]}")
+        item = item.lstrip("([{")
+        item = re.sub(r"^\s*(?:[-–—*•]|\d+[.)])\s+", "", item)
+        if not item:
+            continue
+
+        if item.startswith("@"):
+            item = "https://t.me/" + item[1:]
+        elif re.match(r"^(?:https?://|tg://)", item, re.I):
+            pass
+        elif re.match(r"^www\.", item, re.I):
+            item = "https://" + item
+        elif re.match(r"^[A-Za-z0-9][A-Za-z0-9.-]*\.[A-Za-z]{2,}(?:/.*)?$", item):
+            item = "https://" + item
+        else:
+            continue
+
+        parts.append(item)
+
+    seen = set()
+    out = []
+    for item in parts:
+        key = item.lower()
+        if key not in seen:
+            seen.add(key)
+            out.append(item)
+
+    return "\n".join(out)
+
+
 def _confirmation_text(payload: dict) -> str:
     return _render_html(payload)
 
@@ -1039,6 +1078,34 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
 )
                 await state.set_state(STATE_CONFIRM)
                 return
+
+            next_step = schema.steps[next_index]
+            await message.answer(
+                next_prompt,
+                reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
+            )
+            await state.set_state(STATE_INPUT)
+            return
+
+        if field_name == "social_links":
+            normalized = _normalize_social_links(raw)
+            if raw.lower() in {"нет", "no", "none", "-", "—"}:
+                ctx.set_value("social_links", "")
+            elif not normalized:
+                await message.answer(
+                    "Не нашёл ссылок. Вставьте сайт или соцсети, например: https://example.com или example.com",
+                    reply_markup=_step_reply_markup(step, back_to="restaurants:back")
+                )
+                return
+            else:
+                ctx.set_value("social_links", normalized)
+
+            next_index, next_prompt = _next_prompt(schema, step_index + 1)
+            await state.update_data(
+                restaurants_schema_active=True,
+                restaurants_schema_payload=ctx.data,
+                restaurants_schema_step_index=next_index,
+            )
 
             next_step = schema.steps[next_index]
             await message.answer(

@@ -39,6 +39,7 @@ from handlers.generic_schema_flow import (
     _valid_pt_mobile,
     _norm,
     _split_lines,
+    _normalize_social_links,
     _next_content_index,
     _previous_interactive_index,
 )
@@ -586,6 +587,19 @@ async def hs_text_input(message: Message, state: FSMContext):
                 disable_web_page_preview=True,
             )
             return
+
+    if field == "social_links":
+        normalized = _normalize_social_links(raw)
+        if raw.lower() in {"нет", "no", "none", "-", "—"}:
+            payload["social_links"] = ""
+        elif not normalized:
+            await message.answer("Не нашёл ссылок. Вставьте сайт или соцсети, например: https://example.com или example.com", reply_markup=_hs_step_kb(step, slug))
+            return
+        else:
+            payload["social_links"] = normalized
+        await _hs_advance(message, message.from_user, state, schema, payload,
+                          step_idx + 1, slug, is_message=True)
+        return
 
     if field == "phone_main":
         if not _valid_pt_mobile(raw):
