@@ -116,7 +116,7 @@ def _hs_render_html(payload: dict) -> str:
         lines.append(html.escape(pm))
 
     pw = _norm(payload.get("phone_whatsapp"))
-    if pw:
+    if pw and pw != pm:
         lines.append(html.escape(pw))
 
     cn = _norm(payload.get("contact_name"))
@@ -166,8 +166,7 @@ def _hs_step_kb(step, slug: str) -> InlineKeyboardMarkup:
         return b.as_markup()
     if fn == "phone_whatsapp":
         b = InlineKeyboardBuilder()
-        b.add(InlineKeyboardButton(text="Совпадает с основным", callback_data=f"hs:wa_same:{slug}"))
-        b.add(InlineKeyboardButton(text="Нет WhatsApp", callback_data=f"hs:wa_none:{slug}"))
+        b.add(InlineKeyboardButton(text="Нет / Совпадает с основным", callback_data=f"hs:wa_skip:{slug}"))
         b.add(InlineKeyboardButton(text="← Назад", callback_data=f"hs:back:{slug}"))
         b.adjust(1)
         return b.as_markup()
@@ -425,7 +424,7 @@ async def hs_wa_same(callback: CallbackQuery, state: FSMContext):
         return
     slug = callback.data.split(":", 2)[2]
     section_name, _, step_idx, payload, _ = await _get_hs(state)
-    payload["phone_whatsapp"] = payload.get("phone_main", "")
+    payload["phone_whatsapp"] = ""
     schema = build_schema_registry().get_by_section(section_name)
     await _hs_advance(callback.message, callback.from_user, state, schema, payload,
                       step_idx + 1, slug, is_message=False)
@@ -434,6 +433,20 @@ async def hs_wa_same(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("hs:wa_none:"))
 async def hs_wa_none(callback: CallbackQuery, state: FSMContext):
+    if await state.get_state() != HS_INPUT:
+        await callback.answer()
+        return
+    slug = callback.data.split(":", 2)[2]
+    section_name, _, step_idx, payload, _ = await _get_hs(state)
+    payload["phone_whatsapp"] = ""
+    schema = build_schema_registry().get_by_section(section_name)
+    await _hs_advance(callback.message, callback.from_user, state, schema, payload,
+                      step_idx + 1, slug, is_message=False)
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("hs:wa_skip:"))
+async def hs_wa_skip(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != HS_INPUT:
         await callback.answer()
         return

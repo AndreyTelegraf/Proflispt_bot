@@ -216,8 +216,7 @@ def _reviews_invalid_html() -> str:
 
 def _whatsapp_fast_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Совпадает с основным", callback_data="restaurants:wa_same"))
-    builder.add(InlineKeyboardButton(text="Нет WhatsApp", callback_data="restaurants:wa_none"))
+    builder.add(InlineKeyboardButton(text="Нет / Совпадает с основным", callback_data="restaurants:wa_skip"))
     builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
     builder.adjust(1)
     return builder.as_markup()
@@ -327,7 +326,7 @@ def _render_html(payload: dict) -> str:
         lines.append(html.escape(phone_main))
 
     phone_whatsapp = _norm(payload.get("phone_whatsapp"))
-    if phone_whatsapp:
+    if phone_whatsapp and phone_whatsapp != phone_main:
         lines.append(html.escape(phone_whatsapp))
 
     contact_name = _norm(payload.get("contact_name"))
@@ -697,8 +696,7 @@ async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMCon
 
 
 
-@router.callback_query(F.data == "restaurants:wa_same")
-async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
+async def _restaurants_wa_advance(callback: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
     if not data.get("restaurants_schema_active"):
         await callback.answer()
@@ -707,14 +705,9 @@ async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
     payload = data.get("restaurants_schema_payload", {})
     step_index = int(data.get("restaurants_schema_step_index", 0))
 
-    phone_main = str(payload.get("phone_main") or "").strip()
-    if not _valid_pt_mobile(phone_main):
-        await callback.answer("Сначала укажите корректный основной номер.", show_alert=True)
-        return
-
     schema = build_schema_registry().get_by_section("Рестораны")
     ctx = _make_ctx(payload)
-    ctx.set_value("phone_whatsapp", phone_main)
+    ctx.set_value("phone_whatsapp", "")
 
     next_index, next_prompt = _next_prompt(schema, step_index + 1)
 
@@ -734,7 +727,7 @@ async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
             reply_markup=builder.as_markup(),
             disable_web_page_preview=True,
             parse_mode="HTML"
-)
+        )
         await state.set_state(STATE_CONFIRM)
         await callback.answer()
         return
@@ -746,51 +739,21 @@ async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
     )
     await state.set_state(STATE_INPUT)
     await callback.answer()
+
+
+@router.callback_query(F.data == "restaurants:wa_skip")
+async def restaurants_wa_skip(callback: CallbackQuery, state: FSMContext):
+    await _restaurants_wa_advance(callback, state)
+
+
+@router.callback_query(F.data == "restaurants:wa_same")
+async def restaurants_wa_same(callback: CallbackQuery, state: FSMContext):
+    await _restaurants_wa_advance(callback, state)
+
 
 @router.callback_query(F.data == "restaurants:wa_none")
 async def restaurants_wa_none(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    if not data.get("restaurants_schema_active"):
-        await callback.answer()
-        return
-
-    payload = data.get("restaurants_schema_payload", {})
-    step_index = int(data.get("restaurants_schema_step_index", 0))
-
-    schema = build_schema_registry().get_by_section("Рестораны")
-    ctx = _make_ctx(payload)
-    ctx.set_value("phone_whatsapp", "нет")
-
-    next_index, next_prompt = _next_prompt(schema, step_index + 1)
-
-    await state.update_data(
-        restaurants_schema_payload=ctx.data,
-        restaurants_schema_step_index=next_index,
-    )
-
-    if next_index >= len(schema.steps):
-        builder = InlineKeyboardBuilder()
-        builder.add(InlineKeyboardButton(text="Опубликовать", callback_data="confirm:restaurants_post"))
-        builder.add(InlineKeyboardButton(text="Опубликовать с фото/видео — 20 €", callback_data="restaurants:premium"))
-        builder.add(InlineKeyboardButton(text="← Назад", callback_data="restaurants:back"))
-        builder.adjust(1)
-        await callback.message.edit_text(
-            _confirmation_text(ctx.data),
-            reply_markup=builder.as_markup(),
-            disable_web_page_preview=True,
-            parse_mode="HTML"
-)
-        await state.set_state(STATE_CONFIRM)
-        await callback.answer()
-        return
-
-    next_step = schema.steps[next_index]
-    await callback.message.edit_text(
-        next_prompt,
-        reply_markup=_step_reply_markup(next_step, back_to="restaurants:back")
-    )
-    await state.set_state(STATE_INPUT)
-    await callback.answer()
+    await _restaurants_wa_advance(callback, state)
 
 @router.callback_query(F.data == "restaurants:username_created")
 async def restaurants_username_created(callback: CallbackQuery, state: FSMContext):
@@ -1049,7 +1012,7 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
 
         if field_name == "phone_whatsapp":
             if raw.lower() in {"нет", "no", "none", ""}:
-                ctx.set_value("phone_whatsapp", "нет")
+                ctx.set_value("phone_whatsapp", "")
                 next_index, next_prompt = _next_prompt(schema, step_index + 1)
 
                 await state.update_data(
