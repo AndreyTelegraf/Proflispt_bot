@@ -165,7 +165,7 @@ def _normalize_social_links(value) -> str:
 def _validate_description_text(text: str) -> tuple[bool, str | None]:
     if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
         return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
-    if re.search(r"[\U00010000-\U0010ffff]", text):
+    if re.search(r"[\U00010000-\U0010ffff\u2600-\u27BF\u2B00-\u2BFF\uFE0F]", text):
         return False, "В описании допускается только текст. Эмодзи использовать нельзя."
     if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
         return False, "В описании допускается только текст. Ссылки можно будет добавить отдельно."
