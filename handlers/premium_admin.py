@@ -88,9 +88,14 @@ async def admin_approve_premium(callback: CallbackQuery):
 
             if pin_fail_reason:
                 db.reject_premium_post(post_id, callback.from_user.id, f"Pin failed: {pin_fail_reason}")
+                main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+                ])
                 await callback.bot.send_message(
                     chat_id=user['telegram_id'],
                     text="Не удалось закрепить объявление — оригинальный пост недоступен. Обратитесь к администратору.",
+                    reply_markup=main_menu_keyboard,
+                    disable_web_page_preview=True,
                 )
                 await callback.message.edit_text(
                     f"❌ <b>Закреп #{post_id} не выполнен.</b>\n\n{pin_fail_reason}",
@@ -559,11 +564,16 @@ async def admin_reject_premium(callback: CallbackQuery):
             "Обратитесь к [администратору](https://t.me/andreytelegraf)."
         )
     
+    main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+    ])
     try:
         await callback.bot.send_message(
             chat_id=user['telegram_id'],
             text=user_text,
-            parse_mode="Markdown"
+            parse_mode="Markdown",
+            reply_markup=main_menu_keyboard,
+            disable_web_page_preview=True,
         )
     except Exception as e:
         logger.error(f"Failed to notify user about rejection: {e}")
