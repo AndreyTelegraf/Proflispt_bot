@@ -603,6 +603,11 @@ async def restaurants_geo_custom_input(message: Message, state: FSMContext):
     await state.set_state(STATE_INPUT)
 
 
+@router.message(~F.text, StateFilter(STATE_GEO_CUSTOM))
+async def restaurants_geo_custom_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+
+
 @router.callback_query(F.data.startswith("restaurants:choice:"))
 async def restaurants_schema_choice_input(callback: CallbackQuery, state: FSMContext):
     current_state = await state.get_state()
@@ -1149,6 +1154,12 @@ async def restaurants_schema_text_input(message: Message, state: FSMContext):
             "Ошибка при обработке формы. Вернитесь в меню и попробуйте снова.",
             reply_markup=get_back_button("restaurants:back")
         )
+
+
+@router.message(~F.text, StateFilter(STATE_INPUT))
+async def restaurants_schema_text_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+
 
 @router.callback_query(F.data == "restaurants:premium")
 async def restaurants_premium_start(callback: CallbackQuery, state: FSMContext):

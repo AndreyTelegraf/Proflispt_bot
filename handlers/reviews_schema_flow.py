@@ -339,6 +339,10 @@ async def rv_geo_custom_input(message: Message, state: FSMContext):
     await message.answer(_PROMPTS[_STEP_CONTACTS], reply_markup=_back_kb())
 
 
+@router.message(~F.text, StateFilter(RV_GEO_CUSTOM))
+async def rv_geo_custom_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+
 # ── back ───────────────────────────────────────────────────────────────────────
 
 @router.callback_query(F.data == "rv:back")
@@ -404,6 +408,10 @@ async def rv_text_input(message: Message, state: FSMContext):
         )
         return
 
+
+@router.message(~F.text, StateFilter(RV_INPUT))
+async def rv_text_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
 
 # ── no-media submit ────────────────────────────────────────────────────────────
 

@@ -517,6 +517,11 @@ async def gs_geo_custom_input(message: Message, state: FSMContext):
     await _advance(message, message.from_user, state, schema, payload,
                    step_idx + 1, slug, is_message=True)
 
+
+@router.message(~F.text, StateFilter(GS_GEO_CUSTOM))
+async def gs_geo_custom_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+
 # ── skip / fast-path callbacks ────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("gs:social_none:"))
@@ -695,6 +700,11 @@ async def gs_text_input(message: Message, state: FSMContext):
 
     await _advance(message, message.from_user, state, schema, ctx.data,
                    step_idx + 1, slug, is_message=True)
+
+
+@router.message(~F.text, StateFilter(GS_INPUT))
+async def gs_text_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
 
 # ── free publish ──────────────────────────────────────────────────────────────
 

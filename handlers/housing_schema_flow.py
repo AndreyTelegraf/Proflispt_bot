@@ -391,6 +391,10 @@ async def hs_geo_custom_input(message: Message, state: FSMContext):
                       step_idx + 1, slug, is_message=True)
 
 
+@router.message(~F.text, StateFilter(HS_GEO_CUSTOM))
+async def hs_geo_custom_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
+
 # ── skip / fast-path callbacks ────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("hs:social_none:"))
@@ -540,6 +544,10 @@ async def hs_text_input(message: Message, state: FSMContext):
     await _hs_advance(message, message.from_user, state, schema, ctx.data,
                       step_idx + 1, slug, is_message=True)
 
+
+@router.message(~F.text, StateFilter(HS_INPUT))
+async def hs_text_nontext(message: Message, state: FSMContext):
+    await message.answer("На этом шаге нужно отправить текстом.\n\nФото, видео и файлы добавляются только на шаге загрузки медиа.")
 
 # ── media upload screen ───────────────────────────────────────────────────────
 
