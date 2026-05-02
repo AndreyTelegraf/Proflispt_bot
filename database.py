@@ -1188,11 +1188,23 @@ class Database:
                   AND status IN ('published', 'pending', 'deleted')
                   AND (phone_main = ? OR phone_whatsapp = ?)
                 ORDER BY datetime(created_at) DESC, id DESC
-                LIMIT 1
+                LIMIT 2
             """, (user_id, mode, since, phone, phone))
-            row = cursor.fetchone()
+            rows = cursor.fetchall()
 
-        if row:
+        if rows:
+            latest_created = datetime.fromisoformat(rows[0]["created_at"])
+            now = datetime.now()
+
+            # grace window: 6 hours → allow ONE correction repost
+            if (now - latest_created) <= timedelta(hours=6):
+                if len(rows) == 1:
+                    return True, None  # allow one fix
+                else:
+                    return False, (
+                        "Вы уже редактировали это объявление. Повторная публикация будет доступна позже."
+                    )
+
             return False, (
                 "Похожее бесплатное объявление в этом разделе уже публиковалось за последние 30 дней. "
                 "Удаление объявления не сбрасывает срок повторной публикации."
