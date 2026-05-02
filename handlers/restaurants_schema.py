@@ -410,7 +410,7 @@ def _render_html(payload: dict) -> str:
             for i, r in enumerate(latest):
                 num = start + i
                 link = f"https://t.me/proflistpt/{r['review_topic_id']}/{r['review_message_id']}"
-                lines.append(f"- Отзыв #{num} → <a href=\"{link}\">ссылка</a>")
+                lines.append(f'- <a href="{link}">Отзыв #{num}</a>')
 
     return "\n".join(lines).strip()
 
