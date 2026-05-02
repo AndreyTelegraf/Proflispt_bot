@@ -205,6 +205,7 @@ def _extract_review_links(raw: str) -> list[str]:
 
 def _normalize_review_links(raw: str) -> str:
     links = _extract_review_links(raw)
+    links = links[:3]  # limit to 3 reviews
     return "\n".join(links)
 
 
