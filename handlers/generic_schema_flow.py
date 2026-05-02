@@ -929,8 +929,9 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         logger.exception("Generic free publish failed: %s", e)
         await state.clear()
+        msg = locals().get("limit_message") or "Ошибка при публикации. Попробуйте позже."
         await callback.message.edit_text(
-            "Ошибка при публикации. Попробуйте позже.",
+            msg,
             reply_markup=_back_kb(slug),
         )
 
