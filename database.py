@@ -246,8 +246,127 @@ class Database:
                 )
             """)
 
+            # Review index: normalized performer username -> published review message
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS review_index (
+                    id INTEGER PRIMARY KEY,
+                    performer_username TEXT NOT NULL,
+                    review_post_id INTEGER NOT NULL,
+                    review_message_id INTEGER NOT NULL,
+                    review_topic_id INTEGER NOT NULL DEFAULT 12860,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(performer_username, review_message_id)
+                )
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_review_index_performer
+                ON review_index(performer_username, created_at, review_message_id)
+            """)
+
             conn.commit()
             logger.info("Database initialized successfully")
+
+    @staticmethod
+    def normalize_review_username(username: str) -> str:
+        """Normalize performer username for review indexing."""
+        value = str(username or "").strip()
+        if value.startswith("@"):
+            value = value[1:]
+        return value.lower()
+
+    def add_review_index(
+        self,
+        performer_username: str,
+        review_post_id: int,
+        review_message_id: int,
+        *,
+        review_topic_id: int = 12860,
+        created_at: str | None = None,
+    ) -> bool:
+        """Insert or ignore one published review into review_index."""
+        normalized = self.normalize_review_username(performer_username)
+        if not normalized or not review_message_id:
+            return False
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT OR IGNORE INTO review_index (
+                    performer_username,
+                    review_post_id,
+                    review_message_id,
+                    review_topic_id,
+                    created_at
+                ) VALUES (?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP))
+            """, (
+                normalized,
+                int(review_post_id),
+                int(review_message_id),
+                int(review_topic_id or 12860),
+                created_at,
+            ))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    def backfill_review_index_from_premium_posts(self) -> int:
+        """Backfill review_index from already published mode='reviews' premium_posts."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT OR IGNORE INTO review_index (
+                    performer_username,
+                    review_post_id,
+                    review_message_id,
+                    review_topic_id,
+                    created_at
+                )
+                SELECT
+                    LOWER(LTRIM(TRIM(social_media), '@')) AS performer_username,
+                    id AS review_post_id,
+                    message_id AS review_message_id,
+                    COALESCE(topic_id, 12860) AS review_topic_id,
+                    created_at
+                FROM premium_posts
+                WHERE mode = 'reviews'
+                  AND status = 'published'
+                  AND message_id IS NOT NULL
+                  AND TRIM(COALESCE(social_media, '')) LIKE '@%'
+                  AND LENGTH(TRIM(COALESCE(social_media, ''))) > 1
+            """)
+            inserted = cursor.rowcount
+            conn.commit()
+            return int(inserted or 0)
+
+    def get_review_index_for_performer(self, performer_username: str, *, limit: int = 3) -> dict:
+        """Return total review count and latest review rows for a performer."""
+        normalized = self.normalize_review_username(performer_username)
+        if not normalized:
+            return {"performer_username": "", "total": 0, "latest": []}
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT COUNT(*) AS cnt
+                FROM review_index
+                WHERE performer_username = ?
+            """, (normalized,))
+            total = int(cursor.fetchone()["cnt"])
+
+            cursor.execute("""
+                SELECT review_message_id, review_topic_id, created_at
+                FROM review_index
+                WHERE performer_username = ?
+                ORDER BY datetime(created_at) DESC, review_message_id DESC
+                LIMIT ?
+            """, (normalized, int(limit)))
+            rows = [dict(row) for row in cursor.fetchall()]
+
+        rows.reverse()
+        return {
+            "performer_username": normalized,
+            "total": total,
+            "latest": rows,
+        }
 
     def create_user(self, telegram_id: int, username: Optional[str] = None, 
                    first_name: Optional[str] = None, last_name: Optional[str] = None) -> int:
