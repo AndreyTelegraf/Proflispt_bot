@@ -216,12 +216,26 @@ def _render_html(payload: dict) -> str:
     if cn:
         lines.append("- " + html.escape(cn))
 
-    review_links = _split_lines(payload.get("review_links"))
-    if review_links:
-        if lines:
-            lines.append("")
-        for link in review_links:
-            lines.append("- " + f'<a href="{html.escape(link, quote=True)}">Отзыв</a>')
+    performer = _norm(payload.get("telegram"))
+    if performer:
+        try:
+            from database import db
+            idx = db.get_review_index_for_performer(performer)
+            total = idx.get("total", 0)
+            latest = idx.get("latest", [])
+        except Exception:
+            total, latest = 0, []
+
+        if total > 0 and latest:
+            if lines:
+                lines.append("")
+            lines.append(f"Отзывы ({total}):")
+
+            start = total - len(latest) + 1
+            for i, r in enumerate(latest):
+                num = start + i
+                link = f"https://t.me/proflistpt/{r['review_topic_id']}/{r['review_message_id']}"
+                lines.append(f"- Отзыв #{num} → <a href=\"{link}\">ссылка</a>")
 
     return "\n".join(lines).strip()
 
