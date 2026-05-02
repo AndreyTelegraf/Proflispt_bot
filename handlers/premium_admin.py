@@ -438,6 +438,18 @@ async def admin_approve_premium(callback: CallbackQuery):
         if published_message:
             db.update_premium_post_publication(post_id, published_message.message_id, publish_chat_id, topic_id, published_message_ids=published_message_ids)
             logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
+
+            if post.get('mode') == 'reviews':
+                try:
+                    db.add_review_index(
+                        post.get("social_media", ""),
+                        post_id,
+                        published_message.message_id,
+                        review_topic_id=12860,
+                    )
+                except Exception as e:
+                    logger.warning(f"review_index insert failed for post #{post_id}: {e}")
+
             if post.get("action_type") == "repost" and old_post_id_to_supersede:
                 db.mark_premium_post_superseded(int(old_post_id_to_supersede))
 
