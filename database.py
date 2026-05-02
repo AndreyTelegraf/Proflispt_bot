@@ -12,6 +12,17 @@ from config import Config
 logger = logging.getLogger(__name__)
 
 
+
+import re
+
+def sanitize_description(text: str) -> str:
+    if not text:
+        return text
+    text = re.sub(r"[\U00010000-\U0010ffff]", " ", text)
+    text = re.sub(r"[★☆✓✔✦✨🔥💥]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
 class Database:
     """Database manager for the bot."""
 
@@ -1013,7 +1024,7 @@ class Database:
                     action_type, admin_notes, review_links
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                user_id, data.get('mode'), data.get('cities'), data.get('description'),
+                user_id, data.get('mode'), data.get('cities'), sanitize_description(data.get('description')),
                 data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
                 data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
                 data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
@@ -1246,7 +1257,7 @@ class Database:
             """, (
                 user_id,
                 cities,
-                payload.get("description", ""),
+                sanitize_description(payload.get("description", "")),
                 payload.get("social_links", ""),
                 payload.get("telegram", ""),
                 payload.get("phone_main", ""),
@@ -1295,7 +1306,7 @@ class Database:
                 user_id,
                 mode,
                 cities,
-                payload.get("description", ""),
+                sanitize_description(payload.get("description", "")),
                 payload.get("social_links", ""),
                 payload.get("telegram", ""),
                 payload.get("phone_main", ""),
@@ -1348,7 +1359,7 @@ class Database:
                 user_id,
                 mode,
                 cities,
-                payload.get("description", ""),
+                sanitize_description(payload.get("description", "")),
                 payload.get("social_links", ""),
                 payload.get("telegram", ""),
                 payload.get("phone_main", ""),
