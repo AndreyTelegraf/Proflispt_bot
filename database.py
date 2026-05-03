@@ -1227,17 +1227,53 @@ class Database:
         per_mode_limit: int = 5,
         total_limit: int = 10,
     ) -> tuple[bool, str | None]:
-        """Check free directory posting limits in premium_posts for rolling 30 days."""
+        """Check free directory posting limits in premium_posts for rolling 30 days.
+
+        Deleted correction reposts inside the 6-hour edit window are not counted.
+        """
         if mode == "reviews":
             return True, None
 
         since = (datetime.now() - timedelta(days=30)).isoformat()
+        now = datetime.now()
+
+        def _parse_dt(value):
+            return datetime.fromisoformat(str(value))
+
+        def _phone_key(row):
+            phone = str(row["phone_main"] or row["phone_whatsapp"] or "").strip()
+            return phone or f"post:{row['id']}"
+
+        def _count_rows(rows):
+            first_by_group = {}
+            for row in rows:
+                key = (row["mode"], _phone_key(row))
+                created = _parse_dt(row["created_at"])
+                first_by_group[key] = min(first_by_group.get(key, created), created)
+
+            count = 0
+            for row in rows:
+                status = row["status"]
+                payment_amount = float(row["payment_amount"] or 0)
+                key = (row["mode"], _phone_key(row))
+                first_created = first_by_group[key]
+
+                if (
+                    status == "deleted"
+                    and payment_amount == 0
+                    and (now - first_created) <= timedelta(hours=6)
+                ):
+                    continue
+
+                count += 1
+
+            return count
 
         with self.get_connection() as conn:
             cursor = conn.cursor()
 
             cursor.execute("""
-                SELECT COUNT(*) AS cnt
+                SELECT id, mode, phone_main, phone_whatsapp, status, payment_amount, created_at
                 FROM premium_posts
                 WHERE user_id = ?
                   AND mode = ?
@@ -1245,15 +1281,15 @@ class Database:
                   AND action_type = 'post'
                   AND datetime(created_at) > datetime(?)
                   AND (
-    status IN ('published', 'pending')
-    OR (
-        status = 'deleted'
-        AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
-    )
-)
+                      status IN ('published', 'pending')
+                      OR (
+                          status = 'deleted'
+                          AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
+                      )
+                  )
                   AND payment_status IN ('approved', 'pending', 'rejected')
             """, (user_id, mode, since))
-            per_mode_count = int(cursor.fetchone()["cnt"])
+            per_mode_count = _count_rows(cursor.fetchall())
 
             if per_mode_count >= per_mode_limit:
                 return False, (
@@ -1262,22 +1298,22 @@ class Database:
                 )
 
             cursor.execute("""
-                SELECT COUNT(*) AS cnt
+                SELECT id, mode, phone_main, phone_whatsapp, status, payment_amount, created_at
                 FROM premium_posts
                 WHERE user_id = ?
                   AND mode != 'reviews'
                   AND action_type = 'post'
                   AND datetime(created_at) > datetime(?)
                   AND (
-    status IN ('published', 'pending')
-    OR (
-        status = 'deleted'
-        AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
-    )
-)
+                      status IN ('published', 'pending')
+                      OR (
+                          status = 'deleted'
+                          AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
+                      )
+                  )
                   AND payment_status IN ('approved', 'pending', 'rejected')
             """, (user_id, since))
-            total_count = int(cursor.fetchone()["cnt"])
+            total_count = _count_rows(cursor.fetchall())
 
             if total_count >= total_limit:
                 return False, (
@@ -1296,7 +1332,7 @@ class Database:
         *,
         days: int = 30,
     ) -> tuple[bool, str | None]:
-        """Block free reposts in the same section by same user+phone within rolling period, including user-deleted posts."""
+        """Allow unlimited delete/repost corrections during first 6 hours, then block 30 days."""
         since = (datetime.now() - timedelta(days=days)).isoformat()
         phone = str(phone_main or "").strip()
 
@@ -1317,30 +1353,29 @@ class Database:
                   AND datetime(created_at) > datetime(?)
                   AND status IN ('published', 'pending', 'deleted')
                   AND (phone_main = ? OR phone_whatsapp = ?)
-                ORDER BY datetime(created_at) DESC, id DESC
-                LIMIT 2
+                ORDER BY datetime(created_at) ASC, id ASC
             """, (user_id, mode, since, phone, phone))
             rows = cursor.fetchall()
 
-        if rows:
-            latest_created = datetime.fromisoformat(rows[0]["created_at"])
-            now = datetime.now()
+        if not rows:
+            return True, None
 
-            # grace window: 6 hours → allow ONE correction repost
-            if (now - latest_created) <= timedelta(hours=6):
-                if len(rows) == 1:
-                    return True, None  # allow one fix
-                else:
-                    return False, (
-                        "Вы уже редактировали это объявление. Повторная публикация будет доступна позже."
-                    )
-
+        if any(row["status"] in ("published", "pending") for row in rows):
             return False, (
-                "Похожее бесплатное объявление в этом разделе уже публиковалось за последние 30 дней. "
-                "Удаление объявления не сбрасывает срок повторной публикации."
+                "Похожее бесплатное объявление в этом разделе уже опубликовано. "
+                "Сначала удалите старое объявление через раздел «Мои объявления»."
             )
 
-        return True, None
+        first_created = datetime.fromisoformat(rows[0]["created_at"])
+        now = datetime.now()
+
+        if (now - first_created) <= timedelta(hours=6):
+            return True, None
+
+        return False, (
+            "Похожее бесплатное объявление в этом разделе уже публиковалось за последние 30 дней. "
+            "Редактирование через удаление и повторную публикацию доступно только в первые 6 часов после первой публикации."
+        )
 
 
     def publish_free_restaurant_post(
