@@ -209,13 +209,13 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
         if is_housing:
             action_rows = [
                 [InlineKeyboardButton(text="Платный перепост в Барахолку — €10", callback_data=f"hs:baraholka_mypostings:{post_id}")],
-                [InlineKeyboardButton(text="Закрепить — 5 €", callback_data=f"pin_premium_{post_id}")],
+                [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
                 [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
         else:
             action_rows = [
-                [InlineKeyboardButton(text="Переопубликовать — 10 €", callback_data=f"repost_premium_{post_id}")],
-                [InlineKeyboardButton(text="Закрепить — 5 €", callback_data=f"pin_premium_{post_id}")],
+                [InlineKeyboardButton(text="Поднять – €10", callback_data=f"repost_premium_{post_id}")],
+                [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
                 [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
 
@@ -897,7 +897,7 @@ async def request_repost_premium(callback: CallbackQuery):
             user_ref = f'<a href="tg://user?id={callback.from_user.id}">{html.escape(callback.from_user.first_name or str(callback.from_user.id))}</a>'
 
         admin_text = (
-            f"🔁 <b>Repost #{new_post_id}</b> — 10 €\n\n"
+            f"🔁 <b>Repost #{new_post_id}</b> — €10\n\n"
             f"<b>{name}</b> ({cities_safe})\n"
             f"{desc}"
             f"{old_link}\n\n"
@@ -1006,7 +1006,7 @@ async def request_pin_premium(callback: CallbackQuery):
             user_ref = f'<a href="tg://user?id={callback.from_user.id}">{html.escape(callback.from_user.first_name or str(callback.from_user.id))}</a>'
 
         admin_text = (
-            f"📌 <b>Pin #{new_post_id}</b> — 5 €\n\n"
+            f"📌 <b>Pin #{new_post_id}</b> — €5\n\n"
             f"<b>{name}</b> ({cities_safe})\n"
             f"{desc}"
             f"{post_link}\n\n"
