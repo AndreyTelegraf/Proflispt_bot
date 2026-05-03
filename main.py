@@ -10,7 +10,7 @@ from aiogram import Bot, Dispatcher, Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ExceptionTypeFilter, Command
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import Message, CallbackQuery, ErrorEvent, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import Message, CallbackQuery, ErrorEvent, Update, InlineKeyboardMarkup, InlineKeyboardButton, ChatMemberUpdated
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.dispatcher.event.bases import UNHANDLED
@@ -147,6 +147,48 @@ async def show_help(callback: CallbackQuery):
 
     await callback.message.edit_text(help_text, reply_markup=builder.as_markup())
 
+
+
+@router.chat_member()
+async def sync_catalog_ban_to_bot(event: ChatMemberUpdated):
+    """Mirror bans from the catalog supergroup into the bot ban table."""
+    if event.chat.id != Config.CHANNEL_ID:
+        return
+
+    member = event.new_chat_member
+    user = member.user
+    status = getattr(member, "status", None)
+
+    if status != "kicked":
+        return
+
+    if getattr(user, "is_bot", False):
+        return
+
+    admin_id = event.from_user.id if event.from_user else Config.ADMIN_IDS[0]
+
+    db.create_user(
+        telegram_id=user.id,
+        username=user.username,
+        first_name=user.first_name,
+        last_name=user.last_name,
+    )
+
+    db.ban_user(
+        user_id=user.id,
+        banned_by=admin_id,
+        reason="Автоматический бан: пользователь забанен в Справочнике",
+        ban_type="permanent",
+        expires_at=None,
+    )
+
+    logger.warning(
+        "Catalog ban mirrored to bot ban table: user_id=%s username=%s by=%s chat_id=%s",
+        user.id,
+        user.username,
+        admin_id,
+        event.chat.id,
+    )
 
 def _job_mode_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
@@ -742,7 +784,7 @@ async def main():
             await start_scheduler(bot)
             logger.info("Cleanup scheduler started")
 
-            await dp.start_polling(bot, skip_updates=True)
+            await dp.start_polling(bot, skip_updates=True, allowed_updates=["message", "callback_query", "chat_member"])
 
     except ValueError as e:
         logger.error("Configuration error: %s", e)
