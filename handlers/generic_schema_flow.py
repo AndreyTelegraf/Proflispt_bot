@@ -23,6 +23,7 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
+from services.geo import normalize_geo_tags_json, render_geo_tags
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -182,12 +183,9 @@ def _validate_description_text(text: str) -> tuple[bool, str | None]:
 def _render_html(payload: dict) -> str:
     lines: list[str] = []
 
-    geo_tags = _split_lines(payload.get("geo_tags"))
+    geo_tags = render_geo_tags(payload.get("geo_tags"))
     if geo_tags:
-        first = geo_tags[0]
-        if not first.startswith("#"):
-            first = "#" + first
-        lines.append(html.escape(first))
+        lines.append(html.escape(geo_tags))
 
     description = _norm(payload.get("description"))
     if description:
@@ -241,11 +239,7 @@ def _render_html(payload: dict) -> str:
 
 
 def _normalize_geo(value) -> str:
-    raw = str(value or "").strip()
-    if not raw:
-        return json.dumps([], ensure_ascii=False)
-    parts = [c.strip().lstrip("#").lower() for c in raw.replace(",", " ").split() if c.strip()]
-    return json.dumps(parts, ensure_ascii=False)
+    return normalize_geo_tags_json(value)
 
 
 def _extract_review_links(raw: str) -> list[str]:

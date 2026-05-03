@@ -18,6 +18,7 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
+from services.geo import normalize_geo_tags_json, render_geo_tags
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -101,17 +102,7 @@ def _media_payload_from_message(message: Message) -> dict | None:
 
 
 def _normalize_geo_tags_for_db(value: object) -> str:
-    raw = str(value or "").strip()
-    if not raw:
-        return json.dumps([], ensure_ascii=False)
-
-    parts = []
-    for chunk in raw.replace(",", " ").split():
-        clean = chunk.strip().lstrip("#").lower()
-        if clean:
-            parts.append(clean)
-
-    return json.dumps(parts, ensure_ascii=False)
+    return normalize_geo_tags_json(value)
 
 
 async def _upsert_premium_media_status(message: Message, state: FSMContext, text: str):
@@ -357,12 +348,9 @@ def _render_html(payload: dict) -> str:
 
     lines: list[str] = []
 
-    geo_tags = _split_lines(payload.get("geo_tags"))
+    geo_tags = render_geo_tags(payload.get("geo_tags"))
     if geo_tags:
-        first_geo = geo_tags[0]
-        if not first_geo.startswith("#"):
-            first_geo = "#" + first_geo
-        lines.append(html.escape(first_geo))
+        lines.append(html.escape(geo_tags))
 
     description = _norm(payload.get("description"))
     if description:
