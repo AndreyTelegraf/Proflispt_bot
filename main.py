@@ -737,6 +737,19 @@ async def main():
             bot = Bot(token=Config.BOT_TOKEN)
             dp = Dispatcher(storage=MemoryStorage())
 
+            @dp.message.outer_middleware()
+            async def ignore_non_private_messages(handler, event: Message, data):
+                if event.chat.type != "private":
+                    logger.info(
+                        "Ignoring non-private message: chat_id=%s chat_type=%s from_user=%s text=%r",
+                        event.chat.id,
+                        event.chat.type,
+                        event.from_user.id if event.from_user else None,
+                        event.text,
+                    )
+                    return
+                return await handler(event, data)
+
             dp.message.middleware(BanCheckMiddleware())
             dp.callback_query.middleware(BanCheckMiddleware())
 
