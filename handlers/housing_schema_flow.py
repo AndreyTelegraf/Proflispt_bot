@@ -32,6 +32,7 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
+from services.geo import render_geo_tags
 
 from handlers.generic_schema_flow import (
     _normalize_geo,
@@ -87,14 +88,11 @@ def _hs_render_html(payload: dict) -> str:
     """Housing-specific render: appends rental_term tag to geo line, omits review links."""
     lines: list[str] = []
 
-    geo_tags = _split_lines(payload.get("geo_tags"))
+    geo_line_raw = render_geo_tags(payload.get("geo_tags"))
     rental_tag = _RENTAL_TAGS.get(str(payload.get("rental_term", "")), "")
 
-    if geo_tags:
-        first = geo_tags[0].strip()
-        if not first.startswith("#"):
-            first = "#" + first.lstrip("#").lower()
-        geo_line = html.escape(first)
+    if geo_line_raw:
+        geo_line = html.escape(geo_line_raw)
         if rental_tag:
             geo_line += " " + html.escape(rental_tag)
         lines.append(geo_line)

@@ -14,7 +14,11 @@ def normalize_geo_tags(value: object) -> list[str]:
     - "#Montijo#Setubal"
     - "Lisboa Sintra"
     """
-    raw = str(value or "").strip()
+    if isinstance(value, (list, tuple, set)):
+        raw = " ".join(str(x or "").strip() for x in value if str(x or "").strip())
+    else:
+        raw = str(value or "").strip()
+
     if not raw:
         return []
 
