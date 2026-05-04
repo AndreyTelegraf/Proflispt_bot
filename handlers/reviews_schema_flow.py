@@ -52,7 +52,15 @@ _PROMPTS = [
     "Вы находитесь в Португалии?",
     "Выберите город или регион:",
     "Укажите @username специалиста, которому вы хотите оставить отзыв:",
-    "Напишите ваш отзыв:",
+    "Напишите отзыв:\n\n"
+    "- Что именно делали: услуга или работа\n"
+    "- Что было хорошо\n"
+    "- Что было плохо, если было\n"
+    "- Итог: рекомендуете или нет\n\n"
+    "Важно:\n"
+    "- Только текст, без ссылок и эмодзи\n"
+    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+    "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
 ]
 
 
@@ -120,6 +128,12 @@ def _normalize_geo(value: str) -> str:
 
 
 def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    stripped = str(text or "").strip()
+    if len(stripped) > 4000:
+        return False, (
+            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+            "Сократите текст и отправьте его заново."
+        )
     if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
         return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
     if re.search(r"[\U00010000-\U0010ffff]", text):
@@ -161,6 +175,22 @@ def _confirm_kb() -> InlineKeyboardMarkup:
     b.add(InlineKeyboardButton(text="← Назад", callback_data="rv:back"))
     b.adjust(1)
     return b.as_markup()
+
+
+def _confirm_no_media_kb() -> InlineKeyboardMarkup:
+    b = InlineKeyboardBuilder()
+    b.add(InlineKeyboardButton(text="Отправить без медиа", callback_data="rv:submit_no_media"))
+    b.add(InlineKeyboardButton(text="← Назад", callback_data="rv:back"))
+    b.adjust(1)
+    return b.as_markup()
+
+
+def _media_too_long_text() -> str:
+    return (
+        "Этот отзыв слишком длинный для публикации с фото/видео. "
+        "Telegram ограничивает подпись к медиа, а ваш текст вместе с городом, исполнителем и автором уже не помещается.\n\n"
+        "Отправьте отзыв без медиа или сократите текст и попробуйте добавить фото/видео снова."
+    )
 
 
 def _media_kb() -> InlineKeyboardMarkup:
@@ -443,10 +473,16 @@ async def rv_text_input(message: Message, state: FSMContext):
         payload["author_telegram"] = message.from_user.username or ""
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
         await state.set_state(RV_CONFIRM)
-        text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+        rendered_text = _rv_render_html(payload)
+        if len(rendered_text) > 1024:
+            text = _media_too_long_text()
+            reply_markup = _confirm_no_media_kb()
+        else:
+            text = rendered_text + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+            reply_markup = _confirm_kb()
         await message.answer(
             text,
-            reply_markup=_confirm_kb(),
+            reply_markup=reply_markup,
             parse_mode="HTML",
             disable_web_page_preview=True,
         )
@@ -482,6 +518,19 @@ async def rv_add_media(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != RV_CONFIRM:
         await callback.answer()
         return
+
+    _, payload, _ = await _get_rv(state)
+    rendered_text = _rv_render_html(payload)
+    if len(rendered_text) > 1024:
+        await callback.message.edit_text(
+            _media_too_long_text(),
+            reply_markup=_confirm_no_media_kb(),
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+        await callback.answer()
+        return
+
     await state.set_state(RV_MEDIA)
     await state.update_data(rv_media=[], rv_media_status_id=callback.message.message_id)
     await callback.message.edit_text(
@@ -550,10 +599,16 @@ async def rv_media_cancel(callback: CallbackQuery, state: FSMContext):
     _, payload, _ = await _get_rv(state)
     await state.update_data(rv_media=[], rv_media_status_id=None)
     await state.set_state(RV_CONFIRM)
-    text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+    rendered_text = _rv_render_html(payload)
+    if len(rendered_text) > 1024:
+        text = _media_too_long_text()
+        reply_markup = _confirm_no_media_kb()
+    else:
+        text = rendered_text + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+        reply_markup = _confirm_kb()
     await callback.message.edit_text(
         text,
-        reply_markup=_confirm_kb(),
+        reply_markup=reply_markup,
         parse_mode="HTML",
         disable_web_page_preview=True,
     )
