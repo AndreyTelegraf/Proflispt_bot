@@ -167,53 +167,78 @@ async def ban_user_command(message: Message, state: FSMContext):
 
 @router.message(Command("unban"))
 async def unban_user_command(message: Message):
-    """Команда для разбана пользователя."""
+    """Команда для разбана пользователя по Telegram ID или @username."""
     if not is_admin(message.from_user.id):
-        await message.answer("🚫 У вас нет прав для выполнения этой команды.")
+        await message.answer("У вас нет прав для выполнения этой команды.")
         return
-    
+
     args = message.text.split()[1:]
-    
+
     if len(args) != 1:
-        await message.answer("📝 Использование: /unban <user_id>")
+        await message.answer("Использование: /unban <user_id или @username>")
         return
-    
-    try:
-        target_user_id = int(args[0])
-        
-        # Получаем пользователя
-        target_user = db.get_user(target_user_id)
-        if not target_user:
-            await message.answer(f"🚫 Пользователь с ID {target_user_id} не найден в базе данных.")
+
+    target_identifier = args[0].strip()
+
+    admin_user = db.get_user(message.from_user.id)
+    if not admin_user:
+        admin_user_id = db.create_user(
+            telegram_id=message.from_user.id,
+            username=message.from_user.username,
+            first_name=message.from_user.first_name,
+            last_name=message.from_user.last_name
+        )
+    else:
+        admin_user_id = admin_user['id']
+
+    if target_identifier.startswith("@"):
+        username = target_identifier.lstrip("@")
+        was_identity_banned, _ = db.is_identity_banned("username", username)
+        if not was_identity_banned:
+            await message.answer(f"Активный username-бан для @{username} не найден.")
             return
-        
-        # Проверяем, забанен ли пользователь
-        is_banned, ban_info = db.is_user_banned(target_user['id'])
-        if not is_banned:
-            await message.answer(f"ℹ️ Пользователь {target_user_id} не забанен.")
-            return
-        
-        # Разбаниваем пользователя
-        admin_user = db.get_user(message.from_user.id)
-        if not admin_user:
-            admin_user_id = db.create_user(
-                telegram_id=message.from_user.id,
-                username=message.from_user.username,
-                first_name=message.from_user.first_name,
-                last_name=message.from_user.last_name
-            )
-        else:
-            admin_user_id = admin_user['id']
-        
-        success = db.unban_user(target_user['id'], admin_user_id)
-        
+
+        success = db.unban_identity("username", username)
         if success:
-            await message.answer(f"✅ Пользователь {target_user_id} разбанен.")
+            await message.answer(f"Пользователь @{username} разбанен по username.")
         else:
-            await message.answer("🚫 Ошибка при разбане пользователя.")
-            
+            await message.answer(f"Не удалось снять username-бан для @{username}.")
+        return
+
+    try:
+        target_user_id = int(target_identifier)
     except ValueError:
-        await message.answer("🚫 Неверный формат user_id. Используйте число.")
+        await message.answer("Неверный формат. Используйте Telegram ID или @username.")
+        return
+
+    target_user = db.get_user(target_user_id)
+    if not target_user:
+        await message.answer(f"Пользователь с ID {target_user_id} не найден в базе данных.")
+        return
+
+    was_user_banned, _ = db.is_user_banned(target_user['id'])
+    user_unbanned = False
+    identity_unbanned = False
+
+    if was_user_banned:
+        user_unbanned = db.unban_user(target_user['id'], admin_user_id)
+
+    username = target_user.get("username")
+    if username:
+        was_identity_banned, _ = db.is_identity_banned("username", username)
+        if was_identity_banned:
+            identity_unbanned = db.unban_identity("username", username)
+
+    if user_unbanned or identity_unbanned:
+        parts = []
+        if user_unbanned:
+            parts.append("Telegram ID")
+        if identity_unbanned and username:
+            parts.append(f"username @{username}")
+        await message.answer(f"Пользователь {target_user_id} разбанен: {', '.join(parts)}.")
+        return
+
+    await message.answer(f"Активный бан для пользователя {target_user_id} не найден.")
 
 @router.message(Command("bans"))
 async def list_bans_command(message: Message):
