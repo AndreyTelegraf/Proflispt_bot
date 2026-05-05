@@ -852,7 +852,16 @@ async def hs_publish_free(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         logger.exception("Housing free publish failed: %s", e)
         await state.clear()
-        await callback.message.edit_text("Ошибка при публикации. Попробуйте позже.")
+
+        msg = str(e).lower()
+        if "message caption is too long" in msg:
+            await callback.message.edit_text(
+                "Текст объявления слишком длинный для публикации с фото/видео. "
+                "Telegram ограничивает подпись к медиа. "
+                "Сократите текст или отправьте объявление без медиа."
+            )
+        else:
+            await callback.message.edit_text("Ошибка при публикации. Попробуйте позже.")
     await callback.answer()
 
 
