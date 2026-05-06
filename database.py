@@ -1751,7 +1751,7 @@ class Database:
                 JOIN users u ON pp.user_id = u.id
                 WHERE pp.user_id = ?
                   AND pp.mode = 'restaurants'
-                  AND pp.status = 'published'
+                  AND pp.status IN ('published', 'deleted')
                   AND pp.payment_status = 'approved'
                 ORDER BY pp.updated_at DESC
             """, (user_id,))
@@ -1786,7 +1786,7 @@ class Database:
                 WHERE pp.user_id = ?
                   AND pp.mode != 'restaurants'
                   AND pp.mode != 'reviews'
-                  AND pp.status = 'published'
+                  AND pp.status IN ('published', 'deleted')
                   AND pp.payment_status = 'approved'
                   AND pp.action_type IN ('post', 'repost')
                   AND INSTR(COALESCE(pp.admin_notes, ''), 'baraholka_repost_target') = 0

@@ -206,18 +206,23 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
 
         text = f"📋 Мои объявления {counter}\n\n{post.get('name', '')} ({cities_str})\n\n{desc}"
 
+        is_deleted = post.get('status') == 'deleted'
         is_housing = post.get('mode') in ('housing_wanted', 'owner_real_estate') and post.get('action_type') == 'post'
-        if is_housing:
+        if is_deleted:
+            action_rows = [
+                [InlineKeyboardButton(text="Опубликовать снова — €10", callback_data=f"repost_premium_{post_id}")],
+            ]
+        elif is_housing:
             action_rows = [
                 [InlineKeyboardButton(text="Платный перепост в Барахолку — €10", callback_data=f"hs:baraholka_mypostings:{post_id}")],
                 [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
-                [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_premium_{post_id}")],
+                [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
         else:
             action_rows = [
-                [InlineKeyboardButton(text="Поднять – €10", callback_data=f"repost_premium_{post_id}")],
+                [InlineKeyboardButton(text="Поднять — €10", callback_data=f"repost_premium_{post_id}")],
                 [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
-                [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_premium_{post_id}")],
+                [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
 
     inline_keyboard = []
@@ -842,20 +847,23 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Нет доступа.", show_alert=True)
         return
 
-    if post.get('status') != 'published':
-        await callback.answer("Объявление уже не активно.", show_alert=True)
-        return
-
-    if not post.get('message_id') or not post.get('chat_id'):
-        db.delete_premium_post(post_id)
-        await callback.answer("Объявление удалено из канала и недоступно.", show_alert=True)
+    if post.get('status') not in ('published', 'deleted'):
+        await callback.answer("Это объявление нельзя переопубликовать.", show_alert=True)
         return
 
     review_links = post.get("review_links") or ""
 
+    repost_notes = {
+        "old_post_id": post['id'],
+        "old_message_id": post.get('message_id'),
+        "old_chat_id": post.get('chat_id'),
+        "old_topic_id": post.get('topic_id'),
+        "old_published_message_ids": post.get('published_message_ids') or [],
+    }
+
     new_post_id = db.create_premium_post(
         user_id=user['id'],
-        mode='restaurants',
+        mode=post.get('mode'),
         cities=json.dumps(post['cities']),
         description=post['description'],
         social_media=post.get('social_media'),
@@ -869,13 +877,7 @@ async def request_repost_premium(callback: CallbackQuery):
         payment_amount=10.00,
         action_type='repost',
         review_links=review_links,
-        admin_notes=json.dumps({
-            "old_post_id": post['id'],
-            "old_message_id": post.get('message_id'),
-            "old_chat_id": post.get('chat_id'),
-            "old_topic_id": post.get('topic_id'),
-            "old_published_message_ids": post.get('published_message_ids') or [],
-        }),
+        admin_notes=json.dumps(repost_notes),
     )
 
     try:
