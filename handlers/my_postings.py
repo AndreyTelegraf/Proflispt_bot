@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Optional
 
 from aiogram import Router, F
+from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -689,7 +690,15 @@ async def select_edit_field(callback: CallbackQuery, state: FSMContext):
         pass
 
 
-@router.message(F.text)
+@router.message(
+    F.text,
+    StateFilter(
+        EditPostingStates.edit_description,
+        EditPostingStates.edit_cities,
+        EditPostingStates.edit_phone_whatsapp,
+        EditPostingStates.edit_social_media,
+    ),
+)
 async def handle_edit_text_input(message: Message, state: FSMContext):
     """Handle text input for editing posting fields."""
     current_state = await state.get_state()

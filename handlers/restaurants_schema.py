@@ -983,7 +983,7 @@ async def restaurants_reviews_none(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.message(F.text)
+@router.message(F.text, StateFilter(STATE_INPUT))
 async def restaurants_schema_text_input(message: Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state != STATE_INPUT:

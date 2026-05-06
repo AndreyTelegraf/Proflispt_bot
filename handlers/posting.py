@@ -2,6 +2,7 @@
 
 import logging
 from aiogram import Router, F
+from aiogram.filters import StateFilter
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
@@ -136,7 +137,19 @@ async def handle_phone_check(message: Message, state: FSMContext):
         await state.set_state("waiting_for_phone_main")
 
 
-@router.message(F.text)
+@router.message(
+    F.text,
+    StateFilter(
+        "waiting_for_custom_city",
+        "waiting_for_description",
+        "waiting_for_social_media",
+        "waiting_for_username_creation",
+        "waiting_for_phone_main",
+        "waiting_for_phone_whatsapp",
+        "waiting_for_name",
+        "waiting_for_confirmation",
+    ),
+)
 async def handle_text_input(message: Message, state: FSMContext):
     """Handle text input for various states."""
     current_state = await state.get_state()
