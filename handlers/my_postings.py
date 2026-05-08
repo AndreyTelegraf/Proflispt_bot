@@ -1,6 +1,7 @@
 """Handlers for 'My Postings' section."""
 
 import json
+import logging
 from datetime import datetime
 from typing import Optional
 
@@ -15,6 +16,7 @@ from config import Config
 from utils import get_first_words, escape_markdown, format_posting_card
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 class DeletePostingStates(StatesGroup):
