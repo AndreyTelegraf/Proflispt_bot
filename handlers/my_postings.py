@@ -1096,10 +1096,14 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
         message_ids = [post['message_id']]
 
     chat_id = post.get('chat_id')
+    channel_cleanup_done = not bool(chat_id and message_ids)
+    undeletable_seen = False
+
     if chat_id:
         for mid in message_ids:
             try:
                 await callback.bot.delete_message(chat_id=int(chat_id), message_id=int(mid))
+                channel_cleanup_done = True
             except Exception as e:
                 err = str(e).lower()
                 if (
@@ -1108,9 +1112,48 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
                     or "chat not found" in err
                     or "message not found" in err
                 ):
-                    pass
-                else:
-                    logger.warning(f"Could not delete premium post message {mid}: {e}")
+                    channel_cleanup_done = True
+                    continue
+
+                if "message can't be deleted" in err:
+                    undeletable_seen = True
+                    logger.warning(f"Premium post message {mid} cannot be deleted, will try to mark it deleted: {e}")
+                    continue
+
+                logger.warning(f"Could not delete premium post message {mid}: {e}")
+
+        if undeletable_seen and not channel_cleanup_done and message_ids:
+            first_mid = int(message_ids[0])
+            marker_text = "Объявление удалено пользователем."
+            try:
+                await callback.bot.edit_message_text(
+                    chat_id=int(chat_id),
+                    message_id=first_mid,
+                    text=marker_text,
+                )
+                channel_cleanup_done = True
+            except Exception as text_error:
+                try:
+                    await callback.bot.edit_message_caption(
+                        chat_id=int(chat_id),
+                        message_id=first_mid,
+                        caption=marker_text,
+                    )
+                    channel_cleanup_done = True
+                except Exception as caption_error:
+                    logger.warning(
+                        "Could not mark premium post %s as deleted after Telegram refused deletion: text_error=%s caption_error=%s",
+                        post_id,
+                        text_error,
+                        caption_error,
+                    )
+
+    if not channel_cleanup_done:
+        await callback.answer(
+            "Не удалось удалить объявление из канала. Обратитесь к администратору.",
+            show_alert=True,
+        )
+        return
 
     db.delete_premium_post(post_id)
 
