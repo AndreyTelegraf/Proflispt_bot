@@ -1332,7 +1332,11 @@ class Database:
         *,
         days: int = 30,
     ) -> tuple[bool, str | None]:
-        """Allow unlimited delete/repost corrections during first 6 hours, then block 30 days."""
+        """Allow unlimited delete/repost corrections during first 6 hours, then block 30 days.
+
+        For job_offer, an already deleted vacancy with the same employer phone
+        must not block a new vacancy. The active/pending duplicate guard remains.
+        """
         since = (datetime.now() - timedelta(days=days)).isoformat()
         phone = str(phone_main or "").strip()
 
@@ -1365,6 +1369,9 @@ class Database:
                 "Похожее бесплатное объявление в этом разделе уже опубликовано. "
                 "Сначала удалите старое объявление через раздел «Мои объявления»."
             )
+
+        if mode == "job_offer":
+            return True, None
 
         first_created = datetime.fromisoformat(rows[0]["created_at"])
         now = datetime.now()
