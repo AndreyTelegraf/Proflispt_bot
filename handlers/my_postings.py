@@ -210,9 +210,15 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
 
         is_deleted = post.get('status') == 'deleted'
         is_housing = post.get('mode') in ('housing_wanted', 'owner_real_estate') and post.get('action_type') == 'post'
+        is_housing_wanted = post.get('mode') == 'housing_wanted' and post.get('action_type') == 'post'
         if is_deleted:
             action_rows = [
                 [InlineKeyboardButton(text="Опубликовать снова — €10", callback_data=f"repost_premium_{post_id}")],
+            ]
+        elif is_housing_wanted:
+            action_rows = [
+                [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
+                [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
         elif is_housing:
             action_rows = [

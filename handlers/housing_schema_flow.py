@@ -820,22 +820,128 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
     except Exception:
         pass
 
+    baraholka_link = None
+    if slug == "housing_wanted" and source_post_id:
+        try:
+            baraholka_message = None
+            baraholka_message_ids: list[int] = []
+
+            if media:
+                from aiogram.types import InputMediaPhoto, InputMediaVideo
+                if len(media) > 1:
+                    group = []
+                    for i, item in enumerate(media[:10]):
+                        caption = post_text if i == 0 else None
+                        if item["type"] == "photo":
+                            group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+                        else:
+                            group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+                    msgs = await callback.bot.send_media_group(
+                        chat_id=Config.BARAHOLKA_CHANNEL_ID,
+                        media=group,
+                        message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+                    )
+                    baraholka_message = msgs[0] if msgs else None
+                    baraholka_message_ids = [m.message_id for m in msgs]
+                else:
+                    item = media[0]
+                    if item["type"] == "photo":
+                        baraholka_message = await callback.bot.send_photo(
+                            chat_id=Config.BARAHOLKA_CHANNEL_ID,
+                            photo=item["file_id"],
+                            caption=post_text,
+                            message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+                            parse_mode="HTML",
+                        )
+                    else:
+                        baraholka_message = await callback.bot.send_video(
+                            chat_id=Config.BARAHOLKA_CHANNEL_ID,
+                            video=item["file_id"],
+                            caption=post_text,
+                            message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+                            parse_mode="HTML",
+                        )
+                    baraholka_message_ids = [baraholka_message.message_id]
+            else:
+                baraholka_message = await callback.bot.send_message(
+                    chat_id=Config.BARAHOLKA_CHANNEL_ID,
+                    text=post_text,
+                    message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+                    parse_mode="HTML",
+                    disable_web_page_preview=True,
+                )
+                baraholka_message_ids = [baraholka_message.message_id]
+
+            if baraholka_message:
+                admin_notes = json.dumps({
+                    "baraholka_repost_target": True,
+                    "baraholka_auto_publish": True,
+                    "rental_term": payload.get("rental_term", ""),
+                    "source_post_id": source_post_id,
+                    "source_chat_id": channel_id,
+                    "source_message_id": published_message.message_id,
+                    "source_published_message_ids": published_message_ids,
+                })
+                cities_val = _normalize_geo(payload.get("geo_tags"))
+                if isinstance(cities_val, list):
+                    cities_val = json.dumps(cities_val)
+
+                baraholka_post_id = db.create_premium_post(
+                    user_id=user["id"],
+                    mode=slug,
+                    cities=cities_val,
+                    description=payload.get("description", ""),
+                    social_media=payload.get("social_links", ""),
+                    telegram_username=payload.get("telegram", ""),
+                    phone_main=payload.get("phone_main", ""),
+                    phone_whatsapp=payload.get("phone_whatsapp", ""),
+                    name=payload.get("contact_name", ""),
+                    media_list=media,
+                    payment_amount=0,
+                    action_type="repost",
+                    admin_notes=admin_notes,
+                )
+                db.approve_premium_post(baraholka_post_id, 0)
+                db.update_premium_post_publication(
+                    baraholka_post_id,
+                    baraholka_message.message_id,
+                    Config.BARAHOLKA_CHANNEL_ID,
+                    Config.BARAHOLKA_HOUSING_TOPIC_ID,
+                    published_message_ids=baraholka_message_ids,
+                )
+
+                try:
+                    baraholka_chat = await callback.bot.get_chat(Config.BARAHOLKA_CHANNEL_ID)
+                    if baraholka_chat.username:
+                        baraholka_link = f"https://t.me/{baraholka_chat.username}/{baraholka_message.message_id}"
+                except Exception:
+                    pass
+        except Exception as e:
+            logger.exception("Housing wanted auto Baraholka publish failed: %s", e)
+
     link_line = f"Объявление опубликовано в Справочнике: {link}" if link else "Объявление опубликовано в Справочнике."
-    upsell_text = (
-        f"{link_line}\n\n"
-        "Если хотите больше откликов и быстрее закрыть сделку, усильте объявление платным перепостом "
-        "в @baraholka_pt с живой и активной аудиторией.\n\n"
-        "Стоимость перепоста — €10"
-    )
+    if slug == "housing_wanted":
+        if baraholka_link:
+            result_text = f"{link_line}\n\nОбъявление также опубликовано в Барахолке: {baraholka_link}"
+        else:
+            result_text = f"{link_line}\n\nОбъявление также отправлено в Барахолку."
+    else:
+        result_text = (
+            f"{link_line}\n\n"
+            "Если хотите больше откликов и быстрее закрыть сделку, усильте объявление платным перепостом "
+            "в @baraholka_pt с живой и активной аудиторией.\n\n"
+            "Стоимость перепоста — €10"
+        )
+
     b = InlineKeyboardBuilder()
-    if source_post_id:
+    if source_post_id and slug != "housing_wanted":
         b.add(InlineKeyboardButton(
             text="Платный перепост в Барахолку — €10",
             callback_data=f"hs:upsell_baraholka:{source_post_id}",
         ))
     b.add(InlineKeyboardButton(text="В главное меню", callback_data="go:main"))
     b.adjust(1)
-    await callback.message.edit_text(upsell_text, reply_markup=b.as_markup(), disable_web_page_preview=True)
+    await callback.message.edit_text(result_text, reply_markup=b.as_markup(), disable_web_page_preview=True)
 
 
 # ── free publish callbacks ────────────────────────────────────────────────────
