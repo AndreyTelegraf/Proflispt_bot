@@ -283,7 +283,7 @@ def _choice_kb(step, slug: str) -> InlineKeyboardMarkup:
         b.add(InlineKeyboardButton(text="← Назад", callback_data=f"gs:back:{slug}"))
 
     if field == "geo_tags":
-        b.adjust(3, 3, 3, 2, 1)
+        b.adjust(3, 3, 3, 1, 1)
     elif is_residency:
         b.adjust(2)
     else:
@@ -540,7 +540,7 @@ async def gs_choice(callback: CallbackQuery, state: FSMContext):
     if getattr(step, "field_name", "") == "geo_tags" and raw_value == "custom":
         await state.set_state(GS_GEO_CUSTOM)
         await callback.message.edit_text(
-            "Введите города вручную, например: #lisboa #setubal #algarve или #online",
+            "Введите все нужные города одним сообщением.\n\nНапример: #lisboa #sintra #cascais или #online.\n\nНе добавляйте города потом в описание — они попадут в объявление отдельной строкой.",
             reply_markup=_back_kb(slug),
         )
         await callback.answer()
@@ -584,7 +584,7 @@ async def gs_geo_custom_input(message: Message, state: FSMContext):
     raw = str(message.text or "").strip()
     if not raw:
         await message.answer(
-            "Введите хотя бы один город, например: #lisboa #porto #online",
+            "Введите хотя бы один город одним сообщением, например: #lisboa #porto #online",
             reply_markup=_back_kb(slug),
         )
         return

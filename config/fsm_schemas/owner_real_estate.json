@@ -10,8 +10,22 @@
       "prompt": "Вы или ваш бизнес находитесь в Португалии?",
       "required": true,
       "options": [
-        {"value": "yes", "aliases": ["да", "yes", "y"]},
-        {"value": "no",  "aliases": ["нет", "no", "n"]}
+        {
+          "value": "yes",
+          "aliases": [
+            "да",
+            "yes",
+            "y"
+          ]
+        },
+        {
+          "value": "no",
+          "aliases": [
+            "нет",
+            "no",
+            "n"
+          ]
+        }
       ],
       "stop_if_negative": true
     },
@@ -19,22 +33,57 @@
       "step_id": "geo_tags",
       "kind": "choice",
       "field_name": "geo_tags",
-      "prompt": "Выберите город, где находится объект.\n\nМожно указать несколько городов через запятую:",
+      "prompt": "Выберите город, где находится объект.\n\nЕсли нужен один город — нажмите кнопку ниже.\nЕсли нужно несколько городов, другой город или #online — нажмите «Несколько / другой город» и введите все города одним сообщением.",
       "required": true,
       "options": [
-        {"value": "lisboa",  "label": "Lisboa"},
-        {"value": "porto",   "label": "Porto"},
-        {"value": "coimbra", "label": "Coimbra"},
-        {"value": "braga",   "label": "Braga"},
-        {"value": "faro",    "label": "Faro"},
-        {"value": "sintra",  "label": "Sintra"},
-        {"value": "cascais", "label": "Cascais"},
-        {"value": "leiria",  "label": "Leiria"},
-        {"value": "setubal", "label": "Setúbal"},
-        {"value": "online",  "label": "Онлайн"},
-        {"value": "custom",  "label": "Другие города"}
+        {
+          "value": "lisboa",
+          "label": "Lisboa"
+        },
+        {
+          "value": "porto",
+          "label": "Porto"
+        },
+        {
+          "value": "coimbra",
+          "label": "Coimbra"
+        },
+        {
+          "value": "braga",
+          "label": "Braga"
+        },
+        {
+          "value": "faro",
+          "label": "Faro"
+        },
+        {
+          "value": "sintra",
+          "label": "Sintra"
+        },
+        {
+          "value": "cascais",
+          "label": "Cascais"
+        },
+        {
+          "value": "leiria",
+          "label": "Leiria"
+        },
+        {
+          "value": "setubal",
+          "label": "Setúbal"
+        },
+        {
+          "value": "online",
+          "label": "Онлайн"
+        },
+        {
+          "value": "custom",
+          "label": "Несколько / другой город"
+        }
       ],
-      "validation": {"max_len": 200}
+      "validation": {
+        "max_len": 200
+      }
     },
     {
       "step_id": "rental_term",
@@ -43,8 +92,14 @@
       "prompt": "Укажите срок аренды:",
       "required": true,
       "options": [
-        {"value": "short_term", "label": "Короткосрок < 12 мес"},
-        {"value": "long_term",  "label": "Долгосрок > 1 года"}
+        {
+          "value": "short_term",
+          "label": "Короткосрок < 12 мес"
+        },
+        {
+          "value": "long_term",
+          "label": "Долгосрок > 1 года"
+        }
       ]
     },
     {
@@ -53,7 +108,9 @@
       "field_name": "description",
       "prompt": "Опишите объект.",
       "required": true,
-      "validation": {"max_len": 1200}
+      "validation": {
+        "max_len": 1200
+      }
     },
     {
       "step_id": "social_links",
@@ -61,7 +118,9 @@
       "field_name": "social_links",
       "prompt": "Вставьте ссылки на соцсети или сайты, если они есть:",
       "required": false,
-      "validation": {"max_len": 1200}
+      "validation": {
+        "max_len": 1200
+      }
     },
     {
       "step_id": "phone_main",
@@ -69,7 +128,9 @@
       "field_name": "phone_main",
       "prompt": "Укажите португальский номер телефона для основной связи, начиная с +351.",
       "required": true,
-      "validation": {"regex": "^\\+351\\d{9}$"}
+      "validation": {
+        "regex": "^\\+351\\d{9}$"
+      }
     },
     {
       "step_id": "phone_whatsapp",
@@ -77,7 +138,9 @@
       "field_name": "phone_whatsapp",
       "prompt": "Укажите номер телефона, к которому привязан WhatsApp для резервной связи, если отличается от основного. Можно оставить пустым.",
       "required": false,
-      "validation": {"regex": "^\\+\\d+$"}
+      "validation": {
+        "regex": "^\\+\\d+$"
+      }
     },
     {
       "step_id": "contact_name",
@@ -85,7 +148,9 @@
       "field_name": "contact_name",
       "prompt": "Укажите имя или название:",
       "required": true,
-      "validation": {"max_len": 300}
+      "validation": {
+        "max_len": 300
+      }
     }
   ]
 }

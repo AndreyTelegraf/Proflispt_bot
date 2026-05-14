@@ -573,7 +573,7 @@ async def restaurants_geo_custom_start(callback: CallbackQuery, state: FSMContex
 
     await state.set_state(STATE_GEO_CUSTOM)
     await callback.message.edit_text(
-        "Введите города вручную, например: #lisboa #setubal #algarve или #online",
+        "Введите все нужные города одним сообщением.\n\nНапример: #lisboa #sintra #cascais или #online.\n\nНе добавляйте города потом в описание — они попадут в объявление отдельной строкой.",
         reply_markup=get_back_button("restaurants:back")
     )
     await callback.answer()
@@ -642,7 +642,7 @@ async def restaurants_geo_custom_input(message: Message, state: FSMContext):
     raw = str(message.text or "").strip()
     if not raw:
         await message.answer(
-            "Введите хотя бы один город или тег, например: #lisboa #porto #online",
+            "Введите хотя бы один город одним сообщением, например: #lisboa #porto #online",
             reply_markup=get_back_button("restaurants:back")
         )
         return
