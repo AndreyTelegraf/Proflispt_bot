@@ -262,6 +262,18 @@ async def _rv_notify_admin(bot, post_id: int, payload: dict, media_list: list) -
 
 async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dict, media_list: list) -> None:
     author_username = callback.from_user.username or ""
+    if not author_username:
+        await callback.answer("Нужен Telegram username автора отзыва.", show_alert=True)
+        await callback.message.edit_text(
+            "Чтобы отправить отзыв, у вас должен быть Telegram username.\n\n"
+            "Создайте username в настройках Telegram и вернитесь к отправке отзыва.",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="@username создан", callback_data="rv:author_username_ready")],
+                [InlineKeyboardButton(text="← Назад", callback_data="rv:back")],
+            ]),
+        )
+        return
+
     payload["author_telegram"] = author_username
     first = media_list[0] if media_list else None
     try:
@@ -501,6 +513,37 @@ async def rv_text_nontext(message: Message, state: FSMContext):
     await message.answer("В описании допускается только текст. Фото, видео, ссылки и контакты можно будет добавить на следующих шагах.\n\nПовторите отправку текстового описания:")
 
 # ── no-media submit ────────────────────────────────────────────────────────────
+
+@router.callback_query(F.data == "rv:author_username_ready")
+async def rv_author_username_ready(callback: CallbackQuery, state: FSMContext):
+    if await state.get_state() != RV_CONFIRM:
+        await callback.answer()
+        return
+
+    if not callback.from_user.username:
+        await callback.answer("Username всё ещё не найден. Проверьте настройки Telegram.", show_alert=True)
+        return
+
+    step, payload, media_list = await _get_rv(state)
+    payload["author_telegram"] = callback.from_user.username
+    await _save_rv(state, step=step, payload=payload)
+
+    rendered_text = _rv_render_html(payload)
+    if len(rendered_text) > 1024:
+        text = _media_too_long_text()
+        reply_markup = _confirm_no_media_kb()
+    else:
+        text = rendered_text + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+        reply_markup = _confirm_kb()
+
+    await callback.message.edit_text(
+        text,
+        reply_markup=reply_markup,
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
+    await callback.answer()
+
 
 @router.callback_query(F.data == "rv:submit_no_media")
 async def rv_submit_no_media(callback: CallbackQuery, state: FSMContext):
