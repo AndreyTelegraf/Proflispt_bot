@@ -356,11 +356,31 @@ def _render_html(payload: dict) -> str:
 
     description = _norm(payload.get("description"))
     if description:
-        desc_lines = [part.strip() for part in description.splitlines() if part.strip()]
+        desc_lines: list[str | None] = []
+        blank_seen = False
+        for raw_line in description.splitlines():
+            part = raw_line.strip()
+            if part:
+                desc_lines.append(part)
+                blank_seen = False
+            elif desc_lines and not blank_seen:
+                desc_lines.append(None)
+                blank_seen = True
+
+        while desc_lines and desc_lines[-1] is None:
+            desc_lines.pop()
+
         if desc_lines:
-            lines.append("- " + html.escape(desc_lines[0]))
-            for part in desc_lines[1:]:
-                lines.append(html.escape(part))
+            first_written = False
+            for part in desc_lines:
+                if part is None:
+                    lines.append("")
+                    continue
+                if not first_written:
+                    lines.append("- " + html.escape(part))
+                    first_written = True
+                else:
+                    lines.append(html.escape(part))
 
     for link in _split_lines(payload.get("social_links")):
         lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
