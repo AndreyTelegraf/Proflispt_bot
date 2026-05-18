@@ -18,10 +18,26 @@ import re
 def sanitize_description(text: str) -> str:
     if not text:
         return text
+
+    text = str(text).replace("\r\n", "\n").replace("\r", "\n")
     text = re.sub(r"[\U00010000-\U0010ffff]", " ", text)
     text = re.sub(r"[★☆✓✔✦✨🔥💥]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+
+    lines: list[str | None] = []
+    blank_seen = False
+    for raw_line in text.split("\n"):
+        line = re.sub(r"[ \t\f\v]+", " ", raw_line).strip()
+        if line:
+            lines.append(line)
+            blank_seen = False
+        elif lines and not blank_seen:
+            lines.append(None)
+            blank_seen = True
+
+    while lines and lines[-1] is None:
+        lines.pop()
+
+    return "\n".join("" if line is None else line for line in lines)
 
 class Database:
     """Database manager for the bot."""
