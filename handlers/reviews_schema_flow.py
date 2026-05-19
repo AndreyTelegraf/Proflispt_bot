@@ -128,19 +128,8 @@ def _normalize_geo(value: str) -> str:
 
 
 def _validate_description_text(text: str) -> tuple[bool, str | None]:
-    stripped = str(text or "").strip()
-    if len(stripped) > 4000:
-        return False, (
-            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
-            "Сократите текст и отправьте его заново."
-        )
-    if re.search(r"(https?://|www\.|t\.me/)", text, re.I):
-        return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
-    if re.search(r"[\U00010000-\U0010ffff]", text):
-        return False, "В описании допускается только текст. Эмодзи использовать нельзя."
-    if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
-        return False, "В описании допускается только текст. Ссылки можно будет добавить отдельно."
-    return True, None
+    from services.contact_guard import validate_description_text
+    return validate_description_text(text)
 
 
 # ── keyboards ──────────────────────────────────────────────────────────────────
