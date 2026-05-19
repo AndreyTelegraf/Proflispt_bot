@@ -459,7 +459,7 @@ async def cmd_unban(message: Message):
 
 @router.message(Command("pays"))
 async def cmd_pays(message: Message):
-    """Show approved paid services statistics since 2026-04-01."""
+    """Show paid services statistics since 2026-04-01."""
     allowed_usernames = {"andreytelegraf", "kak_odin"}
     username = (message.from_user.username or "").lower()
 
@@ -469,83 +469,76 @@ async def cmd_pays(message: Message):
 
     since = "2026-04-01 00:00:00"
 
+    base_where = """
+        pp.payment_status = 'approved'
+        AND CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0
+        AND datetime(pp.created_at) >= datetime(?)
+    """
+
+    fields = """
+        pp.id,
+        pp.user_id,
+        pp.mode,
+        pp.action_type,
+        pp.payment_amount,
+        pp.status,
+        pp.created_at,
+        pp.updated_at,
+        pp.message_id,
+        pp.topic_id,
+        pp.telegram_username,
+        pp.phone_main,
+        pp.name,
+        u.telegram_id,
+        u.username AS user_username
+    """
+
     with db.get_connection() as conn:
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT
-                pp.id,
-                pp.user_id,
-                pp.mode,
-                pp.action_type,
-                pp.payment_amount,
-                pp.status,
-                pp.created_at,
-                pp.updated_at,
-                pp.message_id,
-                pp.topic_id,
-                pp.telegram_username,
-                pp.phone_main,
-                pp.name,
-                u.telegram_id,
-                u.username AS user_username
-            FROM premium_posts pp
-            LEFT JOIN users u ON pp.user_id = u.id
-            WHERE pp.payment_status = 'approved'
-              AND CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0
-              AND datetime(pp.created_at) >= datetime(?)
-            ORDER BY datetime(pp.created_at) ASC, pp.id ASC
-        """, (since,))
-        rows = [dict(row) for row in cursor.fetchall()]
+        def fetch_rows(extra_where: str):
+            cursor.execute(f"""
+                SELECT {fields}
+                FROM premium_posts pp
+                LEFT JOIN users u ON pp.user_id = u.id
+                WHERE {base_where}
+                  AND {extra_where}
+                ORDER BY datetime(pp.created_at) ASC, pp.id ASC
+            """, (since,))
+            return [dict(row) for row in cursor.fetchall()]
 
-        cursor.execute("""
+        published_posts = fetch_rows("pp.status = 'published' AND pp.action_type = 'post'")
+        removed_posts = fetch_rows("pp.status IN ('deleted', 'superseded') AND pp.action_type = 'post'")
+        published_reposts = fetch_rows("pp.status = 'published' AND pp.action_type = 'repost'")
+        removed_reposts = fetch_rows("pp.status IN ('deleted', 'superseded') AND pp.action_type = 'repost'")
+        published_pins = fetch_rows("pp.status = 'published' AND pp.action_type = 'pin'")
+
+        cursor.execute(f"""
             SELECT
+                pp.status,
                 pp.action_type,
                 pp.mode,
                 COUNT(*) AS cnt,
                 SUM(CAST(COALESCE(pp.payment_amount, 0) AS REAL)) AS total
             FROM premium_posts pp
-            WHERE pp.payment_status = 'approved'
-              AND CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0
-              AND datetime(pp.created_at) >= datetime(?)
-            GROUP BY pp.action_type, pp.mode
-            ORDER BY pp.action_type, pp.mode
+            WHERE {base_where}
+            GROUP BY pp.status, pp.action_type, pp.mode
+            ORDER BY pp.status, pp.action_type, pp.mode
         """, (since,))
-        groups = [dict(row) for row in cursor.fetchall()]
+        audit_groups = [dict(row) for row in cursor.fetchall()]
 
-    total = sum(float(row.get("payment_amount") or 0) for row in rows)
+    def rows_sum(rows):
+        return sum(float(row.get("payment_amount") or 0) for row in rows)
 
-    action_names = {
-        "post": "публикация",
-        "repost": "репост",
-        "pin": "закреп",
-    }
+    def append_rows(lines, title, rows):
+        if not rows:
+            return
 
-    lines = [
-        "Платные услуги",
-        "Период: с 01.04.2026 включительно",
-        "",
-        f"Всего оплат: {len(rows)}",
-        f"Сумма: {total:.2f} €",
-    ]
-
-    if groups:
         lines.append("")
-        lines.append("Итого по услугам:")
-        for group in groups:
-            action = action_names.get(group.get("action_type"), group.get("action_type") or "-")
-            mode = group.get("mode") or "-"
-            cnt = int(group.get("cnt") or 0)
-            subtotal = float(group.get("total") or 0)
-            lines.append(f"- {action} / {mode}: {cnt} шт. — {subtotal:.2f} €")
-
-    if rows:
-        lines.append("")
-        lines.append("Детализация:")
+        lines.append(title)
         for row in rows:
             amount = float(row.get("payment_amount") or 0)
             created = str(row.get("created_at") or "")[:10]
-            action = action_names.get(row.get("action_type"), row.get("action_type") or "-")
             mode = row.get("mode") or "-"
             post_status = row.get("status") or "-"
             tg = row.get("telegram_username") or "-"
@@ -554,6 +547,7 @@ async def cmd_pays(message: Message):
             post_id = row.get("id")
             msg = row.get("message_id")
             topic = row.get("topic_id")
+
             if msg and topic:
                 link = f"https://t.me/proflistpt/{topic}/{msg}"
             elif msg:
@@ -562,13 +556,65 @@ async def cmd_pays(message: Message):
                 link = "-"
 
             lines.append(
-                f"- {created}; #{post_id}; {amount:.2f} €; {action}; {mode}; "
+                f"- {created}; #{post_id}; {amount:.2f} €; {mode}; "
                 f"status={post_status}; {tg}; {phone}; {name}; {link}"
             )
 
+    published_posts_total = rows_sum(published_posts)
+    removed_posts_total = rows_sum(removed_posts)
+    published_reposts_total = rows_sum(published_reposts)
+    removed_reposts_total = rows_sum(removed_reposts)
+    published_pins_total = rows_sum(published_pins)
+
+    payable_count = len(published_posts) + len(published_reposts) + len(published_pins)
+    payable_total = published_posts_total + published_reposts_total + published_pins_total
+
+    lines = [
+        "Платные услуги",
+        "Период: с 01.04.2026 включительно",
+        "",
+        "Реально опубликованные платные посты:",
+        f"- постов: {len(published_posts)}",
+        f"- сумма: {published_posts_total:.2f} €",
+        "",
+        "Удалённые / заменённые платные посты:",
+        f"- постов: {len(removed_posts)}",
+        f"- сумма: {removed_posts_total:.2f} €",
+        "",
+        "Перепосты в Барахолку:",
+        f"- опубликованные: {len(published_reposts)}",
+        f"- сумма опубликованных: {published_reposts_total:.2f} €",
+        f"- удалённые / заменённые: {len(removed_reposts)}",
+        f"- сумма удалённых / заменённых: {removed_reposts_total:.2f} €",
+        "",
+        "Закрепы:",
+        f"- опубликованные: {len(published_pins)}",
+        f"- сумма: {published_pins_total:.2f} €",
+        "",
+        "Итого к зачёту:",
+        f"- всего оплат: {payable_count}",
+        f"- сумма: {payable_total:.2f} €",
+    ]
+
+    if audit_groups:
+        lines.append("")
+        lines.append("Аудит по status / action_type / mode:")
+        for group in audit_groups:
+            status = group.get("status") or "-"
+            action_type = group.get("action_type") or "-"
+            mode = group.get("mode") or "-"
+            cnt = int(group.get("cnt") or 0)
+            subtotal = float(group.get("total") or 0)
+            lines.append(f"- {status} / {action_type} / {mode}: {cnt} шт. — {subtotal:.2f} €")
+
+    append_rows(lines, "Детализация опубликованных постов:", published_posts)
+    append_rows(lines, "Детализация опубликованных перепостов в Барахолку:", published_reposts)
+    append_rows(lines, "Детализация удалённых / заменённых постов:", removed_posts)
+    append_rows(lines, "Детализация удалённых / заменённых перепостов:", removed_reposts)
+    append_rows(lines, "Детализация закрепов:", published_pins)
+
     text = "\n".join(lines)
 
-    # Telegram message limit safety.
     chunks = []
     while len(text) > 3900:
         cut = text.rfind("\n", 0, 3900)
@@ -580,6 +626,7 @@ async def cmd_pays(message: Message):
 
     for chunk in chunks:
         await message.answer(chunk, disable_web_page_preview=True)
+
 
 
 @router.message(Command("premium_posts"))
