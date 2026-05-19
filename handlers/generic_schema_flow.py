@@ -966,6 +966,18 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
                     chat_id=channel_id,
                     topic_id=topic_id,
                 )
+                try:
+                    from services.auto_repost import maybe_auto_repost_cargo
+                    await maybe_auto_repost_cargo(
+                        callback.bot,
+                        db,
+                        chat_id=channel_id,
+                        topic_id=topic_id,
+                        mode=slug,
+                        action_type="post",
+                    )
+                except Exception as auto_repost_error:
+                    logger.warning("Cargo auto repost failed: %s", auto_repost_error)
         except Exception as e:
             logger.warning("Could not persist free generic post: %s", e)
 

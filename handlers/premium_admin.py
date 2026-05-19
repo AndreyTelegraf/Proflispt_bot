@@ -439,6 +439,19 @@ async def admin_approve_premium(callback: CallbackQuery):
             db.update_premium_post_publication(post_id, published_message.message_id, publish_chat_id, topic_id, published_message_ids=published_message_ids)
             logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
 
+            try:
+                from services.auto_repost import maybe_auto_repost_cargo
+                await maybe_auto_repost_cargo(
+                    callback.bot,
+                    db,
+                    chat_id=publish_chat_id,
+                    topic_id=topic_id,
+                    mode=post.get("mode"),
+                    action_type=post.get("action_type") or "post",
+                )
+            except Exception as auto_repost_error:
+                logger.warning("Cargo auto repost failed for premium post #%s: %s", post_id, auto_repost_error)
+
             if post.get('mode') == 'reviews':
                 try:
                     db.add_review_index(
