@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 CARGO_TOPIC_ID = 364
 CARGO_PROMO_MESSAGE_ID = 35049
+CARGO_REPOST_ENABLED = False
+
 CARGO_REPOST_EVERY = 5
 CARGO_REPOST_DELAY_SECONDS = 25 * 60
 AUTO_REPOST_POLL_SECONDS = 60
@@ -169,6 +171,9 @@ async def maybe_auto_repost_cargo(
     First matching publication initializes baseline as current_count - 1, so counting
     starts from the first real publication after deployment and does not backfill old posts.
     """
+    if not CARGO_REPOST_ENABLED:
+        return
+
     if int(chat_id) != int(Config.CHANNEL_ID):
         return
     if int(topic_id or 0) != CARGO_TOPIC_ID:
