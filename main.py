@@ -30,6 +30,7 @@ from handlers.restaurants_schema import router as restaurants_schema_router
 from handlers.section_catalog import router as section_catalog_router
 from handlers.reviews_schema_flow import router as reviews_schema_flow_router
 from services.scheduler import start_scheduler
+from services.auto_repost import start_auto_repost_scheduler
 from middleware.ban_check import BanCheckMiddleware
 from keyboards.main import get_main_menu, get_back_button
 
@@ -845,6 +846,9 @@ async def main():
 
             await start_scheduler(bot)
             logger.info("Cleanup scheduler started")
+
+            await start_auto_repost_scheduler(bot, db)
+            logger.info("Auto repost scheduler started")
 
             await dp.start_polling(bot, skip_updates=True, allowed_updates=["message", "callback_query", "chat_member"])
 
