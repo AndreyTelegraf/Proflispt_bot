@@ -28,6 +28,8 @@ def normalize_geo_tags(value: object) -> list[str]:
 
     for token in tokens:
         clean = token.strip().lstrip("#").lower()
+        clean = re.sub(r"[-–—]+", "_", clean)
+        clean = re.sub(r"_+", "_", clean).strip("_")
         if not clean:
             continue
         if clean not in seen:
