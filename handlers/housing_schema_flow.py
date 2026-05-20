@@ -481,6 +481,13 @@ async def hs_wa_skip(callback: CallbackQuery, state: FSMContext):
 async def hs_tg_created(callback: CallbackQuery, state: FSMContext):
     slug = callback.data.split(":", 2)[2]
     section_name, _, step_idx, payload, _ = await _get_hs(state)
+    if not section_name:
+        section_name = HOUSING_SLUGS.get(slug, "")
+        if not section_name:
+            await callback.answer("Сессия устарела. Начните публикацию заново.", show_alert=True)
+            await state.clear()
+            return
+        await state.update_data(hs_section_name=section_name)
 
     uname = _username_value(callback.from_user)
     if not uname:
