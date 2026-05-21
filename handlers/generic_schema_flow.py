@@ -927,6 +927,13 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
             return
 
+        if not payload.get("telegram"):
+            uname = _username_value(callback.from_user)
+            if uname:
+                payload = dict(payload)
+                payload["telegram"] = uname
+                await state.update_data(gs_payload=payload)
+
         # Final publish-boundary validation.
         # FSM/input validation is not enough: stale or corrupted state must not publish.
         validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
