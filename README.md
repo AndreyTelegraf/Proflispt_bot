@@ -1,4 +1,4 @@
-# Work in Portugal Bot
+# Proflistpt Bot
 
 Telegram бот для публикации объявлений о работе в Португалии.
 

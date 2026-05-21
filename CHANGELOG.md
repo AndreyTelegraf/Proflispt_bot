@@ -1,4 +1,4 @@
-# Changelog - Work in Portugal Bot
+# Changelog - Proflistpt Bot
 
 ## Версия: Стабильная (2025-09-04)
 

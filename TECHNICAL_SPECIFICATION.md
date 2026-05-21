@@ -1,8 +1,8 @@
-# Техническое задание: Telegram Bot "Work in Portugal"
+# Техническое задание: Telegram Bot "Proflistpt"
 
 ## 📋 Общее описание
 
-**Название**: Work in Portugal Bot  
+**Название**: Proflistpt Bot  
 **Username**: @workinportugal_bot  
 **Назначение**: Бот для публикации объявлений о поиске и предложении работы в Португалии
 
@@ -269,7 +269,7 @@ AUTO_EXPIRE_DAYS=30
 
 ### Главное меню
 ```
-🤖 Work in Portugal Bot
+🤖 Proflistpt Bot
 
 Выберите действие:
 
