@@ -927,6 +927,27 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
             await callback.answer()
             return
 
+        # Final publish-boundary validation.
+        # FSM/input validation is not enough: stale or corrupted state must not publish.
+        phone_main = str(payload.get("phone_main") or "").strip()
+        if not _valid_pt_mobile(phone_main):
+            await callback.answer("Сессия повреждена: не указан корректный телефон.", show_alert=True)
+            return
+
+        required_fields = {
+            "geo_tags": "город",
+            "description": "описание",
+            "telegram": "Telegram",
+            "contact_name": "контактное имя",
+        }
+        missing = [label for key, label in required_fields.items() if not str(payload.get(key) or "").strip()]
+        if missing:
+            await callback.answer(
+                "Сессия повреждена: не заполнено поле " + ", ".join(missing) + ".",
+                show_alert=True,
+            )
+            return
+
         registry = load_sections_registry()
         channel_id = int(registry.channel_id)
         topic_id = int(registry.get_topic_id(section_name))
