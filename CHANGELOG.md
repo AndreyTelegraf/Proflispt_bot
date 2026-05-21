@@ -76,7 +76,7 @@
 ### 📁 Структура проекта
 
 ```
-workinportugal_bot/
+proflistpt_bot/
 ├── handlers/
 │   ├── my_postings.py          # Основные изменения
 │   └── ...

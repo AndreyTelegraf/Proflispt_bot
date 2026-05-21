@@ -33,7 +33,7 @@
 
 ### Структура проекта
 ```
-workinportugal_bot/
+proflistpt_bot/
 ├── main.py                 # Точка входа
 ├── config.py              # Конфигурация
 ├── database.py            # Работа с БД
