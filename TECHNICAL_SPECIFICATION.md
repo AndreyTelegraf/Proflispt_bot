@@ -3,7 +3,7 @@
 ## 📋 Общее описание
 
 **Название**: Proflistpt Bot  
-**Username**: @workinportugal_bot  
+**Username**: @proflistpt_bot  
 **Назначение**: Бот для публикации объявлений о поиске и предложении работы в Португалии
 
 ## 🎯 Основные функции
@@ -197,7 +197,7 @@ CREATE TABLE drafts (
 ```env
 # Bot Configuration
 BOT_TOKEN=your_bot_token_here
-BOT_USERNAME=workinportugal_bot
+BOT_USERNAME=proflistpt_bot
 
 # Channel Configuration
 CHANNEL_ID=-1001234567890
