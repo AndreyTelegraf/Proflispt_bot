@@ -751,6 +751,7 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
         if uname:
             payload = dict(payload)
             payload["telegram"] = uname
+            await state.update_data(hs_payload=payload)
 
     # Final publish-boundary validation.
     # FSM/input validation is not enough: stale or corrupted state must not publish.
