@@ -24,16 +24,18 @@ git grep -n -I -E "workinportugal|Work in Portugal|workinportugal_bot|workinport
   | grep -v "^scripts/refactor_legacy_naming_audit\.sh:" \
   > "$ALL" || true
 
+grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)|workinportugal_bot_stable_|telegram_workinportugal_bot\.tar\.gz" "$ALL" \
+  | sort -u > "$HISTORICAL" || true
+
 grep -v "^scripts/refactor_legacy_naming_audit\.sh:" "$ALL" \
+  | grep -v -F -x -f "$HISTORICAL" \
   | grep -E "^(config\.py|main\.py|database\.py|.*\.service|.*\.sh|handlers/|services/)" \
   | sort -u > "$RUNTIME" || true
 
 grep -v "^scripts/refactor_legacy_naming_audit\.sh:" "$ALL" \
+  | grep -v -F -x -f "$HISTORICAL" \
   | grep -E "(\.md:|README|TECHNICAL|CHANGELOG|PREMIUM|ADMIN|BAN|CLEANUP|docs/)" \
   | sort -u > "$USER_FACING" || true
-
-grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)|workinportugal_bot_stable_|telegram_workinportugal_bot\.tar\.gz" "$ALL" \
-  | sort -u > "$HISTORICAL" || true
 
 cat "$ALL" | sort -u > "$REVIEW"
 
