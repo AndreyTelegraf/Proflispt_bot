@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import html
 import json
 import logging
 import re
@@ -22,7 +21,7 @@ from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     validate_publish_payload,
 )
-from services.geo import normalize_geo_tags_json, render_geo_tags
+from services.geo import normalize_geo_tags_json
 from services.catalog_listing_renderer import render_catalog_listing_html
 
 logger = logging.getLogger(__name__)
