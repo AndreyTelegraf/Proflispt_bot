@@ -25,13 +25,19 @@ cat "$FORBIDDEN"
 echo
 echo "===== IMPORT SMOKE ====="
 venv/bin/python - <<'PY'
-from services.catalog_modes import MODE_TO_SECTION_NAME, get_catalog_mode_slugs, get_catalog_section_name
+from services.catalog_modes import (
+    MODE_TO_SECTION_NAME,
+    get_catalog_mode_slugs,
+    get_catalog_section_name,
+    get_catalog_topic_id,
+)
 
 assert isinstance(MODE_TO_SECTION_NAME, dict)
 assert len(MODE_TO_SECTION_NAME) >= 30
 assert get_catalog_mode_slugs() == set(MODE_TO_SECTION_NAME)
 assert get_catalog_section_name("realtors") == MODE_TO_SECTION_NAME["realtors"]
 assert get_catalog_section_name("__unknown__") is None
+assert get_catalog_topic_id("__unknown__") is None
 print("catalog_modes_import_smoke_ok", len(MODE_TO_SECTION_NAME))
 PY
 
