@@ -29,7 +29,7 @@ grep -E "^(config\.py|main\.py|database\.py|.*\.service|.*\.sh|handlers/|service
 grep -E "(\.md:|README|TECHNICAL|CHANGELOG|PREMIUM|ADMIN|BAN|CLEANUP|docs/)" "$ALL" \
   | sort -u > "$USER_FACING" || true
 
-grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)" "$ALL" \
+grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)|workinportugal_bot_stable_|telegram_workinportugal_bot\.tar\.gz" "$ALL" \
   | sort -u > "$HISTORICAL" || true
 
 cat "$ALL" | sort -u > "$REVIEW"
