@@ -134,7 +134,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         # Format the post text
         if post.get('mode') == 'restaurants':
             import json
-            from handlers.restaurants_schema import _render_html
+            from services.catalog_listing_renderer import render_catalog_listing_html
 
             cities_raw = post.get('cities')
             geo_tags = ""
@@ -184,7 +184,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 "contact_name": post.get("name", ""),
                 "review_links": review_links,
             }
-            post_text = _render_html(restaurants_payload)
+            post_text = render_catalog_listing_html(restaurants_payload)
         elif post.get('mode') in ('job_seeker', 'job_offer'):
             post_text = format_premium_posting_html(post)
         elif post.get('mode') in ('housing_wanted', 'owner_real_estate'):
