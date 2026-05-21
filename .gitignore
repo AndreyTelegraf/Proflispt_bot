@@ -25,3 +25,12 @@ opt/
 config/fsm_schemas/*.bak_*
 handlers/*.bak_*
 main.py.bak*
+
+# Runtime/local artifacts
+.env.*
+.env.copied_from_live_*
+data/
+*.sqlite
+*.pre_*.bak
+*.tar.gz
+bot.log
