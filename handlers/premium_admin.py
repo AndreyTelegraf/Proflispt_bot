@@ -134,7 +134,6 @@ async def admin_approve_premium(callback: CallbackQuery):
         # Format the post text
         if post.get('mode') == 'restaurants':
             import json
-            from services.catalog_listing_renderer import render_catalog_listing_html
 
             cities_raw = post.get('cities')
             geo_tags = ""
@@ -226,7 +225,6 @@ async def admin_approve_premium(callback: CallbackQuery):
             post_text = _rv_render_html_from_post(post)
         else:
             from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
-            from services.catalog_listing_renderer import render_catalog_listing_html
             import json as _json
             if post['mode'] in _GS_SLUGS:
                 cities_raw = post.get('cities')
