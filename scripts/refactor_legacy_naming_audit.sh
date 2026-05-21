@@ -21,6 +21,7 @@ echo "$OUT"
 git grep -n -I -E "workinportugal|Work in Portugal|workinportugal_bot|workinportugal-bot|proflispt|Proflispt" \
   -- \
   "*.py" "*.json" "*.md" "*.sh" "*.service" \
+  | grep -v "^scripts/refactor_legacy_naming_audit\.sh:" \
   > "$ALL" || true
 
 grep -v "^scripts/refactor_legacy_naming_audit\.sh:" "$ALL" \
