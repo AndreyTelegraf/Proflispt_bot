@@ -7,7 +7,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
 from services.formatting import format_premium_posting, format_premium_posting_html
-from services.catalog_listing_renderer import render_catalog_listing_html
+from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
 
 logger = logging.getLogger(__name__)
 
@@ -136,54 +136,14 @@ async def admin_approve_premium(callback: CallbackQuery):
         if post.get('mode') == 'restaurants':
             import json
 
-            cities_raw = post.get('cities')
-            geo_tags = ""
-            if cities_raw:
-                try:
-                    cities = json.loads(cities_raw)
-                    if isinstance(cities, list):
-                        geo_tags = " ".join(
-                            f"#{str(x).strip().lstrip('#').lower()}"
-                            for x in cities
-                            if str(x).strip()
-                        )
-                    elif isinstance(cities, str):
-                        clean = cities.strip()
-                        geo_tags = clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
-                    else:
-                        clean = str(cities_raw).strip()
-                        geo_tags = clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
-                except Exception:
-                    raw = str(cities_raw).strip()
-                    if raw.startswith("[") and raw.endswith("]"):
-                        raw = raw[1:-1].strip()
-                    raw = raw.strip().strip("'").strip('"').strip()
-                    if raw:
-                        parts = [p.strip().strip("'").strip('"') for p in raw.split(",") if p.strip()]
-                        geo_tags = " ".join(
-                            f"#{p.lstrip('#').lower()}" for p in parts if p
-                        )
-
-            import json
-
-            review_links = post.get("review_links") or ""
-            if not review_links and post.get("admin_notes"):
+            restaurants_payload = build_catalog_listing_payload_from_premium_post(post)
+            if not restaurants_payload.get("review_links") and post.get("admin_notes"):
                 try:
                     notes = json.loads(post["admin_notes"])
-                    review_links = notes.get("review_links", "")
+                    restaurants_payload["review_links"] = notes.get("review_links", "")
                 except Exception:
                     pass
 
-            restaurants_payload = {
-                "geo_tags": geo_tags,
-                "description": post.get("description", ""),
-                "social_links": post.get("social_media", ""),
-                "telegram": post.get("telegram_username", ""),
-                "phone_main": post.get("phone_main", ""),
-                "phone_whatsapp": post.get("phone_whatsapp", ""),
-                "contact_name": post.get("name", ""),
-                "review_links": review_links,
-            }
             post_text = render_catalog_listing_html(restaurants_payload)
         elif post.get('mode') in ('job_seeker', 'job_offer'):
             post_text = format_premium_posting_html(post)
@@ -226,43 +186,8 @@ async def admin_approve_premium(callback: CallbackQuery):
             post_text = _rv_render_html_from_post(post)
         else:
             from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
-            import json as _json
             if post['mode'] in _GS_SLUGS:
-                cities_raw = post.get('cities')
-                geo_tags = ""
-                if cities_raw:
-                    try:
-                        _cities = _json.loads(cities_raw)
-                        if isinstance(_cities, list):
-                            geo_tags = " ".join(
-                                f"#{str(x).strip().lstrip('#').lower()}"
-                                for x in _cities
-                                if str(x).strip()
-                            )
-                        elif isinstance(_cities, str):
-                            _clean = _cities.strip()
-                            geo_tags = _clean if _clean.startswith("#") else f"#{_clean.lstrip('#').lower()}"
-                        else:
-                            _clean = str(cities_raw).strip()
-                            geo_tags = _clean if _clean.startswith("#") else f"#{_clean.lstrip('#').lower()}"
-                    except Exception:
-                        _raw = str(cities_raw).strip()
-                        if _raw.startswith("[") and _raw.endswith("]"):
-                            _raw = _raw[1:-1].strip()
-                        _raw = _raw.strip().strip("'").strip('"').strip()
-                        if _raw:
-                            _parts = [p.strip().strip("'").strip('"') for p in _raw.split(",") if p.strip()]
-                            geo_tags = " ".join(f"#{p.lstrip('#').lower()}" for p in _parts if p)
-                _generic_payload = {
-                    "geo_tags": geo_tags,
-                    "description": post.get("description", ""),
-                    "social_links": post.get("social_media", ""),
-                    "telegram": post.get("telegram_username", ""),
-                    "phone_main": post.get("phone_main", ""),
-                    "phone_whatsapp": post.get("phone_whatsapp", ""),
-                    "contact_name": post.get("name", ""),
-                    "review_links": post.get("review_links") or "",
-                }
+                _generic_payload = build_catalog_listing_payload_from_premium_post(post)
                 post_text = render_catalog_listing_html(_generic_payload)
             else:
                 logger.warning(

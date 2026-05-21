@@ -1,9 +1,54 @@
 """Shared catalog listing HTML renderer."""
 
 import html
+import json
 
 from database import db
 from services.geo import render_geo_tags
+
+
+def normalize_catalog_geo_tags_from_db(value: object) -> str:
+    if not value:
+        return ""
+
+    cities = value
+    if isinstance(value, str):
+        try:
+            cities = json.loads(value)
+        except Exception:
+            raw = value.strip()
+            if raw.startswith("[") and raw.endswith("]"):
+                raw = raw[1:-1].strip()
+            raw = raw.strip().strip("'").strip('"').strip()
+            parts = [p.strip().strip("'").strip('"') for p in raw.split(",") if p.strip()]
+            return " ".join(f"#{p.lstrip('#').lower()}" for p in parts if p)
+
+    if isinstance(cities, list):
+        return " ".join(
+            f"#{str(x).strip().lstrip('#').lower()}"
+            for x in cities
+            if str(x).strip()
+        )
+
+    if isinstance(cities, str):
+        clean = cities.strip()
+        return clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
+
+    clean = str(value).strip()
+    return clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
+
+
+def build_catalog_listing_payload_from_premium_post(post: dict) -> dict:
+    return {
+        "geo_tags": normalize_catalog_geo_tags_from_db(post.get("cities")),
+        "description": post.get("description", ""),
+        "social_links": post.get("social_media", ""),
+        "telegram": post.get("telegram_username", ""),
+        "phone_main": post.get("phone_main", ""),
+        "phone_whatsapp": post.get("phone_whatsapp", ""),
+        "contact_name": post.get("name", ""),
+        "review_links": post.get("review_links") or "",
+    }
 
 
 def _norm(value: object) -> str:
