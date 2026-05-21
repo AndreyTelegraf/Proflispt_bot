@@ -70,6 +70,10 @@ echo "===== PYTHON LEGACY NAMING AUDIT ====="
 scripts/refactor_python_legacy_docstring_audit.sh | tee "$OUT/python_legacy_docstring_run.txt"
 
 echo
+echo "===== FULL LEGACY NAMING AUDIT ====="
+scripts/refactor_legacy_naming_audit.sh | tee "$OUT/legacy_naming_run.txt"
+
+echo
 echo "===== SAFETY CHECKS ====="
 if grep -qE "^./venv/|^venv/" "$RUNTIME" "$BACKUPS_PROTECTED" "$BACKUPS_REVIEW" "$BACKUPS_LOW" "$DIAG_PROTECTED" "$DIAG_REVIEW" "$DIAG_LOW"; then
   echo "ERROR: venv path detected" >&2
