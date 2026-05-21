@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import functools
-import html
 import json
 import logging
 import re
@@ -23,7 +22,7 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
-from services.geo import normalize_geo_tags_json, render_geo_tags
+from services.geo import normalize_geo_tags_json
 from services.catalog_listing_renderer import render_catalog_listing_html
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
