@@ -66,6 +66,10 @@ echo "===== CATALOG RENDERER PARITY AUDIT ====="
 scripts/refactor_catalog_renderer_parity_audit.sh | tee "$OUT/catalog_renderer_parity_run.txt"
 
 echo
+echo "===== PYTHON LEGACY NAMING AUDIT ====="
+scripts/refactor_python_legacy_docstring_audit.sh | tee "$OUT/python_legacy_docstring_run.txt"
+
+echo
 echo "===== SAFETY CHECKS ====="
 if grep -qE "^./venv/|^venv/" "$RUNTIME" "$BACKUPS_PROTECTED" "$BACKUPS_REVIEW" "$BACKUPS_LOW" "$DIAG_PROTECTED" "$DIAG_REVIEW" "$DIAG_LOW"; then
   echo "ERROR: venv path detected" >&2
