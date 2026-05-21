@@ -1068,6 +1068,13 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
 
     first = media[0]
 
+    if not payload.get("telegram"):
+        uname = _username_value(callback.from_user)
+        if uname:
+            payload = dict(payload)
+            payload["telegram"] = uname
+            await state.update_data(gs_payload=payload)
+
     # Final premium-submit boundary validation.
     # FSM/input validation is not enough: stale or corrupted state must not create premium posts.
     validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
