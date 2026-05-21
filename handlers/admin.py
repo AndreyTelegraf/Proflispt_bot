@@ -146,8 +146,8 @@ async def ban_user_command(message: Message, state: FSMContext):
             admin_user_id = admin_user['id']
         
         success = db.ban_user(
-            user_id=target_user['id'],
-            banned_by=admin_user_id,
+            user_id=target_user_id,
+            banned_by=message.from_user.id,
             reason=reason,
             ban_type=ban_type,
             expires_at=expires_at
@@ -216,12 +216,12 @@ async def unban_user_command(message: Message):
         await message.answer(f"Пользователь с ID {target_user_id} не найден в базе данных.")
         return
 
-    was_user_banned, _ = db.is_user_banned(target_user['id'])
+    was_user_banned, _ = db.is_user_banned(target_user_id)
     user_unbanned = False
     identity_unbanned = False
 
     if was_user_banned:
-        user_unbanned = db.unban_user(target_user['id'], admin_user_id)
+        user_unbanned = db.unban_user(target_user_id, message.from_user.id)
 
     username = target_user.get("username")
     if username:
