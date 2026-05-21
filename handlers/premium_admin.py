@@ -225,7 +225,8 @@ async def admin_approve_premium(callback: CallbackQuery):
             from handlers.reviews_schema_flow import _rv_render_html_from_post
             post_text = _rv_render_html_from_post(post)
         else:
-            from handlers.generic_schema_flow import _render_html as _gs_render_html, SLUG_TO_SECTION as _GS_SLUGS
+            from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
+            from services.catalog_listing_renderer import render_catalog_listing_html
             import json as _json
             if post['mode'] in _GS_SLUGS:
                 cities_raw = post.get('cities')
@@ -263,7 +264,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                     "contact_name": post.get("name", ""),
                     "review_links": post.get("review_links") or "",
                 }
-                post_text = _gs_render_html(_generic_payload)
+                post_text = render_catalog_listing_html(_generic_payload)
             else:
                 logger.warning(
                     "Unknown mode %r for premium post #%s, falling back to format_premium_posting_html",
