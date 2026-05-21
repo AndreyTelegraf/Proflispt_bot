@@ -168,9 +168,6 @@ def _validate_description_text(text: str) -> tuple[bool, str | None]:
     return validate_description_text(text)
 
 
-def _render_html(payload: dict) -> str:
-    return render_catalog_listing_html(payload)
-
 
 def _normalize_geo(value) -> str:
     return normalize_geo_tags_json(value)
@@ -352,7 +349,7 @@ async def _advance(
 
     if next_index >= len(schema.steps):
         await state.set_state(GS_CONFIRM)
-        text = _render_html(payload)
+        text = render_catalog_listing_html(payload)
         kb = _preview_kb(slug)
         if is_message:
             await target.answer(text, reply_markup=kb, parse_mode="HTML", disable_web_page_preview=True)
@@ -373,7 +370,7 @@ async def _notify_admin(bot, post_id: int, payload: dict, media_list: list, sect
     from aiogram.types import InputMediaPhoto, InputMediaVideo
 
     admin_chat_id = 336224597
-    post_text = _render_html(payload)
+    post_text = render_catalog_listing_html(payload)
 
     group = []
     for idx, item in enumerate(media_list[:10]):
@@ -873,7 +870,7 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
 
         published = await callback.bot.send_message(
             chat_id=channel_id,
-            text=_render_html(payload),
+            text=render_catalog_listing_html(payload),
             message_thread_id=topic_id,
             disable_web_page_preview=True,
             parse_mode="HTML",
@@ -1065,7 +1062,7 @@ async def gs_media_cancel(callback: CallbackQuery, state: FSMContext):
     await state.update_data(gs_media=[], gs_media_status_id=None)
     await state.set_state(GS_CONFIRM)
     await callback.message.edit_text(
-        _render_html(payload),
+        render_catalog_listing_html(payload),
         reply_markup=_preview_kb(slug),
         parse_mode="HTML",
         disable_web_page_preview=True,
