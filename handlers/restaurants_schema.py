@@ -1361,6 +1361,11 @@ async def restaurants_premium_submit(callback: CallbackQuery, state: FSMContext)
         return
 
     payload = dict(data.get("restaurants_schema_payload", {}))
+    if not payload.get("telegram"):
+        username_value = _username_value(callback.from_user)
+        if username_value:
+            payload["telegram"] = username_value
+            await state.update_data(restaurants_schema_payload=payload)
     media_list = list(data.get("restaurants_premium_media", []))
 
     if not media_list:
@@ -1368,6 +1373,13 @@ async def restaurants_premium_submit(callback: CallbackQuery, state: FSMContext)
         return
 
     first_media = media_list[0]
+
+    # Final premium-submit boundary validation.
+    # FSM/input validation is not enough: stale or corrupted state must not create premium posts.
+    validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+    if not validation.ok:
+        await callback.answer(validation.message, show_alert=True)
+        return
 
     try:
         user_db_id = db.create_user(
@@ -1419,7 +1431,12 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
         await callback.answer("Сессия публикации не найдена.")
         return
 
-    payload = data.get("restaurants_schema_payload", {})
+    payload = dict(data.get("restaurants_schema_payload", {}))
+    if not payload.get("telegram"):
+        username_value = _username_value(callback.from_user)
+        if username_value:
+            payload["telegram"] = username_value
+            await state.update_data(restaurants_schema_payload=payload)
 
     if data.get("restaurants_premium_media"):
         await callback.answer(

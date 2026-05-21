@@ -1068,6 +1068,13 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
 
     first = media[0]
 
+    # Final premium-submit boundary validation.
+    # FSM/input validation is not enough: stale or corrupted state must not create premium posts.
+    validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+    if not validation.ok:
+        await callback.answer(validation.message, show_alert=True)
+        return
+
     try:
         user_db_id = db.create_user(
             telegram_id=callback.from_user.id,
