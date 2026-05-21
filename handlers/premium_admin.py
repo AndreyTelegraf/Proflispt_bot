@@ -8,6 +8,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBut
 from database import db
 from services.formatting import format_premium_posting, format_premium_posting_html
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
+from services.catalog_modes import get_catalog_mode_slugs, get_catalog_section_name
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +186,6 @@ async def admin_approve_premium(callback: CallbackQuery):
             from handlers.reviews_schema_flow import _rv_render_html_from_post
             post_text = _rv_render_html_from_post(post)
         else:
-            from services.catalog_modes import get_catalog_mode_slugs
             if post['mode'] in get_catalog_mode_slugs():
                 _generic_payload = build_catalog_listing_payload_from_premium_post(post)
                 post_text = render_catalog_listing_html(_generic_payload)
@@ -229,7 +229,6 @@ async def admin_approve_premium(callback: CallbackQuery):
             topic_id = 12860
         else:
             from services.sections_registry import load_sections_registry
-            from services.catalog_modes import get_catalog_section_name
             _section_name = get_catalog_section_name(post['mode'])
             if _section_name:
                 registry = load_sections_registry()
