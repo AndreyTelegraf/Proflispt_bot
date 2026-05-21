@@ -9,6 +9,16 @@ def get_catalog_section_name(mode: str) -> str | None:
     return MODE_TO_SECTION_NAME.get(mode)
 
 
+def get_catalog_topic_id(mode: str) -> int | None:
+    section_name = get_catalog_section_name(mode)
+    if not section_name:
+        return None
+
+    from services.sections_registry import load_sections_registry
+    registry = load_sections_registry()
+    return int(registry.get_topic_id(section_name))
+
+
 MODE_TO_SECTION_NAME = {
     "job_seeker":           "Ищу работу",
     "job_offer":            "Предлагаю работу",

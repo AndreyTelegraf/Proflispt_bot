@@ -8,7 +8,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardBut
 from database import db
 from services.formatting import format_premium_posting, format_premium_posting_html
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
-from services.catalog_modes import get_catalog_mode_slugs, get_catalog_section_name
+from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
 
 logger = logging.getLogger(__name__)
 
@@ -228,11 +228,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         elif post['mode'] == 'reviews':
             topic_id = 12860
         else:
-            from services.sections_registry import load_sections_registry
-            _section_name = get_catalog_section_name(post['mode'])
-            if _section_name:
-                registry = load_sections_registry()
-                topic_id = int(registry.get_topic_id(_section_name))
+            topic_id = get_catalog_topic_id(post['mode'])
         publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID
         
         if post.get("action_type") == "repost" and repost_old_chat_id:
