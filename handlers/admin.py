@@ -193,16 +193,31 @@ async def unban_user_command(message: Message):
 
     if target_identifier.startswith("@"):
         username = target_identifier.lstrip("@")
+        target_user = db.get_user_by_username(username)
+
+        user_unbanned = False
+        identity_unbanned = False
+
+        if target_user:
+            was_user_banned, _ = db.is_user_banned(target_user["telegram_id"])
+            if was_user_banned:
+                user_unbanned = db.unban_user(target_user["telegram_id"], message.from_user.id)
+
         was_identity_banned, _ = db.is_identity_banned("username", username)
-        if not was_identity_banned:
-            await message.answer(f"Активный username-бан для @{username} не найден.")
+        if was_identity_banned:
+            identity_unbanned = db.unban_identity("username", username)
+
+        if user_unbanned or identity_unbanned:
+            parts = []
+            if user_unbanned:
+                parts.append("Telegram ID")
+            if identity_unbanned:
+                parts.append(f"username @{username}")
+            joined = ", ".join(parts)
+            await message.answer(f"Пользователь @{username} разбанен: {joined}.")
             return
 
-        success = db.unban_identity("username", username)
-        if success:
-            await message.answer(f"Пользователь @{username} разбанен по username.")
-        else:
-            await message.answer(f"Не удалось снять username-бан для @{username}.")
+        await message.answer(f"Активный бан для @{username} не найден.")
         return
 
     try:
