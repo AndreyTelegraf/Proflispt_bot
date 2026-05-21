@@ -1,4 +1,4 @@
-"""Posting handlers for Work in Portugal Bot."""
+"""Posting handlers for Proflistpt Bot."""
 
 import logging
 from aiogram import Router, F

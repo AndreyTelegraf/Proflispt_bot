@@ -1,4 +1,4 @@
-"""Utility functions for Work in Portugal Bot."""
+"""Utility functions for Proflistpt Bot."""
 
 import re
 import unicodedata

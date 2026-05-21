@@ -1,4 +1,4 @@
-"""Configuration module for Work in Portugal Bot."""
+"""Configuration module for Proflistpt Bot."""
 
 import os
 from dotenv import load_dotenv

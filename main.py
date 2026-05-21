@@ -1,4 +1,4 @@
-"""Main entry point for Work in Portugal Bot."""
+"""Main entry point for Proflistpt Bot."""
 
 import asyncio
 import logging
@@ -842,7 +842,7 @@ async def main():
             dp.include_router(my_postings_router)
             dp.include_router(fallback_router)
 
-            logger.info("Work in Portugal Bot started successfully")
+            logger.info("Proflistpt Bot started successfully")
 
             await start_scheduler(bot)
             logger.info("Cleanup scheduler started")

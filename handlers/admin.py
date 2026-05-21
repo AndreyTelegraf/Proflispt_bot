@@ -1,4 +1,4 @@
-"""Admin handlers for Work in Portugal Bot."""
+"""Admin handlers for Proflistpt Bot."""
 
 import logging
 from datetime import datetime, timedelta

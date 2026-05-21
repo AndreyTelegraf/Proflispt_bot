@@ -1,4 +1,4 @@
-"""Validation service for Work in Portugal Bot."""
+"""Validation service for Proflistpt Bot."""
 
 import re
 from typing import List, Tuple

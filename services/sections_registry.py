@@ -1,4 +1,4 @@
-"""Sections registry loader for Work in Portugal Bot."""
+"""Sections registry loader for Proflistpt Bot."""
 
 from __future__ import annotations
 

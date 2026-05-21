@@ -1,1 +1,1 @@
-"""Services package for Work in Portugal Bot."""
+"""Services package for Proflistpt Bot."""

@@ -1,5 +1,5 @@
 # BACK_ARROW_AND_RESIDENCY_FIX_APPLIED
-"""Main keyboards for Work in Portugal Bot."""
+"""Main keyboards for Proflistpt Bot."""
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder

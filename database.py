@@ -1,4 +1,4 @@
-"""Database module for Work in Portugal Bot."""
+"""Database module for Proflistpt Bot."""
 
 import sqlite3
 import re

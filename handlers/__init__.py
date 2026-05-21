@@ -1,1 +1,1 @@
-"""Handlers package for Work in Portugal Bot."""
+"""Handlers package for Proflistpt Bot."""

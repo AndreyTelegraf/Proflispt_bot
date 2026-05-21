@@ -1,1 +1,1 @@
-"""Keyboards package for Work in Portugal Bot."""
+"""Keyboards package for Proflistpt Bot."""

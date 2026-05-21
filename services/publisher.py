@@ -1,4 +1,4 @@
-"""Publisher service for Work in Portugal Bot."""
+"""Publisher service for Proflistpt Bot."""
 
 import logging
 from typing import Optional

@@ -1,1 +1,1 @@
-"""Models package for Work in Portugal Bot."""
+"""Models package for Proflistpt Bot."""

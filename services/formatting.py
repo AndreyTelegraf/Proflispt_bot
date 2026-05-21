@@ -1,4 +1,4 @@
-"""Formatting service for Work in Portugal Bot."""
+"""Formatting service for Proflistpt Bot."""
 
 from typing import List
 from models.job_posting import JobPosting

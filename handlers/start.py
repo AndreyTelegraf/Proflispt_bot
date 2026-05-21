@@ -1,4 +1,4 @@
-"""Start handler for Work in Portugal Bot."""
+"""Start handler for Proflistpt Bot."""
 
 import logging
 

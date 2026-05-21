@@ -1,4 +1,4 @@
-"""Premium posting handlers for Work in Portugal Bot."""
+"""Premium posting handlers for Proflistpt Bot."""
 
 import logging
 from aiogram import Router, F
