@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Work in Portugal Bot Startup Script
-echo "🚀 Starting Work in Portugal Bot..."
+# Proflistpt Bot Startup Script
+echo "Starting Proflistpt Bot..."
 
 # Change to bot directory
 cd /home/bot/workinportugal_bot

@@ -1,5 +1,5 @@
 [Unit]
-Description=Work in Portugal Telegram Bot
+Description=Proflistpt Telegram Bot
 After=network.target
 
 [Service]

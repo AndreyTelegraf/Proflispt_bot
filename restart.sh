@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Work in Portugal Bot Restart Script
-echo "🔄 Restarting Work in Portugal Bot..."
+# Proflistpt Bot Restart Script
+echo "Restarting Proflistpt Bot..."
 
 # Use the utility script for restart
 python3 bot_utils.py restart
