@@ -139,7 +139,7 @@ async def _premium_notify_admin(bot, premium_post_id: int, payload: dict, media_
 
     admin_chat_id = 336224597
 
-    post_text = _render_html(payload)
+    post_text = render_catalog_listing_html(payload)
 
     group = []
     for idx, item in enumerate(media_list[:10]):
@@ -321,8 +321,6 @@ def _confirmation_text(payload: dict) -> str:
     return render_catalog_listing_html(payload)
 
 
-def _render_html(payload: dict) -> str:
-    return render_catalog_listing_html(payload)
 
 
 def _username_value(user):
@@ -1403,7 +1401,7 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
 
         published_message = await callback.bot.send_message(
             chat_id=channel_id,
-            text=_render_html(payload),
+            text=render_catalog_listing_html(payload),
             message_thread_id=topic_id,
             disable_web_page_preview=True,
             parse_mode="HTML")
