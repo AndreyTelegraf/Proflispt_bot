@@ -22,6 +22,7 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
+from services.catalog_modes import MODE_TO_SECTION_NAME as SLUG_TO_SECTION
 from services.geo import normalize_geo_tags_json
 from services.catalog_listing_renderer import render_catalog_listing_html
 from services.listing_validation import (
@@ -51,42 +52,6 @@ def _resolve_prompt(step, slug: str) -> str:
 
 
 # ── slug ↔ section name ───────────────────────────────────────────────────────
-
-SLUG_TO_SECTION: dict[str, str] = {
-    "job_seeker":           "Ищу работу",
-    "job_offer":            "Предлагаю работу",
-    "realtors":             "Риелторы",
-    "construction_repair":  "Строительство и ремонт",
-    "home_repair":          "Бытовой ремонт и обустройство",
-    "device_repair":        "Ремонт техники",
-    "furniture":            "Мебель изготовление",
-    "cleaning":             "Клининг",
-    "home_staff":           "Домашний персонал",
-    "tailoring":            "Пошив одежды",
-    "cooking":              "Кулинария",
-    "passenger_transport":  "Пассажирские перевозки",
-    "cargo_transport":      "Грузовые перевозки",
-    "car_rental":           "Прокат авто",
-    "auto_service":         "Автосервис",
-    "translators":          "Переводчики",
-    "residence_lawyers":    "ВНЖ/Юристы",
-    "marketing":            "Маркетинг",
-    "it_smm":               "IT/SMM",
-    "money_credit":         "Деньги/кредиты",
-    "insurance":            "Страхование",
-    "accountants":          "Бухгалтеры",
-    "printing":             "Полиграфия",
-    "health":               "Здоровье",
-    "medicine":             "Медицина",
-    "beauty":               "Красота",
-    "teaching":             "Преподавание",
-    "sport":                "Спорт",
-    "animals":              "Животные",
-    "leisure":              "Отдых",
-    "tourism":              "Туризм",
-    "photo_video":          "Фото/видео",
-    "art":                  "Искусство",
-}
 
 # ── FSM state names ───────────────────────────────────────────────────────────
 
