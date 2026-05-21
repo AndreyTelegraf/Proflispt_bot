@@ -18,6 +18,10 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
+from services.listing_validation import (
+    STANDARD_LISTING_REQUIRED_FIELDS,
+    validate_publish_payload,
+)
 from services.geo import normalize_geo_tags_json, render_geo_tags
 
 logger = logging.getLogger(__name__)
@@ -1457,6 +1461,13 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
             b.adjust(1)
             await callback.message.edit_text(limit_message, reply_markup=b.as_markup())
             await callback.answer()
+            return
+
+        # Final publish-boundary validation.
+        # FSM/input validation is not enough: stale or corrupted state must not publish.
+        validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+        if not validation.ok:
+            await callback.answer(validation.message, show_alert=True)
             return
 
         registry = load_sections_registry()
