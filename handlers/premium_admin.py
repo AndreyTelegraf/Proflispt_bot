@@ -185,8 +185,8 @@ async def admin_approve_premium(callback: CallbackQuery):
             from handlers.reviews_schema_flow import _rv_render_html_from_post
             post_text = _rv_render_html_from_post(post)
         else:
-            from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
-            if post['mode'] in _GS_SLUGS:
+            from services.catalog_modes import get_catalog_mode_slugs
+            if post['mode'] in get_catalog_mode_slugs():
                 _generic_payload = build_catalog_listing_payload_from_premium_post(post)
                 post_text = render_catalog_listing_html(_generic_payload)
             else:
@@ -229,8 +229,8 @@ async def admin_approve_premium(callback: CallbackQuery):
             topic_id = 12860
         else:
             from services.sections_registry import load_sections_registry
-            from handlers.generic_schema_flow import SLUG_TO_SECTION as _GS_SLUGS
-            _section_name = _GS_SLUGS.get(post['mode'])
+            from services.catalog_modes import get_catalog_section_name
+            _section_name = get_catalog_section_name(post['mode'])
             if _section_name:
                 registry = load_sections_registry()
                 topic_id = int(registry.get_topic_id(_section_name))
