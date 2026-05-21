@@ -24,6 +24,11 @@ from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.geo import normalize_geo_tags_json, render_geo_tags
+from services.listing_validation import (
+    STANDARD_LISTING_REQUIRED_FIELDS,
+    is_valid_pt_mobile,
+    validate_publish_payload,
+)
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -102,12 +107,7 @@ def _username_value(user) -> str | None:
 
 
 def _valid_pt_mobile(value: str) -> bool:
-    v = str(value or "").strip()
-    if len(v) != 13 or not v.startswith("+351"):
-        return False
-    if not v[4:].isdigit():
-        return False
-    return v[4:6] in {"91", "92", "93", "96"}
+    return is_valid_pt_mobile(value)
 
 
 def _norm(value) -> str:
@@ -929,23 +929,9 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
 
         # Final publish-boundary validation.
         # FSM/input validation is not enough: stale or corrupted state must not publish.
-        phone_main = str(payload.get("phone_main") or "").strip()
-        if not _valid_pt_mobile(phone_main):
-            await callback.answer("Сессия повреждена: не указан корректный телефон.", show_alert=True)
-            return
-
-        required_fields = {
-            "geo_tags": "город",
-            "description": "описание",
-            "telegram": "Telegram",
-            "contact_name": "контактное имя",
-        }
-        missing = [label for key, label in required_fields.items() if not str(payload.get(key) or "").strip()]
-        if missing:
-            await callback.answer(
-                "Сессия повреждена: не заполнено поле " + ", ".join(missing) + ".",
-                show_alert=True,
-            )
+        validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+        if not validation.ok:
+            await callback.answer(validation.message, show_alert=True)
             return
 
         registry = load_sections_registry()
