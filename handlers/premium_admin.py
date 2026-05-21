@@ -7,6 +7,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
 from services.formatting import format_premium_posting, format_premium_posting_html
+from services.catalog_listing_renderer import render_catalog_listing_html
 
 logger = logging.getLogger(__name__)
 
