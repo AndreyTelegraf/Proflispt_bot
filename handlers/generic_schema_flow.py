@@ -24,6 +24,7 @@ from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.geo import normalize_geo_tags_json, render_geo_tags
+from services.catalog_listing_renderer import render_catalog_listing_html
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     is_valid_pt_mobile,
@@ -169,81 +170,7 @@ def _validate_description_text(text: str) -> tuple[bool, str | None]:
 
 
 def _render_html(payload: dict) -> str:
-    lines: list[str] = []
-
-    geo_tags = render_geo_tags(payload.get("geo_tags"))
-    if geo_tags:
-        lines.append(html.escape(geo_tags))
-
-    description = _norm(payload.get("description"))
-    if description:
-        dlines: list[str | None] = []
-        blank_seen = False
-        for raw_line in description.splitlines():
-            part = raw_line.strip()
-            if part:
-                dlines.append(part)
-                blank_seen = False
-            elif dlines and not blank_seen:
-                dlines.append(None)
-                blank_seen = True
-
-        while dlines and dlines[-1] is None:
-            dlines.pop()
-
-        if dlines:
-            first_written = False
-            for part in dlines:
-                if part is None:
-                    lines.append("")
-                    continue
-                if not first_written:
-                    lines.append("- " + html.escape(part))
-                    first_written = True
-                else:
-                    lines.append(html.escape(part))
-
-    for link in _split_lines(payload.get("social_links")):
-        lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
-
-    tg = _norm(payload.get("telegram"))
-    if tg:
-        lines.append(html.escape(tg))
-
-    pm = _norm(payload.get("phone_main"))
-    if pm:
-        lines.append(html.escape(pm))
-
-    pw = _norm(payload.get("phone_whatsapp"))
-    if pw and pw != pm:
-        lines.append(html.escape(pw))
-
-    cn = _norm(payload.get("contact_name"))
-    if cn:
-        lines.append("- " + html.escape(cn))
-
-    performer = _norm(payload.get("telegram"))
-    if performer:
-        try:
-            from database import db
-            idx = db.get_review_index_for_performer(performer)
-            total = idx.get("total", 0)
-            latest = idx.get("latest", [])
-        except Exception:
-            total, latest = 0, []
-
-        if total > 0 and latest:
-            if lines:
-                lines.append("")
-            lines.append(f"Отзывы ({total}):")
-
-            start = total - len(latest) + 1
-            for i, r in enumerate(latest):
-                num = start + i
-                link = f"https://t.me/proflistpt/{r['review_topic_id']}/{r['review_message_id']}"
-                lines.append(f'- <a href="{link}">Отзыв #{num}</a>')
-
-    return "\n".join(lines).strip()
+    return render_catalog_listing_html(payload)
 
 
 def _normalize_geo(value) -> str:
