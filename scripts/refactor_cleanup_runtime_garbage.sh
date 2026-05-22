@@ -54,6 +54,16 @@ if [[ "$MODE" == "--apply" ]]; then
     rm -f -- "$path"
     echo "deleted $path"
   done < "$CANDIDATES"
+
+  echo
+  echo "===== DELETE EMPTY __PYCACHE__ DIRS ====="
+  find . \
+    -type d \
+    -name "__pycache__" \
+    -not -path "./venv/*" \
+    -empty \
+    -print \
+    -exec rmdir {} +
 else
   echo
   echo "===== DRY RUN ONLY ====="
