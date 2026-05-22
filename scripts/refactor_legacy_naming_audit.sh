@@ -70,9 +70,17 @@ echo "legacy_naming_audit_ok"
   wc -l "$ALL" "$RUNTIME" "$USER_FACING" "$HISTORICAL" "$REVIEW"
   echo
   echo "VERDICT:"
-  echo "rename blocked until runtime-critical matches are reviewed one by one"
+  if [ -s "$RUNTIME" ]; then
+    echo "rename blocked until runtime-critical matches are reviewed one by one"
+  else
+    echo "no active runtime-critical legacy naming matches found"
+  fi
+  if [ -s "$USER_FACING" ]; then
+    echo "docs/user-facing strings may be renamed first after review"
+  else
+    echo "no active user-facing legacy naming matches found"
+  fi
   echo "historical diagnostics/backups should not be rewritten"
-  echo "docs/user-facing strings may be renamed first after review"
 } | tee "$REPORT"
 
 echo
