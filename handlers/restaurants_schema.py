@@ -1401,8 +1401,9 @@ async def handle_restaurants_schema_confirmation(callback: CallbackQuery, state:
 
         try:
             if user:
-                db.publish_free_restaurant_post(
+                db.publish_free_generic_post(
                     user_id=user['id'],
+                    mode="restaurants",
                     payload=payload,
                     cities=_normalize_geo_tags_for_db(payload.get("geo_tags")),
                     message_id=published_message.message_id,
