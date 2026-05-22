@@ -18,7 +18,7 @@ router = Router()
 ACTIVE_SECTION_CALLBACKS = {
     "Ищу работу":                    "section:generic:job_seeker",
     "Предлагаю работу":              "section:generic:job_offer",
-    "Рестораны":                     "section:restaurants",
+    "Рестораны":                     "section:generic:restaurants",
     # generic sections
     "Ищу жильё":                     "section:housing:housing_wanted",
     "Недвижимость от хозяев":        "section:housing:owner_real_estate",

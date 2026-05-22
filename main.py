@@ -26,7 +26,6 @@ from handlers.premium_posting import router as premium_posting_router
 from handlers.premium_admin import router as premium_admin_router
 from handlers.housing_schema_flow import router as housing_schema_flow_router
 from handlers.generic_schema_flow import router as generic_schema_flow_router
-from handlers.restaurants_schema import router as restaurants_schema_router
 from handlers.section_catalog import router as section_catalog_router
 from handlers.reviews_schema_flow import router as reviews_schema_flow_router
 from services.scheduler import start_scheduler
@@ -837,7 +836,6 @@ async def main():
             dp.include_router(section_catalog_router)
             dp.include_router(housing_schema_flow_router)
             dp.include_router(generic_schema_flow_router)
-            dp.include_router(restaurants_schema_router)
             dp.include_router(posting_router)
             dp.include_router(my_postings_router)
             dp.include_router(fallback_router)
