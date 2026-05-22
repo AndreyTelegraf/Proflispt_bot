@@ -970,7 +970,7 @@ async def request_pin_premium(callback: CallbackQuery):
 
     new_post_id = db.create_premium_post(
         user_id=user['id'],
-        mode='restaurants',
+        mode=post.get('mode'),
         cities=json.dumps(post['cities']),
         description=post['description'],
         social_media=post.get('social_media'),

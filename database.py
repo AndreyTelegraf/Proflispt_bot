@@ -1401,53 +1401,6 @@ class Database:
         )
 
 
-    def publish_free_restaurant_post(
-        self,
-        user_id: int,
-        payload: dict,
-        cities: str,
-        message_id: int,
-        chat_id: int,
-        topic_id: int,
-    ) -> int:
-        """Insert a free (text-only) restaurant post directly as published."""
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO premium_posts (
-                    user_id, mode, cities, description, social_media,
-                    telegram_username, phone_main, phone_whatsapp, name,
-                    media_file_id, media_type, media_list,
-                    payment_status, payment_amount, action_type,
-                    admin_notes, review_links,
-                    message_id, chat_id, topic_id,
-                    status, published_message_ids, expires_at
-                ) VALUES (
-                    ?, 'restaurants', ?, ?, ?,
-                    ?, ?, ?, ?,
-                    NULL, NULL, '[]',
-                    'approved', 0.00, 'post',
-                    NULL, ?,
-                    ?, ?, ?,
-                    'published', ?, ?
-                )
-            """, (
-                user_id,
-                cities,
-                sanitize_description(payload.get("description", "")),
-                payload.get("social_links", ""),
-                payload.get("telegram", ""),
-                payload.get("phone_main", ""),
-                payload.get("phone_whatsapp", ""),
-                payload.get("contact_name", ""),
-                payload.get("review_links", ""),
-                message_id, chat_id, topic_id,
-                json.dumps([message_id]),
-                self._premium_post_expires_at('restaurants'),
-            ))
-            conn.commit()
-            return cursor.lastrowid
-
     def publish_free_generic_post(
         self,
         user_id: int,
@@ -1764,40 +1717,6 @@ class Database:
 
             conn.commit()
             return cursor.rowcount > 0
-
-    def get_user_published_restaurant_premium_posts(self, user_id: int) -> List[Dict[str, Any]]:
-        with self.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT pp.*, u.telegram_id, u.username, u.first_name, u.last_name
-                FROM premium_posts pp
-                JOIN users u ON pp.user_id = u.id
-                WHERE pp.user_id = ?
-                  AND pp.mode = 'restaurants'
-                  AND pp.status IN ('published', 'deleted')
-                  AND pp.payment_status = 'approved'
-                ORDER BY pp.updated_at DESC
-            """, (user_id,))
-            results = cursor.fetchall()
-            rows = []
-            for result in results:
-                post_data = dict(result)
-                if post_data.get('media_list'):
-                    try:
-                        post_data['media_list'] = json.loads(post_data['media_list'])
-                    except (json.JSONDecodeError, TypeError):
-                        post_data['media_list'] = []
-                else:
-                    post_data['media_list'] = []
-                if post_data.get('cities'):
-                    try:
-                        post_data['cities'] = json.loads(post_data['cities'])
-                    except (json.JSONDecodeError, TypeError):
-                        post_data['cities'] = ['online']
-                else:
-                    post_data['cities'] = ['online']
-                rows.append(post_data)
-            return rows
 
     def get_user_published_generic_premium_posts(self, user_id: int) -> List[Dict[str, Any]]:
         with self.get_connection() as conn:

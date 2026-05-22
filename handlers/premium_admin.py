@@ -134,19 +134,7 @@ async def admin_approve_premium(callback: CallbackQuery):
             return
 
         # Format the post text
-        if post.get('mode') == 'restaurants':
-            import json
-
-            restaurants_payload = build_catalog_listing_payload_from_premium_post(post)
-            if not restaurants_payload.get("review_links") and post.get("admin_notes"):
-                try:
-                    notes = json.loads(post["admin_notes"])
-                    restaurants_payload["review_links"] = notes.get("review_links", "")
-                except Exception:
-                    pass
-
-            post_text = render_catalog_listing_html(restaurants_payload)
-        elif post.get('mode') in ('job_seeker', 'job_offer'):
+        if post.get('mode') in ('job_seeker', 'job_offer'):
             post_text = format_premium_posting_html(post)
         elif post.get('mode') in ('housing_wanted', 'owner_real_estate'):
             from handlers.housing_schema_flow import _hs_render_html
@@ -203,10 +191,6 @@ async def admin_approve_premium(callback: CallbackQuery):
             topic_id = Config.JOB_SEEKING_TOPIC_ID
         elif post['mode'] == 'job_offer':
             topic_id = Config.JOB_OFFERING_TOPIC_ID
-        elif post['mode'] == 'restaurants':
-            from services.sections_registry import load_sections_registry
-            registry = load_sections_registry()
-            topic_id = int(registry.get_topic_id("Рестораны"))
         elif post['mode'] in ('housing_wanted', 'owner_real_estate'):
             import json as _json_hn
             try:
