@@ -49,6 +49,7 @@ MODE_TO_SECTION_NAME = {
     "teaching":             "Преподавание",
     "sport":                "Спорт",
     "animals":              "Животные",
+    "restaurants":          "Рестораны",
     "leisure":              "Отдых",
     "tourism":              "Туризм",
     "photo_video":          "Фото/видео",
