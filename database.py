@@ -1807,7 +1807,6 @@ class Database:
                 FROM premium_posts pp
                 JOIN users u ON pp.user_id = u.id
                 WHERE pp.user_id = ?
-                  AND pp.mode != 'restaurants'
                   AND pp.mode != 'reviews'
                   AND pp.status IN ('published', 'deleted')
                   AND pp.payment_status = 'approved'
