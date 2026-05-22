@@ -85,7 +85,6 @@ venv/bin/python -m py_compile \
   services/catalog_listing_renderer.py \
   handlers/premium_admin.py \
   handlers/generic_schema_flow.py \
-  handlers/restaurants_schema.py \
   main.py \
   database.py
 
