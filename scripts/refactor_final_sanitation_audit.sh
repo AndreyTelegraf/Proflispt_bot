@@ -115,7 +115,11 @@ echo "safety_checks_ok"
   wc -l "$RUNTIME" "$BACKUPS_PROTECTED" "$BACKUPS_REVIEW" "$BACKUPS_LOW" "$DIAG_PROTECTED" "$DIAG_REVIEW" "$DIAG_LOW"
   echo
   echo "VERDICT:"
-  echo "runtime cleanup may proceed via scripts/refactor_cleanup_runtime_garbage.sh --apply"
+  if [ -s "$OUT/runtime_candidates.txt" ]; then
+    echo "runtime cleanup may proceed via scripts/refactor_cleanup_runtime_garbage.sh --apply"
+  else
+    echo "runtime cleanup already clean: no runtime garbage candidates found"
+  fi
   echo "backup destructive cleanup blocked: no approved deletion set yet"
   echo "diagnostics destructive cleanup blocked: no approved deletion set yet"
 } | tee "$REPORT"
