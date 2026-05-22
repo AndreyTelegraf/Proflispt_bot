@@ -224,15 +224,6 @@ def _whatsapp_fast_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 def _step_reply_markup(step, *, back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
-    if getattr(step, "field_name", "") == "social_links":
-        return _social_links_fast_keyboard()
-    if getattr(step, "kind", None) == "choice":
-        return _choice_keyboard(step, back_to=back_to)
-    return get_back_button(back_to)
-
-
-
-def _step_reply_markup(step, *, back_to: str = "restaurants:back") -> InlineKeyboardMarkup:
     if getattr(step, "field_name", "") == "phone_whatsapp":
         return _whatsapp_fast_keyboard()
     if getattr(step, "field_name", "") == "social_links":
