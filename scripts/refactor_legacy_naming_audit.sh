@@ -24,7 +24,7 @@ git grep -n -I -E "workinportugal|Work in Portugal|workinportugal_bot|workinport
   | grep -v "^scripts/refactor_legacy_naming_audit\.sh:" \
   > "$ALL" || true
 
-grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)|workinportugal_bot_stable_|telegram_workinportugal_bot\.tar\.gz|^infra_restructure_summary\.md:" "$ALL" \
+grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)|workinportugal_bot_stable_|telegram_workinportugal_bot\.tar\.gz|^infra_restructure_summary\.md:|^deploy_workinportugal(_staging)?\.sh:|^rollback_workinportugal\.sh:|^run\.sh:|^start_bot\.sh:|^workinportugal-bot\.service:|^scripts/refactor_python_legacy_docstring_audit\.sh:" "$ALL" \
   | sort -u > "$HISTORICAL" || true
 
 grep -v "^scripts/refactor_legacy_naming_audit\.sh:" "$ALL" \
