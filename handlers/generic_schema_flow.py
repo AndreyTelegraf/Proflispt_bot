@@ -1,6 +1,8 @@
 """Generic schema flow handler for all catalogue sections except restaurants/jobs."""
 from __future__ import annotations
 
+import asyncio
+
 import functools
 import json
 import logging
@@ -33,6 +35,17 @@ from services.listing_validation import (
 
 logger = logging.getLogger(__name__)
 router = Router()
+
+_GS_MEDIA_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
+
+
+def _gs_media_lock(message: Message) -> asyncio.Lock:
+    key = (int(message.chat.id), int(message.from_user.id if message.from_user else 0))
+    lock = _GS_MEDIA_LOCKS.get(key)
+    if lock is None:
+        lock = asyncio.Lock()
+        _GS_MEDIA_LOCKS[key] = lock
+    return lock
 
 # ── description prompt overrides ─────────────────────────────────────────────
 
@@ -913,43 +926,44 @@ async def gs_premium_start(callback: CallbackQuery, state: FSMContext):
 
 @router.message(StateFilter(GS_MEDIA))
 async def gs_media_input(message: Message, state: FSMContext):
-    _, slug, _, _, media = await _get_gs(state)
+    async with _gs_media_lock(message):
+        _, slug, _, _, media = await _get_gs(state)
 
-    item = None
-    if message.photo:
-        item = {"type": "photo", "file_id": message.photo[-1].file_id}
-    elif message.video:
-        item = {"type": "video", "file_id": message.video.file_id}
+        item = None
+        if message.photo:
+            item = {"type": "photo", "file_id": message.photo[-1].file_id}
+        elif message.video:
+            item = {"type": "video", "file_id": message.video.file_id}
 
-    if not item:
-        return
-
-    if len(media) >= 10:
-        await message.answer("Достигнут лимит 10 файлов.", reply_markup=_media_kb(slug))
-        return
-
-    media = media + [item]
-    await state.update_data(gs_media=media)
-
-    data = await state.get_data()
-    status_id = data.get("gs_media_status_id")
-    text = f"Добавлено файлов: {len(media)}/10"
-    kb = _media_kb(slug)
-
-    if status_id:
-        try:
-            await message.bot.edit_message_text(
-                chat_id=message.chat.id,
-                message_id=status_id,
-                text=text,
-                reply_markup=kb,
-            )
+        if not item:
             return
-        except Exception:
-            pass
 
-    sent = await message.answer(text, reply_markup=kb)
-    await state.update_data(gs_media_status_id=sent.message_id)
+        if len(media) >= 10:
+            await message.answer("Достигнут лимит 10 файлов.", reply_markup=_media_kb(slug))
+            return
+
+        media = media + [item]
+        await state.update_data(gs_media=media)
+
+        data = await state.get_data()
+        status_id = data.get("gs_media_status_id")
+        text = f"Добавлено файлов: {len(media)}/10"
+        kb = _media_kb(slug)
+
+        if status_id:
+            try:
+                await message.bot.edit_message_text(
+                    chat_id=message.chat.id,
+                    message_id=status_id,
+                    text=text,
+                    reply_markup=kb,
+                )
+                return
+            except Exception:
+                pass
+
+        sent = await message.answer(text, reply_markup=kb)
+        await state.update_data(gs_media_status_id=sent.message_id)
 
 
 @router.callback_query(F.data.startswith("gs:media_submit:"))
