@@ -961,7 +961,7 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
         return
 
-    post_text = _render_html(payload)
+    post_text = render_catalog_listing_html(payload)
     if len(post_text) > 1024:
         await callback.message.edit_text(
             "Текст объявления слишком длинный для публикации с фото/видео. "
