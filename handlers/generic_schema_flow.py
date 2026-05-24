@@ -961,6 +961,18 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
         return
 
+    post_text = _render_html(payload)
+    if len(post_text) > 1024:
+        await callback.message.edit_text(
+            "Текст объявления слишком длинный для публикации с фото/видео. "
+            "Telegram ограничивает подпись к медиа 1024 символами.\n\n"
+            "Сократите описание и отправьте исправленный вариант заново, либо опубликуйте объявление без медиа.",
+            reply_markup=_back_kb(slug),
+            disable_web_page_preview=True,
+        )
+        await callback.answer()
+        return
+
     first = media[0]
 
     if not payload.get("telegram"):
