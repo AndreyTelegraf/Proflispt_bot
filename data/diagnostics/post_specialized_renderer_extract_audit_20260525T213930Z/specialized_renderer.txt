@@ -1,0 +1,158 @@
+     1	"""Specialized catalog HTML renderers shared by handlers and admin publishing."""
+     2	
+     3	import html
+     4	import json
+     5	
+     6	from services.catalog_listing_renderer import _norm, _split_lines
+     7	from services.geo import render_geo_tags
+     8	
+     9	
+    10	RENTAL_TAGS: dict[str, str] = {
+    11	    "short_term": "#короткосрок",
+    12	    "long_term": "#долгосрок",
+    13	}
+    14	
+    15	
+    16	def normalize_housing_geo_tags_from_db(value: object) -> str:
+    17	    if not value:
+    18	        return ""
+    19	
+    20	    cities = value
+    21	    if isinstance(value, str):
+    22	        try:
+    23	            cities = json.loads(value)
+    24	        except Exception:
+    25	            raw = value.strip()
+    26	            if raw.startswith("[") and raw.endswith("]"):
+    27	                raw = raw[1:-1].strip()
+    28	            raw = raw.strip().strip("'").strip('"').strip()
+    29	            parts = [p.strip().strip("'").strip('"') for p in raw.split(",") if p.strip()]
+    30	            return " ".join(f"#{p.lstrip('#').lower()}" for p in parts if p)
+    31	
+    32	    if isinstance(cities, list):
+    33	        return " ".join(
+    34	            f"#{str(x).strip().lstrip('#').lower()}"
+    35	            for x in cities
+    36	            if str(x).strip()
+    37	        )
+    38	
+    39	    clean = str(cities).strip()
+    40	    return clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
+    41	
+    42	
+    43	def extract_housing_rental_term_from_post(post: dict) -> str:
+    44	    try:
+    45	        notes = json.loads(post.get("admin_notes") or "{}")
+    46	        return str(notes.get("rental_term") or "")
+    47	    except Exception:
+    48	        return ""
+    49	
+    50	
+    51	def build_housing_listing_payload_from_premium_post(post: dict) -> dict:
+    52	    return {
+    53	        "geo_tags": normalize_housing_geo_tags_from_db(post.get("cities")),
+    54	        "rental_term": extract_housing_rental_term_from_post(post),
+    55	        "description": post.get("description", ""),
+    56	        "social_links": post.get("social_media", ""),
+    57	        "telegram": post.get("telegram_username", ""),
+    58	        "phone_main": post.get("phone_main", ""),
+    59	        "phone_whatsapp": post.get("phone_whatsapp", ""),
+    60	        "contact_name": post.get("name", ""),
+    61	    }
+    62	
+    63	
+    64	def render_housing_listing_html(payload: dict) -> str:
+    65	    """Housing-specific render: appends rental_term tag to geo line, omits review links."""
+    66	    lines: list[str] = []
+    67	
+    68	    geo_line_raw = render_geo_tags(payload.get("geo_tags"))
+    69	    rental_tag = RENTAL_TAGS.get(str(payload.get("rental_term", "")), "")
+    70	
+    71	    if geo_line_raw:
+    72	        geo_line = html.escape(geo_line_raw)
+    73	        if rental_tag:
+    74	            geo_line += " " + html.escape(rental_tag)
+    75	        lines.append(geo_line)
+    76	
+    77	    description = _norm(payload.get("description"))
+    78	    if description:
+    79	        dlines = [p.strip() for p in description.splitlines() if p.strip()]
+    80	        if dlines:
+    81	            lines.append("- " + html.escape(dlines[0]))
+    82	            for p in dlines[1:]:
+    83	                lines.append(html.escape(p))
+    84	
+    85	    for link in _split_lines(payload.get("social_links")):
+    86	        lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
+    87	
+    88	    telegram = _norm(payload.get("telegram"))
+    89	    if telegram:
+    90	        lines.append(html.escape(telegram))
+    91	
+    92	    phone_main = _norm(payload.get("phone_main"))
+    93	    if phone_main:
+    94	        lines.append(html.escape(phone_main))
+    95	
+    96	    phone_whatsapp = _norm(payload.get("phone_whatsapp"))
+    97	    if phone_whatsapp and phone_whatsapp != phone_main:
+    98	        lines.append(html.escape(phone_whatsapp))
+    99	
+   100	    contact_name = _norm(payload.get("contact_name"))
+   101	    if contact_name:
+   102	        lines.append("- " + html.escape(contact_name))
+   103	
+   104	    return "\n".join(lines).strip()
+   105	
+   106	
+   107	def render_review_listing_html(payload: dict) -> str:
+   108	    lines: list[str] = []
+   109	
+   110	    geo = str(payload.get("geo_tags") or "").strip()
+   111	    if geo:
+   112	        tag = geo if geo.startswith("#") else f"#{geo.lstrip('#').lower()}"
+   113	        lines.append(html.escape(tag))
+   114	
+   115	    performer = str(payload.get("performer_contacts") or "").strip()
+   116	    if performer:
+   117	        uname = performer if performer.startswith("@") else f"@{performer.lstrip('@')}"
+   118	        lines.append(f"Исполнитель: {html.escape(uname)}")
+   119	
+   120	    description = str(payload.get("description") or "").strip()
+   121	    if description:
+   122	        dlines = [p.strip() for p in description.splitlines() if p.strip()]
+   123	        if dlines:
+   124	            lines.append("- " + html.escape(dlines[0]))
+   125	            for p in dlines[1:]:
+   126	                lines.append(html.escape(p))
+   127	
+   128	    author = str(payload.get("author_telegram") or "").strip()
+   129	    if author:
+   130	        uname = author if author.startswith("@") else f"@{author.lstrip('@')}"
+   131	        lines.append(f"Автор: {html.escape(uname)}")
+   132	
+   133	    return "\n".join(lines).strip()
+   134	
+   135	
+   136	def build_review_listing_html_from_premium_post(post: dict) -> str:
+   137	    cities_raw = post.get("cities")
+   138	    geo_tags = ""
+   139	    if cities_raw:
+   140	        try:
+   141	            cities = json.loads(cities_raw) if isinstance(cities_raw, str) else cities_raw
+   142	            if isinstance(cities, list):
+   143	                geo_tags = " ".join(
+   144	                    f"#{str(x).strip().lstrip('#').lower()}"
+   145	                    for x in cities
+   146	                    if str(x).strip()
+   147	                )
+   148	            else:
+   149	                geo_tags = str(cities_raw).strip()
+   150	        except Exception:
+   151	            geo_tags = str(cities_raw).strip()
+   152	
+   153	    return render_review_listing_html({
+   154	        "geo_tags": geo_tags,
+   155	        "description": post.get("description", ""),
+   156	        "performer_contacts": post.get("social_media", ""),
+   157	        "author_telegram": post.get("telegram_username", ""),
+   158	    })

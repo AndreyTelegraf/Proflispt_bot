@@ -1,0 +1,1 @@
+audit post-extraction renderer coupling, unused imports/constants, and runtime parity

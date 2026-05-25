@@ -1,0 +1,120 @@
+     1	"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+     2	from __future__ import annotations
+     3	
+     4	import asyncio
+     5	import json
+     6	import logging
+     7	import re
+     8	
+     9	_hs_media_locks: dict[str, asyncio.Lock] = {}
+    10	
+    11	
+    12	def _hs_media_lock(chat_id: int, user_id: int) -> asyncio.Lock:
+    13	    key = f"{chat_id}:{user_id}"
+    14	    if key not in _hs_media_locks:
+    15	        _hs_media_locks[key] = asyncio.Lock()
+    16	    return _hs_media_locks[key]
+    17	
+    18	from aiogram import Router, F
+    19	from aiogram.filters import StateFilter
+    20	from aiogram.fsm.context import FSMContext
+    21	from aiogram.types import (
+    22	    CallbackQuery, Message,
+    23	    InlineKeyboardMarkup, InlineKeyboardButton,
+    24	)
+    25	from aiogram.utils.keyboard import InlineKeyboardBuilder
+    26	
+    27	from config import Config
+    28	from database import db
+    29	from keyboards.main import get_main_menu
+    30	from models.posting_context import PostingContext
+    31	from services.schema_bootstrap import build_schema_registry
+    32	from services.schema_engine import SchemaEngine
+    33	from services.sections_registry import load_sections_registry
+    34	from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
+    35	from services.listing_validation import (
+    36	    STANDARD_LISTING_REQUIRED_FIELDS,
+    37	    validate_publish_payload,
+    38	)
+    39	
+    40	from handlers.generic_schema_flow import (
+    41	    _normalize_geo,
+    42	    _username_value,
+    43	    _valid_pt_mobile,
+    44	    _norm,
+    45	    _split_lines,
+    46	    _normalize_social_links,
+    47	    _next_content_index,
+    48	    _previous_interactive_index,
+    49	)
+    50	
+    51	logger = logging.getLogger(__name__)
+    52	router = Router()
+    53	
+    54	HOUSING_SLUGS: dict[str, str] = {
+    55	    "housing_wanted":    "Ищу жильё",
+    56	    "owner_real_estate": "Недвижимость от хозяев",
+    57	}
+    58	
+    59	_DESCRIPTION_PROMPTS: dict[str, str] = {
+    60	    "housing_wanted": (
+    61	        "Опишите, какое жильё вы ищете: город или район, срок аренды, бюджет, количество людей, животные, документы и важные условия.\n\n"
+    62	        "Пока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\n"
+    63	        "Максимальная длина текста в этом блоке — 600 знаков:"
+    64	    ),
+    65	    "owner_real_estate": (
+    66	        "Опишите объект: город или район, тип жилья, цена, срок аренды или продажи, условия, мебель, коммунальные платежи и другие важные детали.\n\n"
+    67	        "Пока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\n"
+    68	        "Максимальная длина текста в этом блоке — 600 знаков:"
+    69	    ),
+    70	}
+    71	
+    72	_RENTAL_TAGS: dict[str, str] = {
+    73	    "short_term": "#короткосрок",
+    74	    "long_term":  "#долгосрок",
+    75	}
+    76	
+    77	HS_INPUT      = "hs_input"
+    78	HS_GEO_CUSTOM = "hs_geo_custom"
+    79	HS_TG_GATE    = "hs_tg_gate"
+    80	HS_CONFIRM    = "hs_confirm"
+    81	HS_MEDIA      = "hs_media"
+    82	
+    83	
+    84	def _hs_resolve_prompt(step, slug: str) -> str:
+    85	    if getattr(step, "field_name", "") == "description":
+    86	        return _DESCRIPTION_PROMPTS.get(slug, step.prompt)
+    87	    return step.prompt
+    88	
+    89	
+    90	
+    91	def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    92	    from services.contact_guard import validate_description_text
+    93	    return validate_description_text(text)
+    94	
+    95	
+    96	# ── keyboards ─────────────────────────────────────────────────────────────────
+    97	
+    98	def _hs_back_kb(slug: str) -> InlineKeyboardMarkup:
+    99	    b = InlineKeyboardBuilder()
+   100	    b.add(InlineKeyboardButton(text="← Назад", callback_data=f"hs:back:{slug}"))
+   101	    return b.as_markup()
+   102	
+   103	
+   104	def _hs_choice_kb(step, slug: str) -> InlineKeyboardMarkup:
+   105	    b = InlineKeyboardBuilder()
+   106	    field = getattr(step, "field_name", "")
+   107	    label_defaults = {"yes": "Да", "no": "Нет"}
+   108	    for opt in getattr(step, "options", []) or []:
+   109	        val = str(opt.get("value", "")).strip()
+   110	        if not val:
+   111	            continue
+   112	        label = str(opt.get("label") or label_defaults.get(val.lower(), val)).strip()
+   113	        b.add(InlineKeyboardButton(text=label, callback_data=f"hs:choice:{slug}:{val}"))
+   114	    is_residency = (field == "resides_in_portugal")
+   115	    if not is_residency:
+   116	        b.add(InlineKeyboardButton(text="← Назад", callback_data=f"hs:back:{slug}"))
+   117	    if field == "geo_tags":
+   118	        b.adjust(3, 3, 3, 1, 1)
+   119	    elif is_residency:
+   120	        b.adjust(2)

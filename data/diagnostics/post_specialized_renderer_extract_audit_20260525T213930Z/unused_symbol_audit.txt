@@ -1,0 +1,99 @@
+## handlers/housing_schema_flow.py
+MAYBE_UNUSED line=2 name=annotations stmt=from __future__ import annotations
+USED line=4 name=asyncio stmt=import asyncio
+USED line=5 name=json stmt=import json
+USED line=6 name=logging stmt=import logging
+MAYBE_UNUSED line=7 name=re stmt=import re
+USED line=18 name=Router stmt=from aiogram import Router
+USED line=18 name=F stmt=from aiogram import F
+USED line=19 name=StateFilter stmt=from aiogram.filters import StateFilter
+USED line=20 name=FSMContext stmt=from aiogram.fsm.context import FSMContext
+USED line=21 name=CallbackQuery stmt=from aiogram.types import CallbackQuery
+USED line=21 name=Message stmt=from aiogram.types import Message
+USED line=21 name=InlineKeyboardMarkup stmt=from aiogram.types import InlineKeyboardMarkup
+USED line=21 name=InlineKeyboardButton stmt=from aiogram.types import InlineKeyboardButton
+USED line=25 name=InlineKeyboardBuilder stmt=from aiogram.utils.keyboard import InlineKeyboardBuilder
+USED line=27 name=Config stmt=from config import Config
+USED line=28 name=db stmt=from database import db
+USED line=29 name=get_main_menu stmt=from keyboards.main import get_main_menu
+USED line=30 name=PostingContext stmt=from models.posting_context import PostingContext
+USED line=31 name=build_schema_registry stmt=from services.schema_bootstrap import build_schema_registry
+USED line=32 name=SchemaEngine stmt=from services.schema_engine import SchemaEngine
+USED line=33 name=load_sections_registry stmt=from services.sections_registry import load_sections_registry
+USED line=34 name=_hs_render_html stmt=from services.catalog_specialized_renderers import render_housing_listing_html
+USED line=35 name=STANDARD_LISTING_REQUIRED_FIELDS stmt=from services.listing_validation import STANDARD_LISTING_REQUIRED_FIELDS
+USED line=35 name=validate_publish_payload stmt=from services.listing_validation import validate_publish_payload
+USED line=40 name=_normalize_geo stmt=from handlers.generic_schema_flow import _normalize_geo
+USED line=40 name=_username_value stmt=from handlers.generic_schema_flow import _username_value
+USED line=40 name=_valid_pt_mobile stmt=from handlers.generic_schema_flow import _valid_pt_mobile
+MAYBE_UNUSED line=40 name=_norm stmt=from handlers.generic_schema_flow import _norm
+MAYBE_UNUSED line=40 name=_split_lines stmt=from handlers.generic_schema_flow import _split_lines
+USED line=40 name=_normalize_social_links stmt=from handlers.generic_schema_flow import _normalize_social_links
+USED line=40 name=_next_content_index stmt=from handlers.generic_schema_flow import _next_content_index
+USED line=40 name=_previous_interactive_index stmt=from handlers.generic_schema_flow import _previous_interactive_index
+USED line=92 name=validate_description_text stmt=from services.contact_guard import validate_description_text
+USED line=729 name=InputMediaPhoto stmt=from aiogram.types import InputMediaPhoto
+USED line=729 name=InputMediaVideo stmt=from aiogram.types import InputMediaVideo
+USED line=800 name=InputMediaPhoto stmt=from aiogram.types import InputMediaPhoto
+USED line=800 name=InputMediaVideo stmt=from aiogram.types import InputMediaVideo
+
+## handlers/reviews_schema_flow.py
+MAYBE_UNUSED line=2 name=annotations stmt=from __future__ import annotations
+USED line=4 name=json stmt=import json
+USED line=5 name=logging stmt=import logging
+USED line=6 name=re stmt=import re
+USED line=8 name=Router stmt=from aiogram import Router
+USED line=8 name=F stmt=from aiogram import F
+USED line=9 name=StateFilter stmt=from aiogram.filters import StateFilter
+USED line=10 name=FSMContext stmt=from aiogram.fsm.context import FSMContext
+USED line=11 name=CallbackQuery stmt=from aiogram.types import CallbackQuery
+USED line=11 name=Message stmt=from aiogram.types import Message
+USED line=11 name=InlineKeyboardMarkup stmt=from aiogram.types import InlineKeyboardMarkup
+USED line=11 name=InlineKeyboardButton stmt=from aiogram.types import InlineKeyboardButton
+USED line=15 name=InlineKeyboardBuilder stmt=from aiogram.utils.keyboard import InlineKeyboardBuilder
+USED line=17 name=db stmt=from database import db
+USED line=18 name=get_main_menu stmt=from keyboards.main import get_main_menu
+MAYBE_UNUSED line=19 name=_rv_render_html_from_post stmt=from services.catalog_specialized_renderers import build_review_listing_html_from_premium_post
+USED line=20 name=_rv_render_html stmt=from services.catalog_specialized_renderers import render_review_listing_html
+USED line=78 name=validate_description_text stmt=from services.contact_guard import validate_description_text
+USED line=158 name=InputMediaPhoto stmt=from aiogram.types import InputMediaPhoto
+USED line=158 name=InputMediaVideo stmt=from aiogram.types import InputMediaVideo
+
+## handlers/premium_admin.py
+USED line=5 name=logging stmt=import logging
+USED line=6 name=Router stmt=from aiogram import Router
+USED line=6 name=F stmt=from aiogram import F
+USED line=7 name=CallbackQuery stmt=from aiogram.types import CallbackQuery
+USED line=7 name=InlineKeyboardMarkup stmt=from aiogram.types import InlineKeyboardMarkup
+USED line=7 name=InlineKeyboardButton stmt=from aiogram.types import InlineKeyboardButton
+USED line=8 name=db stmt=from database import db
+MAYBE_UNUSED line=9 name=format_premium_posting stmt=from services.formatting import format_premium_posting
+USED line=9 name=format_premium_posting_html stmt=from services.formatting import format_premium_posting_html
+USED line=10 name=build_catalog_listing_payload_from_premium_post stmt=from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post
+USED line=10 name=render_catalog_listing_html stmt=from services.catalog_listing_renderer import render_catalog_listing_html
+USED line=11 name=get_catalog_mode_slugs stmt=from services.catalog_modes import get_catalog_mode_slugs
+USED line=11 name=get_catalog_topic_id stmt=from services.catalog_modes import get_catalog_topic_id
+USED line=12 name=build_housing_listing_payload_from_premium_post stmt=from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post
+USED line=12 name=build_review_listing_html_from_premium_post stmt=from services.catalog_specialized_renderers import build_review_listing_html_from_premium_post
+USED line=12 name=render_housing_listing_html stmt=from services.catalog_specialized_renderers import render_housing_listing_html
+USED line=48 name=json stmt=import json
+USED line=63 name=json stmt=import json
+MAYBE_UNUSED line=74 name=format_premium_posting stmt=from services.formatting import format_premium_posting
+USED line=74 name=format_premium_posting_html stmt=from services.formatting import format_premium_posting_html
+USED line=75 name=Config stmt=from config import Config
+USED line=76 name=datetime stmt=from datetime import datetime
+USED line=76 name=timedelta stmt=from datetime import timedelta
+USED line=164 name=_json_hn stmt=import json
+USED line=173 name=load_sections_registry stmt=from services.sections_registry import load_sections_registry
+USED line=206 name=json stmt=import json
+USED line=220 name=InputMediaPhoto stmt=from aiogram.types import InputMediaPhoto
+USED line=220 name=InputMediaVideo stmt=from aiogram.types import InputMediaVideo
+USED line=316 name=maybe_auto_repost_cargo stmt=from services.auto_repost import maybe_auto_repost_cargo
+
+## services/catalog_specialized_renderers.py
+USED line=3 name=html stmt=import html
+USED line=4 name=json stmt=import json
+USED line=6 name=_norm stmt=from services.catalog_listing_renderer import _norm
+USED line=6 name=_split_lines stmt=from services.catalog_listing_renderer import _split_lines
+USED line=7 name=render_geo_tags stmt=from services.geo import render_geo_tags
+

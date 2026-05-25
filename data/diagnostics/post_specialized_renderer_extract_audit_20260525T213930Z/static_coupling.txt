@@ -1,0 +1,16 @@
+handlers/housing_schema_flow.py:34:from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
+handlers/housing_schema_flow.py:72:_RENTAL_TAGS: dict[str, str] = {
+handlers/housing_schema_flow.py:723:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py:954:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:974:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1049:    post_text = _hs_render_html(payload)
+handlers/reviews_schema_flow.py:19:from services.catalog_specialized_renderers import build_review_listing_html_from_premium_post as _rv_render_html_from_post
+handlers/reviews_schema_flow.py:20:from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
+handlers/reviews_schema_flow.py:160:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:424:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:467:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:502:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:581:    rendered_text = _rv_render_html(payload)
+handlers/premium_admin.py:12:from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
+services/catalog_specialized_renderers.py:10:RENTAL_TAGS: dict[str, str] = {
+services/catalog_specialized_renderers.py:69:    rental_tag = RENTAL_TAGS.get(str(payload.get("rental_term", "")), "")

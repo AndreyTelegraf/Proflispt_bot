@@ -1,0 +1,34 @@
+HOUSING_DIRECT:
+#lisboa #porto #долгосрок
+- Первая строка
+Вторая строка
+<a href="https://example.com">Ссылка</a>
+<a href="https://instagram.com/example">Ссылка</a>
+@telegraf
++351912345678
++351912345679
+- Andrey Telegraf
+
+HOUSING_FROM_POST:
+#lisboa #porto #долгосрок
+- Первая строка
+Вторая строка
+<a href="https://example.com">Ссылка</a>
+@telegraf
++351912345678
++351912345679
+- Andrey Telegraf
+
+REVIEW_DIRECT:
+#lisboa
+Исполнитель: @performer
+- Отзыв первая строка
+Отзыв вторая строка
+Автор: @author
+
+REVIEW_FROM_POST:
+#lisboa
+Исполнитель: @performer
+- Отзыв первая строка
+Отзыв вторая строка
+Автор: @author

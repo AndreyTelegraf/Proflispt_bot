@@ -1,0 +1,100 @@
+     1	"""Reviews FSM flow — content moderation without payment."""
+     2	from __future__ import annotations
+     3	
+     4	import json
+     5	import logging
+     6	import re
+     7	
+     8	from aiogram import Router, F
+     9	from aiogram.filters import StateFilter
+    10	from aiogram.fsm.context import FSMContext
+    11	from aiogram.types import (
+    12	    CallbackQuery, Message,
+    13	    InlineKeyboardMarkup, InlineKeyboardButton,
+    14	)
+    15	from aiogram.utils.keyboard import InlineKeyboardBuilder
+    16	
+    17	from database import db
+    18	from keyboards.main import get_main_menu
+    19	from services.catalog_specialized_renderers import build_review_listing_html_from_premium_post as _rv_render_html_from_post
+    20	from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
+    21	
+    22	logger = logging.getLogger(__name__)
+    23	router = Router()
+    24	
+    25	ADMIN_CHAT_ID = 336224597
+    26	
+    27	# FSM states
+    28	RV_INPUT      = "rv_input"
+    29	RV_GEO_CUSTOM = "rv_geo_custom"
+    30	RV_MEDIA      = "rv_media"
+    31	RV_CONFIRM    = "rv_confirm"
+    32	
+    33	_STEP_RESIDENCY   = 0
+    34	_STEP_GEO         = 1
+    35	_STEP_CONTACTS    = 2
+    36	_STEP_DESCRIPTION = 3
+    37	
+    38	_GEO_OPTIONS = [
+    39	    ("lisboa",  "Lisboa"),
+    40	    ("porto",   "Porto"),
+    41	    ("coimbra", "Coimbra"),
+    42	    ("braga",   "Braga"),
+    43	    ("faro",    "Faro"),
+    44	    ("sintra",  "Sintra"),
+    45	    ("cascais", "Cascais"),
+    46	    ("leiria",  "Leiria"),
+    47	    ("setubal", "Setúbal"),
+    48	    ("online",  "Онлайн"),
+    49	    ("custom",  "Другие города"),
+    50	]
+    51	
+    52	_PROMPTS = [
+    53	    "Вы находитесь в Португалии?",
+    54	    "Выберите город или регион:",
+    55	    "Укажите @username специалиста, которому вы хотите оставить отзыв:",
+    56	    "Напишите отзыв:\n\n"
+    57	    "- Что именно делали: услуга или работа\n"
+    58	    "- Что было хорошо\n"
+    59	    "- Что было плохо, если было\n"
+    60	    "- Итог: рекомендуете или нет\n\n"
+    61	    "Важно:\n"
+    62	    "- Только текст, без ссылок и эмодзи\n"
+    63	    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+    64	    "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
+    65	]
+    66	
+    67	
+    68	
+    69	def _normalize_geo(value: str) -> str:
+    70	    raw = str(value or "").strip()
+    71	    if not raw:
+    72	        return json.dumps([], ensure_ascii=False)
+    73	    parts = [c.strip().lstrip("#").lower() for c in raw.replace(",", " ").split() if c.strip()]
+    74	    return json.dumps(parts, ensure_ascii=False)
+    75	
+    76	
+    77	def _validate_description_text(text: str) -> tuple[bool, str | None]:
+    78	    from services.contact_guard import validate_description_text
+    79	    return validate_description_text(text)
+    80	
+    81	
+    82	# ── keyboards ──────────────────────────────────────────────────────────────────
+    83	
+    84	def _residency_kb() -> InlineKeyboardMarkup:
+    85	    b = InlineKeyboardBuilder()
+    86	    b.add(InlineKeyboardButton(text="Да", callback_data="rv:residency:yes"))
+    87	    b.add(InlineKeyboardButton(text="Нет", callback_data="rv:residency:no"))
+    88	    b.adjust(2)
+    89	    return b.as_markup()
+    90	
+    91	
+    92	def _geo_kb() -> InlineKeyboardMarkup:
+    93	    b = InlineKeyboardBuilder()
+    94	    for val, label in _GEO_OPTIONS:
+    95	        b.add(InlineKeyboardButton(text=label, callback_data=f"rv:geo:{val}"))
+    96	    b.add(InlineKeyboardButton(text="← Назад", callback_data="rv:back"))
+    97	    b.adjust(3, 3, 3, 2, 1)
+    98	    return b.as_markup()
+    99	
+   100	
