@@ -4,7 +4,6 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import re
 
 _hs_media_locks: dict[str, asyncio.Lock] = {}
 
@@ -41,8 +40,6 @@ from handlers.generic_schema_flow import (
     _normalize_geo,
     _username_value,
     _valid_pt_mobile,
-    _norm,
-    _split_lines,
     _normalize_social_links,
     _next_content_index,
     _previous_interactive_index,
@@ -67,11 +64,6 @@ _DESCRIPTION_PROMPTS: dict[str, str] = {
         "Пока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\n"
         "Максимальная длина текста в этом блоке — 600 знаков:"
     ),
-}
-
-_RENTAL_TAGS: dict[str, str] = {
-    "short_term": "#короткосрок",
-    "long_term":  "#долгосрок",
 }
 
 HS_INPUT      = "hs_input"

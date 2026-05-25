@@ -16,7 +16,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import db
 from keyboards.main import get_main_menu
-from services.catalog_specialized_renderers import build_review_listing_html_from_premium_post as _rv_render_html_from_post
 from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
 
 logger = logging.getLogger(__name__)

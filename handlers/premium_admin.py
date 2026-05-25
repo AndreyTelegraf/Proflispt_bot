@@ -6,7 +6,7 @@ import logging
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
-from services.formatting import format_premium_posting, format_premium_posting_html
+from services.formatting import format_premium_posting_html
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
 from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
 from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
@@ -71,7 +71,7 @@ async def admin_approve_premium(callback: CallbackQuery):
 
     try:
         # Publish premium post to channel
-        from services.formatting import format_premium_posting, format_premium_posting_html
+        from services.formatting import format_premium_posting_html
         from config import Config
         from datetime import datetime, timedelta
 
