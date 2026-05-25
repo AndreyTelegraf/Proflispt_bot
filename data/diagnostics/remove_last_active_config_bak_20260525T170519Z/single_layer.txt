@@ -1,0 +1,1 @@
+SINGLE_LAYER=remove last ignored .bak artifact from active config directory

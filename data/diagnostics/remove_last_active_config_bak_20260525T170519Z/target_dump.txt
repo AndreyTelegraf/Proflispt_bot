@@ -1,0 +1,139 @@
+     1	{
+     2	  "schema_id": "animals_v1",
+     3	  "section_name": "Животные",
+     4	  "version": 1,
+     5	  "steps": [
+     6	    {
+     7	      "step_id": "residency_gate",
+     8	      "kind": "choice",
+     9	      "field_name": "resides_in_portugal",
+    10	      "prompt": "Вы или ваш бизнес находитесь в Португалии?",
+    11	      "required": true,
+    12	      "options": [
+    13	        {
+    14	          "value": "yes",
+    15	          "aliases": [
+    16	            "да",
+    17	            "yes",
+    18	            "y"
+    19	          ]
+    20	        },
+    21	        {
+    22	          "value": "no",
+    23	          "aliases": [
+    24	            "нет",
+    25	            "no",
+    26	            "n"
+    27	          ]
+    28	        }
+    29	      ],
+    30	      "stop_if_negative": true
+    31	    },
+    32	    {
+    33	      "step_id": "geo_tags",
+    34	      "kind": "choice",
+    35	      "field_name": "geo_tags",
+    36	      "prompt": "Выберите город, где вы работаете.\n\nМожно указать несколько городов через запятую или #online:",
+    37	      "required": true,
+    38	      "options": [
+    39	        {
+    40	          "value": "lisboa",
+    41	          "label": "Lisboa"
+    42	        },
+    43	        {
+    44	          "value": "porto",
+    45	          "label": "Porto"
+    46	        },
+    47	        {
+    48	          "value": "coimbra",
+    49	          "label": "Coimbra"
+    50	        },
+    51	        {
+    52	          "value": "braga",
+    53	          "label": "Braga"
+    54	        },
+    55	        {
+    56	          "value": "faro",
+    57	          "label": "Faro"
+    58	        },
+    59	        {
+    60	          "value": "sintra",
+    61	          "label": "Sintra"
+    62	        },
+    63	        {
+    64	          "value": "cascais",
+    65	          "label": "Cascais"
+    66	        },
+    67	        {
+    68	          "value": "leiria",
+    69	          "label": "Leiria"
+    70	        },
+    71	        {
+    72	          "value": "setubal",
+    73	          "label": "Setúbal"
+    74	        },
+    75	        {
+    76	          "value": "online",
+    77	          "label": "Онлайн"
+    78	        },
+    79	        {
+    80	          "value": "custom",
+    81	          "label": "Другие города"
+    82	        }
+    83	      ],
+    84	      "validation": {
+    85	        "max_len": 200
+    86	      }
+    87	    },
+    88	    {
+    89	      "step_id": "description",
+    90	      "kind": "text",
+    91	      "field_name": "description",
+    92	      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 1.200 знаков:",
+    93	      "required": true,
+    94	      "validation": {
+    95	        "max_len": 1200
+    96	      }
+    97	    },
+    98	    {
+    99	      "step_id": "social_links",
+   100	      "kind": "text",
+   101	      "field_name": "social_links",
+   102	      "prompt": "Вставьте ссылки на соцсети или сайты, если они есть:",
+   103	      "required": false,
+   104	      "validation": {
+   105	        "max_len": 1200
+   106	      }
+   107	    },
+   108	    {
+   109	      "step_id": "phone_main",
+   110	      "kind": "phone",
+   111	      "field_name": "phone_main",
+   112	      "prompt": "Укажите португальский номер телефона для основной связи, начиная с +351.",
+   113	      "required": true,
+   114	      "validation": {
+   115	        "regex": "^\\+351\\d{9}$"
+   116	      }
+   117	    },
+   118	    {
+   119	      "step_id": "phone_whatsapp",
+   120	      "kind": "phone",
+   121	      "field_name": "phone_whatsapp",
+   122	      "prompt": "Укажите номер телефона, к которому привязан WhatsApp для резервной связи, если отличается от основного. Можно оставить пустым.",
+   123	      "required": false,
+   124	      "validation": {
+   125	        "regex": "^\\+\\d+$"
+   126	      }
+   127	    },
+   128	    {
+   129	      "step_id": "contact_name",
+   130	      "kind": "text",
+   131	      "field_name": "contact_name",
+   132	      "prompt": "Укажите имя, название компании или имя представителя:",
+   133	      "required": true,
+   134	      "validation": {
+   135	        "max_len": 300
+   136	      }
+   137	    }
+   138	  ]
+   139	}
