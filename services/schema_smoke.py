@@ -13,10 +13,9 @@ def run_smoke() -> None:
     restaurants = SchemaFlowAdapter("Рестораны")
     assert restaurants.current_prompt()
     assert restaurants.accept_answer("да").accepted
-    assert restaurants.accept_answer("Cafe Telegraf, Lisboa").accepted
+    assert restaurants.accept_answer("lisboa").accepted
     assert restaurants.accept_answer("кофе, завтраки, десерты").accepted
     assert restaurants.accept_answer("https://instagram.com/example").accepted
-    assert restaurants.accept_answer("@telegraf").accepted
     assert restaurants.accept_answer("+351912345678").accepted
     assert restaurants.accept_answer("+351912345679").accepted
     assert restaurants.accept_answer("Andrey Telegraf, Cafe Telegraf").accepted

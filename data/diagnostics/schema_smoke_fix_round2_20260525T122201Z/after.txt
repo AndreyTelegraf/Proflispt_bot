@@ -1,0 +1,13 @@
+    13	    restaurants = SchemaFlowAdapter("Рестораны")
+    14	    assert restaurants.current_prompt()
+    15	    assert restaurants.accept_answer("да").accepted
+    16	    assert restaurants.accept_answer("lisboa").accepted
+    17	    assert restaurants.accept_answer("кофе, завтраки, десерты").accepted
+    18	    assert restaurants.accept_answer("https://instagram.com/example").accepted
+    19	    assert restaurants.accept_answer("+351912345678").accepted
+    20	    assert restaurants.accept_answer("+351912345679").accepted
+    21	    assert restaurants.accept_answer("Andrey Telegraf, Cafe Telegraf").accepted
+    22	    assert restaurants.state.is_finished
+    23	
+    24	    talk = SchemaFlowAdapter("Поговори")
+    25	    assert talk.current_prompt()
