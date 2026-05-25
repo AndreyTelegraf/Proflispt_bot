@@ -1,0 +1,30 @@
+handlers/housing_schema_flow.py:91:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py:766:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py:976:        if "message caption is too long" in msg:
+handlers/housing_schema_flow.py:997:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1017:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1092:    post_text = _hs_render_html(payload)
+handlers/generic_schema_flow.py:989:    if len(post_text) > 1024:
+handlers/reviews_schema_flow.py:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py:213:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:477:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:478:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py:520:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:521:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py:555:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:556:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py:634:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:635:    if len(rendered_text) > 1024:
+handlers/premium_admin.py:140:            from handlers.housing_schema_flow import _hs_render_html
+handlers/premium_admin.py:172:            post_text = _hs_render_html(_hs_payload)
+handlers/premium_admin.py:174:            from handlers.reviews_schema_flow import _rv_render_html_from_post
+handlers/premium_admin.py:175:            post_text = _rv_render_html_from_post(post)
+config/fsm_schemas/animals.json.bak_review_links_20260507_121345:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 1.200 знаков:",
+scripts/refactor_renderer_coupling_audit.sh:18:  git grep -n -I -E "from handlers\.restaurants_schema import _render_html|from handlers\.generic_schema_flow import _render_html|from handlers\.generic_schema_flow import SLUG_TO_SECTION|from handlers\.generic_schema_flow import .*SLUG_TO_SECTION|_render_html as _gs_render_html|_render_html as _restaurants" -- "*.py" || true
+scripts/refactor_legacy_naming_audit.sh:21:git grep -n -I -E "workinportugal|Work in Portugal|workinportugal_bot|workinportugal-bot|proflispt|Proflispt" \
+scripts/refactor_legacy_naming_audit.sh:27:grep -E "^(data/diagnostics|data/backups|.*\.bak|docs/refactor/)|workinportugal_bot_stable_|telegram_workinportugal_bot\.tar\.gz|^infra_restructure_summary\.md:|^deploy_workinportugal(_staging)?\.sh:|^rollback_workinportugal\.sh:|^run\.sh:|^start_bot\.sh:|^workinportugal-bot\.service:|^scripts/refactor_python_legacy_docstring_audit\.sh:" "$ALL" \
+scripts/refactor_audit.sh:30:  handlers/restaurants_schema.py \
+scripts/refactor_restaurants_artifact_audit.sh:29:grep -E "(section:restaurants|confirm:restaurants_post|restaurants:|config/fsm_schemas/restaurants\.json|restaurants_schema\.py|mode.*restaurants|slug.*restaurants)" "$ALL" \
+scripts/refactor_restaurants_artifact_audit.sh:32:grep -E "(canonical|template|schema flow|schema_flow|restaurants_schema\.py|handlers/restaurants_schema\.py|_render_html|_choice_keyboard|_step_reply_markup|_start_flow|PostingContext)" "$ALL" \
