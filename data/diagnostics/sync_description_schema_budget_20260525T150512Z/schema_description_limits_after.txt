@@ -1,0 +1,39 @@
+config/fsm_schemas/accountants.json | section=Бухгалтеры | max_len=600
+config/fsm_schemas/animals.json | section=Животные | max_len=600
+config/fsm_schemas/art.json | section=Искусство | max_len=600
+config/fsm_schemas/auto_service.json | section=Автосервис | max_len=600
+config/fsm_schemas/beauty.json | section=Красота | max_len=600
+config/fsm_schemas/car_rental.json | section=Прокат авто | max_len=600
+config/fsm_schemas/cargo_transport.json | section=Грузовые перевозки | max_len=600
+config/fsm_schemas/cleaning.json | section=Клининг | max_len=600
+config/fsm_schemas/construction_repair.json | section=Строительство и ремонт | max_len=600
+config/fsm_schemas/cooking.json | section=Кулинария | max_len=600
+config/fsm_schemas/device_repair.json | section=Ремонт техники | max_len=600
+config/fsm_schemas/furniture.json | section=Мебель изготовление | max_len=600
+config/fsm_schemas/health.json | section=Здоровье | max_len=600
+config/fsm_schemas/home_repair.json | section=Бытовой ремонт и обустройство | max_len=600
+config/fsm_schemas/home_staff.json | section=Домашний персонал | max_len=600
+config/fsm_schemas/housing_wanted.json | section=Ищу жильё | max_len=600
+config/fsm_schemas/insurance.json | section=Страхование | max_len=600
+config/fsm_schemas/it_smm.json | section=IT/SMM | max_len=600
+config/fsm_schemas/job_offer.json | section=Предлагаю работу | max_len=600
+config/fsm_schemas/job_seeker.json | section=Ищу работу | max_len=600
+config/fsm_schemas/leisure.json | section=Отдых | max_len=600
+config/fsm_schemas/marketing.json | section=Маркетинг | max_len=600
+config/fsm_schemas/medicine.json | section=Медицина | max_len=600
+config/fsm_schemas/money_credit.json | section=Деньги/кредиты | max_len=600
+config/fsm_schemas/owner_real_estate.json | section=Недвижимость от хозяев | max_len=600
+config/fsm_schemas/passenger_transport.json | section=Пассажирские перевозки | max_len=600
+config/fsm_schemas/photo_video.json | section=Фото/видео | max_len=600
+config/fsm_schemas/printing.json | section=Полиграфия | max_len=600
+config/fsm_schemas/realtors.json | section=Риелторы | max_len=600
+config/fsm_schemas/residence_lawyers.json | section=ВНЖ/Юристы | max_len=600
+config/fsm_schemas/restaurants.json | section=Рестораны | max_len=600
+config/fsm_schemas/sport.json | section=Спорт | max_len=600
+config/fsm_schemas/tailoring.json | section=Пошив одежды | max_len=600
+config/fsm_schemas/teaching.json | section=Преподавание | max_len=600
+config/fsm_schemas/tourism.json | section=Туризм | max_len=600
+config/fsm_schemas/translators.json | section=Переводчики | max_len=600
+
+DESCRIPTION_STEPS=36
+BAD=0

@@ -1,0 +1,1 @@
+SINGLE_LAYER=sync active FSM description max_len and prompt text from 1200 to 600
