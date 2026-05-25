@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import html
 import json
 import logging
 import re
@@ -32,7 +31,7 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
-from services.geo import render_geo_tags
+from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     validate_publish_payload,
@@ -87,48 +86,6 @@ def _hs_resolve_prompt(step, slug: str) -> str:
         return _DESCRIPTION_PROMPTS.get(slug, step.prompt)
     return step.prompt
 
-
-def _hs_render_html(payload: dict) -> str:
-    """Housing-specific render: appends rental_term tag to geo line, omits review links."""
-    lines: list[str] = []
-
-    geo_line_raw = render_geo_tags(payload.get("geo_tags"))
-    rental_tag = _RENTAL_TAGS.get(str(payload.get("rental_term", "")), "")
-
-    if geo_line_raw:
-        geo_line = html.escape(geo_line_raw)
-        if rental_tag:
-            geo_line += " " + html.escape(rental_tag)
-        lines.append(geo_line)
-
-    description = _norm(payload.get("description"))
-    if description:
-        dlines = [p.strip() for p in description.splitlines() if p.strip()]
-        if dlines:
-            lines.append("- " + html.escape(dlines[0]))
-            for p in dlines[1:]:
-                lines.append(html.escape(p))
-
-    for link in _split_lines(payload.get("social_links")):
-        lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
-
-    tg = _norm(payload.get("telegram"))
-    if tg:
-        lines.append(html.escape(tg))
-
-    pm = _norm(payload.get("phone_main"))
-    if pm:
-        lines.append(html.escape(pm))
-
-    pw = _norm(payload.get("phone_whatsapp"))
-    if pw and pw != pm:
-        lines.append(html.escape(pw))
-
-    cn = _norm(payload.get("contact_name"))
-    if cn:
-        lines.append("- " + html.escape(cn))
-
-    return "\n".join(lines).strip()
 
 
 def _validate_description_text(text: str) -> tuple[bool, str | None]:

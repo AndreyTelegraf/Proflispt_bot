@@ -9,6 +9,7 @@ from database import db
 from services.formatting import format_premium_posting, format_premium_posting_html
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
 from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
+from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
 
 logger = logging.getLogger(__name__)
 
@@ -137,42 +138,10 @@ async def admin_approve_premium(callback: CallbackQuery):
         if post.get('mode') in ('job_seeker', 'job_offer'):
             post_text = format_premium_posting_html(post)
         elif post.get('mode') in ('housing_wanted', 'owner_real_estate'):
-            from handlers.housing_schema_flow import _hs_render_html
-            import json as _json_hs
-            cities_raw = post.get('cities')
-            geo_tags = ""
-            if cities_raw:
-                _cities = cities_raw if isinstance(cities_raw, list) else []
-                if not _cities and isinstance(cities_raw, str):
-                    try:
-                        _cities = _json_hs.loads(cities_raw)
-                    except Exception:
-                        _cities = [cities_raw]
-                if isinstance(_cities, list):
-                    geo_tags = " ".join(
-                        f"#{str(x).strip().lstrip('#').lower()}"
-                        for x in _cities if str(x).strip()
-                    )
-            _rental_term = ""
-            try:
-                _hn = _json_hs.loads(post.get('admin_notes') or '{}')
-                _rental_term = _hn.get('rental_term', '')
-            except Exception:
-                pass
-            _hs_payload = {
-                "geo_tags": geo_tags,
-                "rental_term": _rental_term,
-                "description": post.get("description", ""),
-                "social_links": post.get("social_media", ""),
-                "telegram": post.get("telegram_username", ""),
-                "phone_main": post.get("phone_main", ""),
-                "phone_whatsapp": post.get("phone_whatsapp", ""),
-                "contact_name": post.get("name", ""),
-            }
-            post_text = _hs_render_html(_hs_payload)
+            _hs_payload = build_housing_listing_payload_from_premium_post(post)
+            post_text = render_housing_listing_html(_hs_payload)
         elif post.get('mode') == 'reviews':
-            from handlers.reviews_schema_flow import _rv_render_html_from_post
-            post_text = _rv_render_html_from_post(post)
+            post_text = build_review_listing_html_from_premium_post(post)
         else:
             if post['mode'] in get_catalog_mode_slugs():
                 _generic_payload = build_catalog_listing_payload_from_premium_post(post)

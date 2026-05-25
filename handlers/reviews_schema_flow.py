@@ -1,7 +1,6 @@
 """Reviews FSM flow — content moderation without payment."""
 from __future__ import annotations
 
-import html
 import json
 import logging
 import re
@@ -17,6 +16,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database import db
 from keyboards.main import get_main_menu
+from services.catalog_specialized_renderers import build_review_listing_html_from_premium_post as _rv_render_html_from_post
+from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -63,60 +64,6 @@ _PROMPTS = [
     "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
 ]
 
-
-# ── render helpers ─────────────────────────────────────────────────────────────
-
-def _rv_render_html(payload: dict) -> str:
-    lines: list[str] = []
-
-    geo = str(payload.get("geo_tags") or "").strip()
-    if geo:
-        tag = geo if geo.startswith("#") else f"#{geo.lstrip('#').lower()}"
-        lines.append(html.escape(tag))
-
-    performer = str(payload.get("performer_contacts") or "").strip()
-    if performer:
-        uname = performer if performer.startswith("@") else f"@{performer.lstrip('@')}"
-        lines.append(f"Исполнитель: {html.escape(uname)}")
-
-    description = str(payload.get("description") or "").strip()
-    if description:
-        dlines = [p.strip() for p in description.splitlines() if p.strip()]
-        if dlines:
-            lines.append("- " + html.escape(dlines[0]))
-            for p in dlines[1:]:
-                lines.append(html.escape(p))
-
-    author = str(payload.get("author_telegram") or "").strip()
-    if author:
-        uname = author if author.startswith("@") else f"@{author.lstrip('@')}"
-        lines.append(f"Автор: {html.escape(uname)}")
-
-    return "\n".join(lines).strip()
-
-
-def _rv_render_html_from_post(post: dict) -> str:
-    cities_raw = post.get("cities")
-    geo_tags = ""
-    if cities_raw:
-        try:
-            cities = json.loads(cities_raw) if isinstance(cities_raw, str) else cities_raw
-            if isinstance(cities, list):
-                geo_tags = " ".join(
-                    f"#{str(x).strip().lstrip('#').lower()}"
-                    for x in cities if str(x).strip()
-                )
-            else:
-                geo_tags = str(cities_raw).strip()
-        except Exception:
-            geo_tags = str(cities_raw).strip()
-
-    return _rv_render_html({
-        "geo_tags": geo_tags,
-        "description": post.get("description", ""),
-        "performer_contacts": post.get("social_media", ""),
-        "author_telegram": post.get("telegram_username", ""),
-    })
 
 
 def _normalize_geo(value: str) -> str:

@@ -1,0 +1,185 @@
+     1	# RESTAURANTS_GEO_TAG_RENDER_FIX
+     2	# RESTAURANTS_PREMIUM_ADMIN_G2_FIX
+     3	"""Admin handlers for premium posts."""
+     4	
+     5	import logging
+     6	from aiogram import Router, F
+     7	from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+     8	from database import db
+     9	from services.formatting import format_premium_posting, format_premium_posting_html
+    10	from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
+    11	from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
+    12	from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
+    13	
+    14	logger = logging.getLogger(__name__)
+    15	
+    16	router = Router()
+    17	
+    18	@router.callback_query(F.data.startswith("admin:approve_premium:"))
+    19	async def admin_approve_premium(callback: CallbackQuery):
+    20	    """Admin approves premium post payment."""
+    21	    # Check if user is admin
+    22	    if callback.from_user.id != 336224597:
+    23	        await callback.answer("🚫 У вас нет прав для выполнения этой команды.", show_alert=True)
+    24	        return
+    25	    
+    26	    post_id = int(callback.data.split(":")[2])
+    27	    
+    28	    # Get premium post
+    29	    post = db.get_premium_post(post_id)
+    30	    if not post:
+    31	        await callback.answer("🚫 Пост не найден.", show_alert=True)
+    32	        return
+    33	    
+    34	    # Get user's telegram_id
+    35	    user = db.get_user_by_id(post['user_id'])
+    36	    if not user:
+    37	        await callback.answer("🚫 Пользователь не найден.", show_alert=True)
+    38	        return
+    39	    
+    40	    # Approve premium post
+    41	    db.approve_premium_post(post_id, callback.from_user.id)
+    42	
+    43	    old_post_id_to_supersede = None
+    44	    repost_old_chat_id = None
+    45	    repost_old_message_id = None
+    46	
+    47	    if post.get("action_type") == "repost":
+    48	        import json
+    49	        try:
+    50	            repost_notes = json.loads(post.get("admin_notes") or "{}")
+    51	        except Exception:
+    52	            repost_notes = {}
+    53	        old_post_id_to_supersede = repost_notes.get("old_post_id")
+    54	        repost_old_chat_id = repost_notes.get("old_chat_id")
+    55	        repost_old_message_id = repost_notes.get("old_message_id")
+    56	        repost_old_published_message_ids = repost_notes.get("old_published_message_ids") or []
+    57	
+    58	    pin_old_chat_id = None
+    59	    pin_old_message_id = None
+    60	    pin_old_topic_id = None
+    61	
+    62	    if post.get("action_type") == "pin":
+    63	        import json
+    64	        try:
+    65	            pin_notes = json.loads(post.get("admin_notes") or "{}")
+    66	        except Exception:
+    67	            pin_notes = {}
+    68	        pin_old_chat_id = pin_notes.get("old_chat_id")
+    69	        pin_old_message_id = pin_notes.get("old_message_id")
+    70	        pin_old_topic_id = pin_notes.get("old_topic_id")
+    71	
+    72	    try:
+    73	        # Publish premium post to channel
+    74	        from services.formatting import format_premium_posting, format_premium_posting_html
+    75	        from config import Config
+    76	        from datetime import datetime, timedelta
+    77	
+    78	        if post.get("action_type") == "pin":
+    79	            pin_fail_reason = None
+    80	            if not pin_old_chat_id or not pin_old_message_id:
+    81	                pin_fail_reason = "Нет координат поста"
+    82	            else:
+    83	                try:
+    84	                    await callback.bot.pin_chat_message(
+    85	                        chat_id=int(pin_old_chat_id),
+    86	                        message_id=int(pin_old_message_id),
+    87	                    )
+    88	                except Exception as pin_error:
+    89	                    logger.warning(f"pin_chat_message failed for post #{post_id}: {pin_error}")
+    90	                    pin_fail_reason = str(pin_error)
+    91	
+    92	            if pin_fail_reason:
+    93	                db.reject_premium_post(post_id, callback.from_user.id, f"Pin failed: {pin_fail_reason}")
+    94	                main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    95	                    [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
+    96	                ])
+    97	                await callback.bot.send_message(
+    98	                    chat_id=user['telegram_id'],
+    99	                    text="Не удалось закрепить объявление — оригинальный пост недоступен. Обратитесь к администратору.",
+   100	                    reply_markup=main_menu_keyboard,
+   101	                    disable_web_page_preview=True,
+   102	                )
+   103	                await callback.message.edit_text(
+   104	                    f"❌ <b>Закреп #{post_id} не выполнен.</b>\n\n{pin_fail_reason}",
+   105	                    parse_mode="HTML",
+   106	                )
+   107	                await callback.answer("❌ Закреп не выполнен.", show_alert=True)
+   108	                return
+   109	
+   110	            pinned_until = datetime.now() + timedelta(hours=24)
+   111	            db.set_premium_post_pinned_until(post_id, pinned_until)
+   112	            db.update_premium_post_publication(
+   113	                post_id,
+   114	                int(pin_old_message_id),
+   115	                int(pin_old_chat_id),
+   116	                int(pin_old_topic_id) if pin_old_topic_id else None,
+   117	            )
+   118	            if pin_old_topic_id:
+   119	                post_link = f"https://t.me/proflistpt/{pin_old_topic_id}/{pin_old_message_id}"
+   120	            else:
+   121	                post_link = f"https://t.me/proflistpt/{pin_old_message_id}"
+   122	            await callback.bot.send_message(
+   123	                chat_id=user['telegram_id'],
+   124	                text=f"Ваше объявление закреплено на 24 часа!\nСсылка: {post_link}",
+   125	                disable_web_page_preview=True,
+   126	                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+   127	                    [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
+   128	                ]),
+   129	            )
+   130	            await callback.message.edit_text(
+   131	                f"✅ <b>Закреп #{post_id} одобрен.</b>",
+   132	                parse_mode="HTML",
+   133	            )
+   134	            await callback.answer("✅ Закреп одобрен!")
+   135	            return
+   136	
+   137	        # Format the post text
+   138	        if post.get('mode') in ('job_seeker', 'job_offer'):
+   139	            post_text = format_premium_posting_html(post)
+   140	        elif post.get('mode') in ('housing_wanted', 'owner_real_estate'):
+   141	            _hs_payload = build_housing_listing_payload_from_premium_post(post)
+   142	            post_text = render_housing_listing_html(_hs_payload)
+   143	        elif post.get('mode') == 'reviews':
+   144	            post_text = build_review_listing_html_from_premium_post(post)
+   145	        else:
+   146	            if post['mode'] in get_catalog_mode_slugs():
+   147	                _generic_payload = build_catalog_listing_payload_from_premium_post(post)
+   148	                post_text = render_catalog_listing_html(_generic_payload)
+   149	            else:
+   150	                logger.warning(
+   151	                    "Unknown mode %r for premium post #%s, falling back to format_premium_posting_html",
+   152	                    post.get('mode'), post.get('id'),
+   153	                )
+   154	                post_text = format_premium_posting_html(post)
+   155	
+   156	        # Determine topic ID based on mode
+   157	        topic_id = None
+   158	        _baraholka_publish = False
+   159	        if post['mode'] == 'job_seeker':
+   160	            topic_id = Config.JOB_SEEKING_TOPIC_ID
+   161	        elif post['mode'] == 'job_offer':
+   162	            topic_id = Config.JOB_OFFERING_TOPIC_ID
+   163	        elif post['mode'] in ('housing_wanted', 'owner_real_estate'):
+   164	            import json as _json_hn
+   165	            try:
+   166	                _hn = _json_hn.loads(post.get('admin_notes') or '{}')
+   167	                _baraholka_publish = bool(_hn.get('baraholka_repost_target'))
+   168	            except Exception:
+   169	                pass
+   170	            if _baraholka_publish:
+   171	                topic_id = Config.BARAHOLKA_HOUSING_TOPIC_ID
+   172	            else:
+   173	                from services.sections_registry import load_sections_registry
+   174	                _hs_sec = {
+   175	                    'housing_wanted': 'Ищу жильё',
+   176	                    'owner_real_estate': 'Недвижимость от хозяев',
+   177	                }.get(post['mode'])
+   178	                if _hs_sec:
+   179	                    registry = load_sections_registry()
+   180	                    topic_id = int(registry.get_topic_id(_hs_sec))
+   181	        elif post['mode'] == 'reviews':
+   182	            topic_id = 12860
+   183	        else:
+   184	            topic_id = get_catalog_topic_id(post['mode'])
+   185	        publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID

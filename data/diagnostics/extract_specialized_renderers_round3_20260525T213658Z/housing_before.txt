@@ -1,0 +1,145 @@
+     1	"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+     2	from __future__ import annotations
+     3	
+     4	import asyncio
+     5	import html
+     6	import json
+     7	import logging
+     8	import re
+     9	
+    10	_hs_media_locks: dict[str, asyncio.Lock] = {}
+    11	
+    12	
+    13	def _hs_media_lock(chat_id: int, user_id: int) -> asyncio.Lock:
+    14	    key = f"{chat_id}:{user_id}"
+    15	    if key not in _hs_media_locks:
+    16	        _hs_media_locks[key] = asyncio.Lock()
+    17	    return _hs_media_locks[key]
+    18	
+    19	from aiogram import Router, F
+    20	from aiogram.filters import StateFilter
+    21	from aiogram.fsm.context import FSMContext
+    22	from aiogram.types import (
+    23	    CallbackQuery, Message,
+    24	    InlineKeyboardMarkup, InlineKeyboardButton,
+    25	)
+    26	from aiogram.utils.keyboard import InlineKeyboardBuilder
+    27	
+    28	from config import Config
+    29	from database import db
+    30	from keyboards.main import get_main_menu
+    31	from models.posting_context import PostingContext
+    32	from services.schema_bootstrap import build_schema_registry
+    33	from services.schema_engine import SchemaEngine
+    34	from services.sections_registry import load_sections_registry
+    35	from services.geo import render_geo_tags
+    36	from services.listing_validation import (
+    37	    STANDARD_LISTING_REQUIRED_FIELDS,
+    38	    validate_publish_payload,
+    39	)
+    40	
+    41	from handlers.generic_schema_flow import (
+    42	    _normalize_geo,
+    43	    _username_value,
+    44	    _valid_pt_mobile,
+    45	    _norm,
+    46	    _split_lines,
+    47	    _normalize_social_links,
+    48	    _next_content_index,
+    49	    _previous_interactive_index,
+    50	)
+    51	
+    52	logger = logging.getLogger(__name__)
+    53	router = Router()
+    54	
+    55	HOUSING_SLUGS: dict[str, str] = {
+    56	    "housing_wanted":    "Ищу жильё",
+    57	    "owner_real_estate": "Недвижимость от хозяев",
+    58	}
+    59	
+    60	_DESCRIPTION_PROMPTS: dict[str, str] = {
+    61	    "housing_wanted": (
+    62	        "Опишите, какое жильё вы ищете: город или район, срок аренды, бюджет, количество людей, животные, документы и важные условия.\n\n"
+    63	        "Пока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\n"
+    64	        "Максимальная длина текста в этом блоке — 600 знаков:"
+    65	    ),
+    66	    "owner_real_estate": (
+    67	        "Опишите объект: город или район, тип жилья, цена, срок аренды или продажи, условия, мебель, коммунальные платежи и другие важные детали.\n\n"
+    68	        "Пока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\n"
+    69	        "Максимальная длина текста в этом блоке — 600 знаков:"
+    70	    ),
+    71	}
+    72	
+    73	_RENTAL_TAGS: dict[str, str] = {
+    74	    "short_term": "#короткосрок",
+    75	    "long_term":  "#долгосрок",
+    76	}
+    77	
+    78	HS_INPUT      = "hs_input"
+    79	HS_GEO_CUSTOM = "hs_geo_custom"
+    80	HS_TG_GATE    = "hs_tg_gate"
+    81	HS_CONFIRM    = "hs_confirm"
+    82	HS_MEDIA      = "hs_media"
+    83	
+    84	
+    85	def _hs_resolve_prompt(step, slug: str) -> str:
+    86	    if getattr(step, "field_name", "") == "description":
+    87	        return _DESCRIPTION_PROMPTS.get(slug, step.prompt)
+    88	    return step.prompt
+    89	
+    90	
+    91	def _hs_render_html(payload: dict) -> str:
+    92	    """Housing-specific render: appends rental_term tag to geo line, omits review links."""
+    93	    lines: list[str] = []
+    94	
+    95	    geo_line_raw = render_geo_tags(payload.get("geo_tags"))
+    96	    rental_tag = _RENTAL_TAGS.get(str(payload.get("rental_term", "")), "")
+    97	
+    98	    if geo_line_raw:
+    99	        geo_line = html.escape(geo_line_raw)
+   100	        if rental_tag:
+   101	            geo_line += " " + html.escape(rental_tag)
+   102	        lines.append(geo_line)
+   103	
+   104	    description = _norm(payload.get("description"))
+   105	    if description:
+   106	        dlines = [p.strip() for p in description.splitlines() if p.strip()]
+   107	        if dlines:
+   108	            lines.append("- " + html.escape(dlines[0]))
+   109	            for p in dlines[1:]:
+   110	                lines.append(html.escape(p))
+   111	
+   112	    for link in _split_lines(payload.get("social_links")):
+   113	        lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
+   114	
+   115	    tg = _norm(payload.get("telegram"))
+   116	    if tg:
+   117	        lines.append(html.escape(tg))
+   118	
+   119	    pm = _norm(payload.get("phone_main"))
+   120	    if pm:
+   121	        lines.append(html.escape(pm))
+   122	
+   123	    pw = _norm(payload.get("phone_whatsapp"))
+   124	    if pw and pw != pm:
+   125	        lines.append(html.escape(pw))
+   126	
+   127	    cn = _norm(payload.get("contact_name"))
+   128	    if cn:
+   129	        lines.append("- " + html.escape(cn))
+   130	
+   131	    return "\n".join(lines).strip()
+   132	
+   133	
+   134	def _validate_description_text(text: str) -> tuple[bool, str | None]:
+   135	    from services.contact_guard import validate_description_text
+   136	    return validate_description_text(text)
+   137	
+   138	
+   139	# ── keyboards ─────────────────────────────────────────────────────────────────
+   140	
+   141	def _hs_back_kb(slug: str) -> InlineKeyboardMarkup:
+   142	    b = InlineKeyboardBuilder()
+   143	    b.add(InlineKeyboardButton(text="← Назад", callback_data=f"hs:back:{slug}"))
+   144	    return b.as_markup()
+   145	

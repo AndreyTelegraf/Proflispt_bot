@@ -1,0 +1,45 @@
+   136	        # Format the post text
+   137	        if post.get('mode') in ('job_seeker', 'job_offer'):
+   138	            post_text = format_premium_posting_html(post)
+   139	        elif post.get('mode') in ('housing_wanted', 'owner_real_estate'):
+   140	            from handlers.housing_schema_flow import _hs_render_html
+   141	            import json as _json_hs
+   142	            cities_raw = post.get('cities')
+   143	            geo_tags = ""
+   144	            if cities_raw:
+   145	                _cities = cities_raw if isinstance(cities_raw, list) else []
+   146	                if not _cities and isinstance(cities_raw, str):
+   147	                    try:
+   148	                        _cities = _json_hs.loads(cities_raw)
+   149	                    except Exception:
+   150	                        _cities = [cities_raw]
+   151	                if isinstance(_cities, list):
+   152	                    geo_tags = " ".join(
+   153	                        f"#{str(x).strip().lstrip('#').lower()}"
+   154	                        for x in _cities if str(x).strip()
+   155	                    )
+   156	            _rental_term = ""
+   157	            try:
+   158	                _hn = _json_hs.loads(post.get('admin_notes') or '{}')
+   159	                _rental_term = _hn.get('rental_term', '')
+   160	            except Exception:
+   161	                pass
+   162	            _hs_payload = {
+   163	                "geo_tags": geo_tags,
+   164	                "rental_term": _rental_term,
+   165	                "description": post.get("description", ""),
+   166	                "social_links": post.get("social_media", ""),
+   167	                "telegram": post.get("telegram_username", ""),
+   168	                "phone_main": post.get("phone_main", ""),
+   169	                "phone_whatsapp": post.get("phone_whatsapp", ""),
+   170	                "contact_name": post.get("name", ""),
+   171	            }
+   172	            post_text = _hs_render_html(_hs_payload)
+   173	        elif post.get('mode') == 'reviews':
+   174	            from handlers.reviews_schema_flow import _rv_render_html_from_post
+   175	            post_text = _rv_render_html_from_post(post)
+   176	        else:
+   177	            if post['mode'] in get_catalog_mode_slugs():
+   178	                _generic_payload = build_catalog_listing_payload_from_premium_post(post)
+   179	                post_text = render_catalog_listing_html(_generic_payload)
+   180	            else:

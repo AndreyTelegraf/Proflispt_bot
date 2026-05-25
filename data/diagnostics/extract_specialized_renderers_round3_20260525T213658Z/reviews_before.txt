@@ -1,0 +1,135 @@
+     1	"""Reviews FSM flow — content moderation without payment."""
+     2	from __future__ import annotations
+     3	
+     4	import html
+     5	import json
+     6	import logging
+     7	import re
+     8	
+     9	from aiogram import Router, F
+    10	from aiogram.filters import StateFilter
+    11	from aiogram.fsm.context import FSMContext
+    12	from aiogram.types import (
+    13	    CallbackQuery, Message,
+    14	    InlineKeyboardMarkup, InlineKeyboardButton,
+    15	)
+    16	from aiogram.utils.keyboard import InlineKeyboardBuilder
+    17	
+    18	from database import db
+    19	from keyboards.main import get_main_menu
+    20	
+    21	logger = logging.getLogger(__name__)
+    22	router = Router()
+    23	
+    24	ADMIN_CHAT_ID = 336224597
+    25	
+    26	# FSM states
+    27	RV_INPUT      = "rv_input"
+    28	RV_GEO_CUSTOM = "rv_geo_custom"
+    29	RV_MEDIA      = "rv_media"
+    30	RV_CONFIRM    = "rv_confirm"
+    31	
+    32	_STEP_RESIDENCY   = 0
+    33	_STEP_GEO         = 1
+    34	_STEP_CONTACTS    = 2
+    35	_STEP_DESCRIPTION = 3
+    36	
+    37	_GEO_OPTIONS = [
+    38	    ("lisboa",  "Lisboa"),
+    39	    ("porto",   "Porto"),
+    40	    ("coimbra", "Coimbra"),
+    41	    ("braga",   "Braga"),
+    42	    ("faro",    "Faro"),
+    43	    ("sintra",  "Sintra"),
+    44	    ("cascais", "Cascais"),
+    45	    ("leiria",  "Leiria"),
+    46	    ("setubal", "Setúbal"),
+    47	    ("online",  "Онлайн"),
+    48	    ("custom",  "Другие города"),
+    49	]
+    50	
+    51	_PROMPTS = [
+    52	    "Вы находитесь в Португалии?",
+    53	    "Выберите город или регион:",
+    54	    "Укажите @username специалиста, которому вы хотите оставить отзыв:",
+    55	    "Напишите отзыв:\n\n"
+    56	    "- Что именно делали: услуга или работа\n"
+    57	    "- Что было хорошо\n"
+    58	    "- Что было плохо, если было\n"
+    59	    "- Итог: рекомендуете или нет\n\n"
+    60	    "Важно:\n"
+    61	    "- Только текст, без ссылок и эмодзи\n"
+    62	    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+    63	    "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
+    64	]
+    65	
+    66	
+    67	# ── render helpers ─────────────────────────────────────────────────────────────
+    68	
+    69	def _rv_render_html(payload: dict) -> str:
+    70	    lines: list[str] = []
+    71	
+    72	    geo = str(payload.get("geo_tags") or "").strip()
+    73	    if geo:
+    74	        tag = geo if geo.startswith("#") else f"#{geo.lstrip('#').lower()}"
+    75	        lines.append(html.escape(tag))
+    76	
+    77	    performer = str(payload.get("performer_contacts") or "").strip()
+    78	    if performer:
+    79	        uname = performer if performer.startswith("@") else f"@{performer.lstrip('@')}"
+    80	        lines.append(f"Исполнитель: {html.escape(uname)}")
+    81	
+    82	    description = str(payload.get("description") or "").strip()
+    83	    if description:
+    84	        dlines = [p.strip() for p in description.splitlines() if p.strip()]
+    85	        if dlines:
+    86	            lines.append("- " + html.escape(dlines[0]))
+    87	            for p in dlines[1:]:
+    88	                lines.append(html.escape(p))
+    89	
+    90	    author = str(payload.get("author_telegram") or "").strip()
+    91	    if author:
+    92	        uname = author if author.startswith("@") else f"@{author.lstrip('@')}"
+    93	        lines.append(f"Автор: {html.escape(uname)}")
+    94	
+    95	    return "\n".join(lines).strip()
+    96	
+    97	
+    98	def _rv_render_html_from_post(post: dict) -> str:
+    99	    cities_raw = post.get("cities")
+   100	    geo_tags = ""
+   101	    if cities_raw:
+   102	        try:
+   103	            cities = json.loads(cities_raw) if isinstance(cities_raw, str) else cities_raw
+   104	            if isinstance(cities, list):
+   105	                geo_tags = " ".join(
+   106	                    f"#{str(x).strip().lstrip('#').lower()}"
+   107	                    for x in cities if str(x).strip()
+   108	                )
+   109	            else:
+   110	                geo_tags = str(cities_raw).strip()
+   111	        except Exception:
+   112	            geo_tags = str(cities_raw).strip()
+   113	
+   114	    return _rv_render_html({
+   115	        "geo_tags": geo_tags,
+   116	        "description": post.get("description", ""),
+   117	        "performer_contacts": post.get("social_media", ""),
+   118	        "author_telegram": post.get("telegram_username", ""),
+   119	    })
+   120	
+   121	
+   122	def _normalize_geo(value: str) -> str:
+   123	    raw = str(value or "").strip()
+   124	    if not raw:
+   125	        return json.dumps([], ensure_ascii=False)
+   126	    parts = [c.strip().lstrip("#").lower() for c in raw.replace(",", " ").split() if c.strip()]
+   127	    return json.dumps(parts, ensure_ascii=False)
+   128	
+   129	
+   130	def _validate_description_text(text: str) -> tuple[bool, str | None]:
+   131	    from services.contact_guard import validate_description_text
+   132	    return validate_description_text(text)
+   133	
+   134	
+   135	# ── keyboards ──────────────────────────────────────────────────────────────────

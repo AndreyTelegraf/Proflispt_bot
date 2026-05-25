@@ -1,0 +1,1 @@
+extract housing/reviews HTML renderers from handler layer to services layer
