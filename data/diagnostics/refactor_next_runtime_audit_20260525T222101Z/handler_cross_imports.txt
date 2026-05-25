@@ -1,0 +1,26 @@
+handlers/my_postings.py:1203:        from handlers.housing_schema_flow import _notify_admin_baraholka_from_post
+handlers/section_catalog.py:13:from handlers.reviews_schema_flow import rv_entry
+handlers/housing_schema_flow.py:33:from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
+handlers/housing_schema_flow.py:39:from handlers.generic_schema_flow import (
+handlers/housing_schema_flow.py:715:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py:946:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:966:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1041:    post_text = _hs_render_html(payload)
+handlers/generic_schema_flow.py:644:                from handlers.section_catalog import _sections_keyboard
+handlers/reviews_schema_flow.py:19:from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
+handlers/reviews_schema_flow.py:159:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:423:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:466:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:501:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:580:    rendered_text = _rv_render_html(payload)
+main.py:20:from handlers.start import router as start_router
+main.py:21:from handlers.posting import router as posting_router
+main.py:22:from handlers.my_postings import router as my_postings_router
+main.py:23:from handlers.fallback import router as fallback_router
+main.py:24:from handlers.admin import router as admin_router
+main.py:25:from handlers.premium_posting import router as premium_posting_router
+main.py:26:from handlers.premium_admin import router as premium_admin_router
+main.py:27:from handlers.housing_schema_flow import router as housing_schema_flow_router
+main.py:28:from handlers.generic_schema_flow import router as generic_schema_flow_router
+main.py:29:from handlers.section_catalog import router as section_catalog_router
+main.py:30:from handlers.reviews_schema_flow import router as reviews_schema_flow_router

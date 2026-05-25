@@ -1,0 +1,16 @@
+handlers/section_catalog.py:21:    "Рестораны":                     "section:generic:restaurants",
+handlers/generic_schema_flow.py:1:"""Generic schema flow handler for all catalogue sections except restaurants/jobs."""
+handlers/premium_admin.py:1:# RESTAURANTS_GEO_TAG_RENDER_FIX
+handlers/premium_admin.py:2:# RESTAURANTS_PREMIUM_ADMIN_G2_FIX
+services/catalog_modes.py:52:    "restaurants":          "Рестораны",
+services/schema_smoke.py:13:    restaurants = SchemaFlowAdapter("Рестораны")
+services/schema_smoke.py:14:    assert restaurants.current_prompt()
+services/schema_smoke.py:15:    assert restaurants.accept_answer("да").accepted
+services/schema_smoke.py:16:    assert restaurants.accept_answer("lisboa").accepted
+services/schema_smoke.py:17:    assert restaurants.accept_answer("кофе, завтраки, десерты").accepted
+services/schema_smoke.py:18:    assert restaurants.accept_answer("https://instagram.com/example").accepted
+services/schema_smoke.py:19:    assert restaurants.accept_answer("+351912345678").accepted
+services/schema_smoke.py:20:    assert restaurants.accept_answer("+351912345679").accepted
+services/schema_smoke.py:21:    assert restaurants.accept_answer("Andrey Telegraf, Cafe Telegraf").accepted
+services/schema_smoke.py:22:    assert restaurants.state.is_finished
+config/fsm_schemas/restaurants.json:2:  "schema_id": "restaurants_v1",
