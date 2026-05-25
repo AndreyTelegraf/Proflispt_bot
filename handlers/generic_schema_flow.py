@@ -36,6 +36,8 @@ from services.listing_validation import (
 logger = logging.getLogger(__name__)
 router = Router()
 
+CATALOG_DESCRIPTION_MAX_LEN = 600
+
 _GS_MEDIA_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
 
 
@@ -701,6 +703,14 @@ async def gs_text_input(message: Message, state: FSMContext):
         if not ok:
             await message.answer(
                 err + "\n\nПовторите отправку текстового описания:",
+                disable_web_page_preview=True,
+            )
+            return
+        if len(raw) > CATALOG_DESCRIPTION_MAX_LEN:
+            await message.answer(
+                f"Описание слишком длинное. Максимум {CATALOG_DESCRIPTION_MAX_LEN} символов. "
+                "Это нужно, чтобы публикация с фото/видео помещалась в лимит Telegram вместе с городом, ссылками, контактами и отзывами.\n\n"
+                "Сократите описание и отправьте его заново:",
                 disable_web_page_preview=True,
             )
             return

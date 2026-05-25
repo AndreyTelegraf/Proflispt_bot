@@ -109,7 +109,7 @@
       "prompt": "Опишите объект.",
       "required": true,
       "validation": {
-        "max_len": 1200
+        "max_len": 600
       }
     },
     {

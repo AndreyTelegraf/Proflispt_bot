@@ -109,7 +109,7 @@
       "prompt": "Опишите, какое жильё вы ищете.",
       "required": true,
       "validation": {
-        "max_len": 1200
+        "max_len": 600
       }
     },
     {
