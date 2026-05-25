@@ -1,0 +1,70 @@
+49-]
+50-
+51-_PROMPTS = [
+52-    "Вы находитесь в Португалии?",
+53-    "Выберите город или регион:",
+54-    "Укажите @username специалиста, которому вы хотите оставить отзыв:",
+55-    "Напишите отзыв:\n\n"
+56-    "- Что именно делали: услуга или работа\n"
+57-    "- Что было хорошо\n"
+58-    "- Что было плохо, если было\n"
+59-    "- Итог: рекомендуете или нет\n\n"
+60-    "Важно:\n"
+61-    "- Только текст, без ссылок и эмодзи\n"
+62-    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+63-    "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
+64-]
+65-
+66-
+67-# ── render helpers ─────────────────────────────────────────────────────────────
+68-
+69:def _rv_render_html(payload: dict) -> str:
+70-    lines: list[str] = []
+71-
+72-    geo = str(payload.get("geo_tags") or "").strip()
+73-    if geo:
+74-        tag = geo if geo.startswith("#") else f"#{geo.lstrip('#').lower()}"
+75-        lines.append(html.escape(tag))
+76-
+77-    performer = str(payload.get("performer_contacts") or "").strip()
+78-    if performer:
+79-        uname = performer if performer.startswith("@") else f"@{performer.lstrip('@')}"
+80-        lines.append(f"Исполнитель: {html.escape(uname)}")
+81-
+82-    description = str(payload.get("description") or "").strip()
+83-    if description:
+84-        dlines = [p.strip() for p in description.splitlines() if p.strip()]
+85-        if dlines:
+86-            lines.append("- " + html.escape(dlines[0]))
+87-            for p in dlines[1:]:
+88-                lines.append(html.escape(p))
+89-
+90-    author = str(payload.get("author_telegram") or "").strip()
+91-    if author:
+92-        uname = author if author.startswith("@") else f"@{author.lstrip('@')}"
+93-        lines.append(f"Автор: {html.escape(uname)}")
+94-
+95-    return "\n".join(lines).strip()
+96-
+97-
+98:def _rv_render_html_from_post(post: dict) -> str:
+99-    cities_raw = post.get("cities")
+100-    geo_tags = ""
+101-    if cities_raw:
+102-        try:
+103-            cities = json.loads(cities_raw) if isinstance(cities_raw, str) else cities_raw
+104-            if isinstance(cities, list):
+105-                geo_tags = " ".join(
+106-                    f"#{str(x).strip().lstrip('#').lower()}"
+107-                    for x in cities if str(x).strip()
+108-                )
+109-            else:
+110-                geo_tags = str(cities_raw).strip()
+111-        except Exception:
+112-            geo_tags = str(cities_raw).strip()
+113-
+114-    return _rv_render_html({
+115-        "geo_tags": geo_tags,
+116-        "description": post.get("description", ""),
+117-        "performer_contacts": post.get("social_media", ""),
+118-        "author_telegram": post.get("telegram_username", ""),

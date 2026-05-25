@@ -1,0 +1,146 @@
+     1	"""Shared catalog listing HTML renderer."""
+     2	
+     3	import html
+     4	import json
+     5	
+     6	from database import db
+     7	from services.geo import render_geo_tags
+     8	
+     9	
+    10	def normalize_catalog_geo_tags_from_db(value: object) -> str:
+    11	    if not value:
+    12	        return ""
+    13	
+    14	    cities = value
+    15	    if isinstance(value, str):
+    16	        try:
+    17	            cities = json.loads(value)
+    18	        except Exception:
+    19	            raw = value.strip()
+    20	            if raw.startswith("[") and raw.endswith("]"):
+    21	                raw = raw[1:-1].strip()
+    22	            raw = raw.strip().strip("'").strip('"').strip()
+    23	            parts = [p.strip().strip("'").strip('"') for p in raw.split(",") if p.strip()]
+    24	            return " ".join(f"#{p.lstrip('#').lower()}" for p in parts if p)
+    25	
+    26	    if isinstance(cities, list):
+    27	        return " ".join(
+    28	            f"#{str(x).strip().lstrip('#').lower()}"
+    29	            for x in cities
+    30	            if str(x).strip()
+    31	        )
+    32	
+    33	    if isinstance(cities, str):
+    34	        clean = cities.strip()
+    35	        return clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
+    36	
+    37	    clean = str(value).strip()
+    38	    return clean if clean.startswith("#") else f"#{clean.lstrip('#').lower()}"
+    39	
+    40	
+    41	def build_catalog_listing_payload_from_premium_post(post: dict) -> dict:
+    42	    return {
+    43	        "geo_tags": normalize_catalog_geo_tags_from_db(post.get("cities")),
+    44	        "description": post.get("description", ""),
+    45	        "social_links": post.get("social_media", ""),
+    46	        "telegram": post.get("telegram_username", ""),
+    47	        "phone_main": post.get("phone_main", ""),
+    48	        "phone_whatsapp": post.get("phone_whatsapp", ""),
+    49	        "contact_name": post.get("name", ""),
+    50	        "review_links": post.get("review_links") or "",
+    51	    }
+    52	
+    53	
+    54	def _norm(value: object) -> str:
+    55	    if value is None:
+    56	        return ""
+    57	    clean = str(value).strip()
+    58	    if not clean:
+    59	        return ""
+    60	    if clean.lower() in {"нет", "no", "none"}:
+    61	        return ""
+    62	    return clean
+    63	
+    64	
+    65	def _split_lines(value: object) -> list[str]:
+    66	    clean = _norm(value)
+    67	    if not clean:
+    68	        return []
+    69	    return [part.strip() for part in clean.splitlines() if part.strip()]
+    70	
+    71	
+    72	def render_catalog_listing_html(payload: dict) -> str:
+    73	    lines: list[str] = []
+    74	
+    75	    geo_tags = render_geo_tags(payload.get("geo_tags"))
+    76	    if geo_tags:
+    77	        lines.append(html.escape(geo_tags))
+    78	
+    79	    description = _norm(payload.get("description"))
+    80	    if description:
+    81	        desc_lines: list[str | None] = []
+    82	        blank_seen = False
+    83	        for raw_line in description.splitlines():
+    84	            part = raw_line.strip()
+    85	            if part:
+    86	                desc_lines.append(part)
+    87	                blank_seen = False
+    88	            elif desc_lines and not blank_seen:
+    89	                desc_lines.append(None)
+    90	                blank_seen = True
+    91	
+    92	        while desc_lines and desc_lines[-1] is None:
+    93	            desc_lines.pop()
+    94	
+    95	        if desc_lines:
+    96	            first_written = False
+    97	            for part in desc_lines:
+    98	                if part is None:
+    99	                    lines.append("")
+   100	                    continue
+   101	                if not first_written:
+   102	                    lines.append("- " + html.escape(part))
+   103	                    first_written = True
+   104	                else:
+   105	                    lines.append(html.escape(part))
+   106	
+   107	    for link in _split_lines(payload.get("social_links")):
+   108	        lines.append(f'<a href="{html.escape(link, quote=True)}">Ссылка</a>')
+   109	
+   110	    telegram = _norm(payload.get("telegram"))
+   111	    if telegram:
+   112	        lines.append(html.escape(telegram))
+   113	
+   114	    phone_main = _norm(payload.get("phone_main"))
+   115	    if phone_main:
+   116	        lines.append(html.escape(phone_main))
+   117	
+   118	    phone_whatsapp = _norm(payload.get("phone_whatsapp"))
+   119	    if phone_whatsapp and phone_whatsapp != phone_main:
+   120	        lines.append(html.escape(phone_whatsapp))
+   121	
+   122	    contact_name = _norm(payload.get("contact_name"))
+   123	    if contact_name:
+   124	        lines.append("- " + html.escape(contact_name))
+   125	
+   126	    performer = _norm(payload.get("telegram"))
+   127	    if performer:
+   128	        try:
+   129	            idx = db.get_review_index_for_performer(performer)
+   130	            total = idx.get("total", 0)
+   131	            latest = idx.get("latest", [])
+   132	        except Exception:
+   133	            total, latest = 0, []
+   134	
+   135	        if total > 0 and latest:
+   136	            if lines:
+   137	                lines.append("")
+   138	            lines.append(f"Отзывы ({total}):")
+   139	
+   140	            start = total - len(latest) + 1
+   141	            for i, r in enumerate(latest):
+   142	                num = start + i
+   143	                link = f"https://t.me/proflistpt/{r['review_topic_id']}/{r['review_message_id']}"
+   144	                lines.append(f'- <a href="{html.escape(link, quote=True)}">Отзыв #{num}</a>')
+   145	
+   146	    return "\n".join(lines).strip()

@@ -1,0 +1,41 @@
+71-}
+72-
+73-_RENTAL_TAGS: dict[str, str] = {
+74-    "short_term": "#короткосрок",
+75-    "long_term":  "#долгосрок",
+76-}
+77-
+78-HS_INPUT      = "hs_input"
+79-HS_GEO_CUSTOM = "hs_geo_custom"
+80-HS_TG_GATE    = "hs_tg_gate"
+81-HS_CONFIRM    = "hs_confirm"
+82-HS_MEDIA      = "hs_media"
+83-
+84-
+85-def _hs_resolve_prompt(step, slug: str) -> str:
+86-    if getattr(step, "field_name", "") == "description":
+87-        return _DESCRIPTION_PROMPTS.get(slug, step.prompt)
+88-    return step.prompt
+89-
+90-
+91:def _hs_render_html(payload: dict) -> str:
+92-    """Housing-specific render: appends rental_term tag to geo line, omits review links."""
+93-    lines: list[str] = []
+94-
+95-    geo_line_raw = render_geo_tags(payload.get("geo_tags"))
+96-    rental_tag = _RENTAL_TAGS.get(str(payload.get("rental_term", "")), "")
+97-
+98-    if geo_line_raw:
+99-        geo_line = html.escape(geo_line_raw)
+100-        if rental_tag:
+101-            geo_line += " " + html.escape(rental_tag)
+102-        lines.append(geo_line)
+103-
+104-    description = _norm(payload.get("description"))
+105-    if description:
+106-        dlines = [p.strip() for p in description.splitlines() if p.strip()]
+107-        if dlines:
+108-            lines.append("- " + html.escape(dlines[0]))
+109-            for p in dlines[1:]:
+110-                lines.append(html.escape(p))
+111-

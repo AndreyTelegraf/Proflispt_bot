@@ -1,0 +1,17 @@
+handlers/housing_schema_flow.py:91:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py:766:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py:997:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1017:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1092:    post_text = _hs_render_html(payload)
+handlers/reviews_schema_flow.py:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py:213:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:477:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:520:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:555:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:634:    rendered_text = _rv_render_html(payload)
+handlers/premium_admin.py:140:            from handlers.housing_schema_flow import _hs_render_html
+handlers/premium_admin.py:172:            post_text = _hs_render_html(_hs_payload)
+handlers/premium_admin.py:174:            from handlers.reviews_schema_flow import _rv_render_html_from_post
+handlers/premium_admin.py:175:            post_text = _rv_render_html_from_post(post)
