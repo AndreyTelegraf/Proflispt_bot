@@ -1,5 +1,3 @@
-# RESTAURANTS_GEO_TAG_RENDER_FIX
-# RESTAURANTS_PREMIUM_ADMIN_G2_FIX
 """Admin handlers for premium posts."""
 
 import logging
