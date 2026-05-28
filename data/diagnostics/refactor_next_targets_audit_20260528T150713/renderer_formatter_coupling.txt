@@ -1,0 +1,254 @@
+handlers/restaurants_schema.py.bak_fix_reviews_invalid_html_url_20260419T113249Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_reviews_invalid_html_url_20260419T113249Z:1034:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_preview_calls_fix_20260419T231024Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_preview_calls_fix_20260419T231024Z:1027:            text=_render_html(payload),
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:208:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:460:        text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:501:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:580:    text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:362:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:1048:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_fix_go_after_telegram_gate_render_20260419T120554Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_go_after_telegram_gate_render_20260419T120554Z:1035:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_fix_restaurants_preview_links_20260419T123431Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_restaurants_preview_links_20260419T123431Z:1020:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_20260502T124806:147:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.bak_20260502T124806:337:    return _render_html(payload)
+handlers/restaurants_schema.py.bak_20260502T124806:340:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_20260502T124806:1457:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_reviews_invalid_text_fix_20260418T123358Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_reviews_invalid_text_fix_20260418T123358Z:1035:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_fix_reviews_urls_consistency_20260419T131308Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_reviews_urls_consistency_20260419T131308Z:1019:            text=_render_html(payload),
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:86:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:741:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:857:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:877:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:952:    post_text = _hs_render_html(payload)
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:60:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:89:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:105:    return _rv_render_html({
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:193:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:426:        text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:533:    text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:171:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:429:        text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:450:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:957:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:1135:        _render_html(payload),
+handlers/restaurants_schema.py.bak_runtime_20260417T233638Z:152:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_runtime_20260417T233638Z:752:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_telegram_gate_safe_render_20260418T131625Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_telegram_gate_safe_render_20260418T131625Z:1048:            text=_render_html(payload),
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:208:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:460:        text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:567:    text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/restaurants_schema.py.bak_fix_newline_20260418T003641Z:157:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_newline_20260418T003641Z:859:            text=_render_html(payload),
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:87:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:753:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:878:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:898:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:973:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:84:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:693:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:809:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:829:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:904:    post_text = _hs_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:224:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:476:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:523:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:602:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:224:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:476:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:523:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:602:    rendered_text = _rv_render_html(payload)
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:146:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:290:    return _render_html(payload)
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:293:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:1349:            text=_render_html(payload),
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:147:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:337:    return _render_html(payload)
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:340:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:1443:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:27:from services.catalog_listing_renderer import render_catalog_listing_html
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:317:        text = render_catalog_listing_html(payload)
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:338:    post_text = render_catalog_listing_html(payload)
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:838:            text=render_catalog_listing_html(payload),
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:964:    post_text = render_catalog_listing_html(payload)
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:1042:        render_catalog_listing_html(payload),
+handlers/restaurants_schema.py.bak_virtualize_telegram_20260419T122004Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_virtualize_telegram_20260419T122004Z:1026:            text=_render_html(payload),
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:182:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:411:        text = _render_html(payload)
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:432:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:879:            text=_render_html(payload),
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:1044:        _render_html(payload),
+handlers/restaurants_schema.py.bak_runtime_20260417T232340Z:135:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_runtime_20260417T232340Z:586:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_preview_flag_20260419T232130Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_preview_flag_20260419T232130Z:1020:            text=_render_html(payload),
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:86:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:734:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:850:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:870:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:945:    post_text = _hs_render_html(payload)
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:138:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:331:    return _render_html(payload)
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:334:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:1462:            text=_render_html(payload),
+handlers/premium_posting.py:413:    from services.formatting import format_premium_posting, format_premium_posting_html
+handlers/premium_posting.py:427:    final_post_text = format_premium_posting_html(post_data)
+handlers/premium_posting.py:636:        from services.formatting import format_premium_posting, format_premium_posting_html
+handlers/premium_posting.py:651:        final_post_text = format_premium_posting_html(post_data)
+handlers/restaurants_schema.py.bak_telegram_gate_fix_20260418T135834Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_telegram_gate_fix_20260418T135834Z:1048:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_telegram_autogate_after_reviews_20260418T131248Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_telegram_autogate_after_reviews_20260418T131248Z:1034:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_20260417T162840Z:67:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_20260417T162840Z:218:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_show_text_fix_20260419T225258Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_show_text_fix_20260419T225258Z:1019:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_fix_strings_20260418T085259Z:157:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_strings_20260418T085259Z:859:            text=_render_html(payload),
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:175:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:404:        text = _render_html(payload)
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:425:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:872:            text=_render_html(payload),
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:1037:        _render_html(payload),
+handlers/housing_schema_flow.py.bak_20260502_125034:86:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.bak_20260502_125034:755:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_20260502_125034:871:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_20260502_125034:891:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_20260502_125034:966:    post_text = _hs_render_html(payload)
+handlers/restaurants_schema.py.bak_fix_review_to_telegram_gate_20260419T113818Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_review_to_telegram_gate_20260419T113818Z:1034:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_fix_reviews_cta_url_20260419T113103Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_reviews_cta_url_20260419T113103Z:1035:            text=_render_html(payload),
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:69:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:98:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:114:    return _rv_render_html({
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:224:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:476:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:523:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:602:    rendered_text = _rv_render_html(payload)
+handlers/generic_schema_flow.py.bak_20260502T124806:182:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.bak_20260502T124806:411:        text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_20260502T124806:432:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_20260502T124806:893:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_20260502T124806:1058:        _render_html(payload),
+handlers/restaurants_schema.py.bak_restore_premium_g1c_20260420T081610Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_restore_premium_g1c_20260420T081610Z:1030:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_20260502_125034:147:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.bak_20260502_125034:338:    return _render_html(payload)
+handlers/restaurants_schema.py.bak_20260502_125034:341:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_20260502_125034:1458:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:185:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:423:        text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:444:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:930:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:1096:        _render_html(payload),
+handlers/restaurants_schema.py.bak_20260417T163505Z:67:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_20260417T163505Z:218:            text=_render_html(payload),
+handlers/housing_schema_flow.py:33:from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
+handlers/housing_schema_flow.py:715:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py:946:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:966:        _hs_render_html(payload),
+handlers/housing_schema_flow.py:1041:    post_text = _hs_render_html(payload)
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:135:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:364:        text = _render_html(payload)
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:385:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:793:            text=_render_html(payload),
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:958:        _render_html(payload),
+handlers/restaurants_schema.py.bak_preview_flag_syntax_fix_20260419T232233Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_preview_flag_syntax_fix_20260419T232233Z:1030:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:138:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:317:    return _render_html(payload)
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:320:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:1468:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:362:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:1048:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_20260502_125034:182:def _render_html(payload: dict) -> str:
+handlers/generic_schema_flow.py.bak_20260502_125034:413:        text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_20260502_125034:434:    post_text = _render_html(payload)
+handlers/generic_schema_flow.py.bak_20260502_125034:895:            text=_render_html(payload),
+handlers/generic_schema_flow.py.bak_20260502_125034:1060:        _render_html(payload),
+handlers/generic_schema_flow.py:29:from services.catalog_listing_renderer import render_catalog_listing_html
+handlers/generic_schema_flow.py:332:        text = render_catalog_listing_html(payload)
+handlers/generic_schema_flow.py:353:    post_text = render_catalog_listing_html(payload)
+handlers/generic_schema_flow.py:861:            text=render_catalog_listing_html(payload),
+handlers/generic_schema_flow.py:988:    post_text = render_catalog_listing_html(payload)
+handlers/generic_schema_flow.py:1066:        render_catalog_listing_html(payload),
+handlers/restaurants_schema.py.bak_review_runtime_20260418T120309Z:157:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_review_runtime_20260418T120309Z:858:            text=_render_html(payload),
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:87:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:753:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:869:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:889:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:964:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:86:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:755:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:871:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:891:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:966:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:87:def _hs_render_html(payload: dict) -> str:
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:753:    post_text = _hs_render_html(payload)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:869:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:889:        _hs_render_html(payload),
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:964:    post_text = _hs_render_html(payload)
+handlers/restaurants_schema.py.bak_fix_only_go_after_telegram_gate_20260418T140932Z:196:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_fix_only_go_after_telegram_gate_20260418T140932Z:1048:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:138:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:329:    return _render_html(payload)
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:332:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:1460:            text=_render_html(payload),
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:61:def _rv_render_html(payload: dict) -> str:
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:90:def _rv_render_html_from_post(post: dict) -> str:
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:106:    return _rv_render_html({
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:194:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:446:        text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:553:    text = _rv_render_html(payload) + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
+handlers/restaurants_schema.py.bak_review_warning_fix_20260418T120601Z:193:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_review_warning_fix_20260418T120601Z:1015:            text=_render_html(payload),
+handlers/restaurants_schema.py.bak_reviews_invalid_text_fix_20260418T130457Z:197:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_reviews_invalid_text_fix_20260418T130457Z:1035:            text=_render_html(payload),
+handlers/reviews_schema_flow.py:19:from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
+handlers/reviews_schema_flow.py:160:    post_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:424:        rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:467:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:502:    rendered_text = _rv_render_html(payload)
+handlers/reviews_schema_flow.py:581:    rendered_text = _rv_render_html(payload)
+handlers/restaurants_schema.py.bak_reviews_render_20260418T121600Z:193:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.bak_reviews_render_20260418T121600Z:1015:            text=_render_html(payload),
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:147:    post_text = _render_html(payload)
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:330:    return _render_html(payload)
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:333:def _render_html(payload: dict) -> str:
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:1436:            text=_render_html(payload),
+handlers/premium_admin.py:7:from services.formatting import format_premium_posting_html
+handlers/premium_admin.py:8:from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
+handlers/premium_admin.py:10:from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
+handlers/premium_admin.py:72:        from services.formatting import format_premium_posting_html
+handlers/premium_admin.py:137:            post_text = format_premium_posting_html(post)
+handlers/premium_admin.py:140:            post_text = render_housing_listing_html(_hs_payload)
+handlers/premium_admin.py:146:                post_text = render_catalog_listing_html(_generic_payload)
+handlers/premium_admin.py:149:                    "Unknown mode %r for premium post #%s, falling back to format_premium_posting_html",
+handlers/premium_admin.py:152:                post_text = format_premium_posting_html(post)
+services/formatting.py:202:def format_premium_posting(post: dict) -> str:
+services/formatting.py:258:def format_premium_posting_html(post: dict) -> str:
+services/catalog_specialized_renderers.py:6:from services.catalog_listing_renderer import _norm, _split_lines
+services/catalog_specialized_renderers.py:64:def render_housing_listing_html(payload: dict) -> str:
+services/catalog_specialized_renderers.py:107:def render_review_listing_html(payload: dict) -> str:
+services/catalog_specialized_renderers.py:153:    return render_review_listing_html({
+services/catalog_listing_renderer.py:72:def render_catalog_listing_html(payload: dict) -> str:
