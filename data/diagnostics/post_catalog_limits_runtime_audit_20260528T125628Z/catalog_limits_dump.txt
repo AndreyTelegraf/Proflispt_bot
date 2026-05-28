@@ -1,0 +1,5 @@
+     1	"""Catalog publication limits derived from Telegram runtime constraints."""
+     2	
+     3	TELEGRAM_MEDIA_CAPTION_LIMIT = 1024
+     4	CATALOG_DESCRIPTION_MAX_LEN = 600
+     5	REVIEW_TEXT_MAX_LEN = 4000

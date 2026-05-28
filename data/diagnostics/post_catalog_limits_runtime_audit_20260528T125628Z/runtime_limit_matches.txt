@@ -1,0 +1,91 @@
+handlers/housing_schema_flow.py:60:        "Максимальная длина текста в этом блоке — 600 знаков:"
+handlers/housing_schema_flow.py:65:        "Максимальная длина текста в этом блоке — 600 знаков:"
+handlers/housing_schema_flow.py:925:        if "message caption is too long" in msg:
+handlers/generic_schema_flow.py:39:from services.catalog_limits import CATALOG_DESCRIPTION_MAX_LEN, TELEGRAM_MEDIA_CAPTION_LIMIT
+handlers/generic_schema_flow.py:709:        if len(raw) > CATALOG_DESCRIPTION_MAX_LEN:
+handlers/generic_schema_flow.py:711:                f"Описание слишком длинное. Максимум {CATALOG_DESCRIPTION_MAX_LEN} символов. "
+handlers/generic_schema_flow.py:989:    if len(post_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+handlers/generic_schema_flow.py:992:            f"Telegram ограничивает подпись к медиа {TELEGRAM_MEDIA_CAPTION_LIMIT} символами.\n\n"
+handlers/reviews_schema_flow.py:20:from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN
+handlers/reviews_schema_flow.py:63:    f"- Длинные отзывы до {REVIEW_TEXT_MAX_LEN} символов доступны без медиа\n"
+handlers/reviews_schema_flow.py:425:        if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+handlers/reviews_schema_flow.py:468:    if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+handlers/reviews_schema_flow.py:503:    if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+handlers/reviews_schema_flow.py:582:    if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+services/contact_guard.py:30:    if len(stripped) > 4000:
+services/contact_guard.py:32:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+services/contact_guard.py:39:    if re.search(r"[\U00010000-\U0010ffff\u2600-\u27BF\u2B00-\u2BFF\uFE0F]", text):
+services/catalog_limits.py:3:TELEGRAM_MEDIA_CAPTION_LIMIT = 1024
+services/catalog_limits.py:4:CATALOG_DESCRIPTION_MAX_LEN = 600
+services/catalog_limits.py:5:REVIEW_TEXT_MAX_LEN = 4000
+services/scheduler.py:72:                await asyncio.sleep(3600)
+config/fsm_schemas/job_offer.json:92:      "prompt": "Опишите вакансию: должность, обязанности, требования, график, оплата, город и условия работы.\n\nНе добавляйте сюда ссылки, контакты и медиа — они добавляются на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/job_offer.json:95:        "max_len": 600
+config/fsm_schemas/tourism.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/tourism.json:95:        "max_len": 600
+config/fsm_schemas/passenger_transport.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/passenger_transport.json:95:        "max_len": 600
+config/fsm_schemas/printing.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/printing.json:95:        "max_len": 600
+config/fsm_schemas/translators.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/translators.json:95:        "max_len": 600
+config/fsm_schemas/money_credit.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/money_credit.json:95:        "max_len": 600
+config/fsm_schemas/housing_wanted.json:112:        "max_len": 600
+config/fsm_schemas/residence_lawyers.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/residence_lawyers.json:95:        "max_len": 600
+config/fsm_schemas/marketing.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/marketing.json:95:        "max_len": 600
+config/fsm_schemas/device_repair.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/device_repair.json:95:        "max_len": 600
+config/fsm_schemas/restaurants.json:92:      "prompt": "Опишите свои услуги, ассортимент, время работы и всё остальное, что вы считаете нужным сообщить потенциальным клиентам. \n\nНе добавляйте сюда ссылки, контакты и медиа — они добавляются на следующих шагах.\n\nМаксимальная длина текста в этом блоке – 600 знаков:",
+config/fsm_schemas/restaurants.json:95:        "max_len": 600
+config/fsm_schemas/leisure.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/leisure.json:95:        "max_len": 600
+config/fsm_schemas/job_seeker.json:92:      "prompt": "Опишите, какую работу вы ищете: сфера, опыт, навыки, желаемый график, город и важные условия.\n\nНе добавляйте сюда ссылки, контакты и медиа — они добавляются на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/job_seeker.json:95:        "max_len": 600
+config/fsm_schemas/cleaning.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/cleaning.json:95:        "max_len": 600
+config/fsm_schemas/health.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/health.json:95:        "max_len": 600
+config/fsm_schemas/medicine.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/medicine.json:95:        "max_len": 600
+config/fsm_schemas/beauty.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/beauty.json:95:        "max_len": 600
+config/fsm_schemas/realtors.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/realtors.json:95:        "max_len": 600
+config/fsm_schemas/photo_video.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/photo_video.json:95:        "max_len": 600
+config/fsm_schemas/owner_real_estate.json:112:        "max_len": 600
+config/fsm_schemas/furniture.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/furniture.json:95:        "max_len": 600
+config/fsm_schemas/auto_service.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/auto_service.json:95:        "max_len": 600
+config/fsm_schemas/sport.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/sport.json:95:        "max_len": 600
+config/fsm_schemas/tailoring.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/tailoring.json:95:        "max_len": 600
+config/fsm_schemas/cargo_transport.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/cargo_transport.json:95:        "max_len": 600
+config/fsm_schemas/cooking.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/cooking.json:95:        "max_len": 600
+config/fsm_schemas/home_staff.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/home_staff.json:95:        "max_len": 600
+config/fsm_schemas/car_rental.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/car_rental.json:95:        "max_len": 600
+config/fsm_schemas/it_smm.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/it_smm.json:95:        "max_len": 600
+config/fsm_schemas/home_repair.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/home_repair.json:95:        "max_len": 600
+config/fsm_schemas/insurance.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/insurance.json:95:        "max_len": 600
+config/fsm_schemas/animals.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/animals.json:95:        "max_len": 600
+config/fsm_schemas/teaching.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/teaching.json:95:        "max_len": 600
+config/fsm_schemas/construction_repair.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/construction_repair.json:95:        "max_len": 600
+config/fsm_schemas/accountants.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/accountants.json:95:        "max_len": 600
+config/fsm_schemas/art.json:92:      "prompt": "Опишите свои услуги и всё важное для потенциальных клиентов.\n\nПока не указывайте ссылки и контакты, их можно будет добавить на следующих шагах.\n\nМаксимальная длина текста в этом блоке — 600 знаков:",
+config/fsm_schemas/art.json:95:        "max_len": 600

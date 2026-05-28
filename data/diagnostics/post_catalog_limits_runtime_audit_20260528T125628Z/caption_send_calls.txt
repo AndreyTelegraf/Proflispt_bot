@@ -1,0 +1,63 @@
+handlers/premium_posting.py:442:            from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/premium_posting.py:448:                        media_group.append(InputMediaPhoto(
+handlers/premium_posting.py:450:                            caption=final_post_text,
+handlers/premium_posting.py:454:                        media_group.append(InputMediaVideo(
+handlers/premium_posting.py:456:                            caption=final_post_text,
+handlers/premium_posting.py:461:                        media_group.append(InputMediaPhoto(media=media['file_id']))
+handlers/premium_posting.py:463:                        media_group.append(InputMediaVideo(media=media['file_id']))
+handlers/premium_posting.py:498:                    caption=final_post_text,
+handlers/premium_posting.py:505:                    caption=final_post_text,
+handlers/premium_posting.py:678:                from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/premium_posting.py:684:                            media_group.append(InputMediaPhoto(
+handlers/premium_posting.py:686:                                caption=admin_text,
+handlers/premium_posting.py:690:                            media_group.append(InputMediaVideo(
+handlers/premium_posting.py:692:                                caption=admin_text,
+handlers/premium_posting.py:697:                            media_group.append(InputMediaPhoto(media=media['file_id']))
+handlers/premium_posting.py:699:                            media_group.append(InputMediaVideo(media=media['file_id']))
+handlers/premium_posting.py:701:                published_messages = await callback.bot.send_media_group(
+handlers/premium_posting.py:717:                    message = await callback.bot.send_photo(
+handlers/premium_posting.py:720:                        caption=admin_text,
+handlers/premium_posting.py:725:                    message = await callback.bot.send_video(
+handlers/premium_posting.py:728:                        caption=admin_text,
+handlers/my_postings.py:1138:                    await callback.bot.edit_message_caption(
+handlers/my_postings.py:1141:                        caption=marker_text,
+handlers/housing_schema_flow.py:721:        from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/housing_schema_flow.py:727:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:729:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:730:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py:738:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py:740:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py:743:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py:745:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py:792:                from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/housing_schema_flow.py:798:                            group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:800:                            group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:801:                    msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py:811:                        baraholka_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py:814:                            caption=post_text,
+handlers/housing_schema_flow.py:819:                        baraholka_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py:822:                            caption=post_text,
+handlers/generic_schema_flow.py:350:    from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/generic_schema_flow.py:362:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py:364:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py:368:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/reviews_schema_flow.py:158:    from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/reviews_schema_flow.py:168:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py:170:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py:174:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/premium_admin.py:218:                from aiogram.types import InputMediaPhoto, InputMediaVideo
+handlers/premium_admin.py:224:                            media_group.append(InputMediaPhoto(
+handlers/premium_admin.py:226:                                caption=post_text,
+handlers/premium_admin.py:230:                            media_group.append(InputMediaVideo(
+handlers/premium_admin.py:232:                                caption=post_text,
+handlers/premium_admin.py:237:                            media_group.append(InputMediaPhoto(media=media['file_id']))
+handlers/premium_admin.py:239:                            media_group.append(InputMediaVideo(media=media['file_id']))
+handlers/premium_admin.py:241:                published_messages = await callback.bot.send_media_group(
+handlers/premium_admin.py:252:                    published_message = await callback.bot.send_photo(
+handlers/premium_admin.py:255:                        caption=post_text,
+handlers/premium_admin.py:261:                    published_message = await callback.bot.send_video(
+handlers/premium_admin.py:264:                        caption=post_text,
+handlers/premium_admin.py:272:                published_message = await callback.bot.send_photo(
+handlers/premium_admin.py:275:                    caption=post_text,
+handlers/premium_admin.py:281:                published_message = await callback.bot.send_video(
+handlers/premium_admin.py:284:                    caption=post_text,
