@@ -17,6 +17,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from database import db
 from keyboards.main import get_main_menu
 from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
+from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -59,7 +60,7 @@ _PROMPTS = [
     "- Итог: рекомендуете или нет\n\n"
     "Важно:\n"
     "- Только текст, без ссылок и эмодзи\n"
-    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+    f"- Длинные отзывы до {REVIEW_TEXT_MAX_LEN} символов доступны без медиа\n"
     "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
 ]
 
@@ -421,7 +422,7 @@ async def rv_text_input(message: Message, state: FSMContext):
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
         await state.set_state(RV_CONFIRM)
         rendered_text = _rv_render_html(payload)
-        if len(rendered_text) > 1024:
+        if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
             text = _media_too_long_text()
             reply_markup = _confirm_no_media_kb()
         else:
@@ -464,7 +465,7 @@ async def rv_author_username_ready(callback: CallbackQuery, state: FSMContext):
     await _save_rv(state, step=step, payload=payload)
 
     rendered_text = _rv_render_html(payload)
-    if len(rendered_text) > 1024:
+    if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
         text = _media_too_long_text()
         reply_markup = _confirm_no_media_kb()
     else:
@@ -499,7 +500,7 @@ async def rv_add_media(callback: CallbackQuery, state: FSMContext):
 
     _, payload, _ = await _get_rv(state)
     rendered_text = _rv_render_html(payload)
-    if len(rendered_text) > 1024:
+    if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
         await callback.message.edit_text(
             _media_too_long_text(),
             reply_markup=_confirm_no_media_kb(),
@@ -578,7 +579,7 @@ async def rv_media_cancel(callback: CallbackQuery, state: FSMContext):
     await state.update_data(rv_media=[], rv_media_status_id=None)
     await state.set_state(RV_CONFIRM)
     rendered_text = _rv_render_html(payload)
-    if len(rendered_text) > 1024:
+    if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
         text = _media_too_long_text()
         reply_markup = _confirm_no_media_kb()
     else:

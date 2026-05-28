@@ -1,0 +1,11 @@
+catalog_limits_exists=True
+generic_imports_constants=True
+generic_no_raw_caption_1024_guard=True
+generic_uses_caption_constant=True
+reviews_imports_constants=True
+reviews_no_raw_caption_1024_guard=True
+reviews_uses_caption_constant=True
+reviews_prompt_is_fstring=True
+limits_define_caption=True
+limits_define_description=True
+limits_define_review=True

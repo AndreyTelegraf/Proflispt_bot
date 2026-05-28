@@ -1,0 +1,3 @@
+ handlers/generic_schema_flow.py |  6 +++---
+ handlers/reviews_schema_flow.py | 11 ++++++-----
+ 2 files changed, 9 insertions(+), 8 deletions(-)

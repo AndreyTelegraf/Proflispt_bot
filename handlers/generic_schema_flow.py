@@ -36,7 +36,7 @@ from services.listing_validation import (
 logger = logging.getLogger(__name__)
 router = Router()
 
-CATALOG_DESCRIPTION_MAX_LEN = 600
+from services.catalog_limits import CATALOG_DESCRIPTION_MAX_LEN, TELEGRAM_MEDIA_CAPTION_LIMIT
 
 _GS_MEDIA_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
 
@@ -986,10 +986,10 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
         return
 
     post_text = render_catalog_listing_html(payload)
-    if len(post_text) > 1024:
+    if len(post_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
         await callback.message.edit_text(
             "Текст объявления слишком длинный для публикации с фото/видео. "
-            "Telegram ограничивает подпись к медиа 1024 символами.\n\n"
+            f"Telegram ограничивает подпись к медиа {TELEGRAM_MEDIA_CAPTION_LIMIT} символами.\n\n"
             "Сократите описание и отправьте исправленный вариант заново, либо опубликуйте объявление без медиа.",
             reply_markup=_back_kb(slug),
             disable_web_page_preview=True,
