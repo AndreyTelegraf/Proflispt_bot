@@ -6,6 +6,7 @@ import sys
 import os
 import signal
 import fcntl
+from calendar import monthrange
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.filters import ExceptionTypeFilter, Command
@@ -457,23 +458,61 @@ async def cmd_unban(message: Message):
     await message.answer(f"Пользователь {target_user_id} разбанен." if success else "Ошибка при разбане пользователя.")
 
 
-@router.message(Command("pays"))
-async def cmd_pays(message: Message):
-    """Show paid services statistics since 2026-04-01."""
+def _billing_is_allowed(message: Message) -> bool:
     allowed_usernames = {"andreytelegraf", "kak_odin"}
     username = (message.from_user.username or "").lower()
+    return username in allowed_usernames
 
-    if username not in allowed_usernames:
-        await message.answer("Нет доступа.")
-        return
 
-    since = "2026-04-01 00:00:00"
+def _parse_billing_period(message: Message):
+    args = (message.text or "").split()[1:]
 
-    base_where = """
-        pp.payment_status = 'approved'
-        AND CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0
-        AND datetime(pp.created_at) >= datetime(?)
-    """
+    if not args:
+        return {
+            "since": "2026-04-01 00:00:00",
+            "until": None,
+            "label": "с 01.04.2026 включительно",
+        }
+
+    raw = args[0].strip()
+    parts = raw.split(".")
+    if len(parts) != 2:
+        return None
+
+    month_raw, year_raw = parts
+    if not (month_raw.isdigit() and year_raw.isdigit()):
+        return None
+
+    month = int(month_raw)
+    year = int(year_raw)
+
+    if month < 1 or month > 12 or year < 2000 or year > 2100:
+        return None
+
+    next_month = 1 if month == 12 else month + 1
+    next_year = year + 1 if month == 12 else year
+    last_day = monthrange(year, month)[1]
+
+    return {
+        "since": f"{year:04d}-{month:02d}-01 00:00:00",
+        "until": f"{next_year:04d}-{next_month:02d}-01 00:00:00",
+        "label": f"с 01.{month:02d}.{year:04d} по {last_day:02d}.{month:02d}.{year:04d} включительно",
+    }
+
+
+def _fetch_billing_report(period):
+    where_parts = [
+        "pp.payment_status = 'approved'",
+        "CAST(COALESCE(pp.payment_amount, 0) AS REAL) > 0",
+        "datetime(pp.created_at) >= datetime(?)",
+    ]
+    params = [period["since"]]
+
+    if period["until"]:
+        where_parts.append("datetime(pp.created_at) < datetime(?)")
+        params.append(period["until"])
+
+    base_where = "\n        AND ".join(where_parts)
 
     fields = """
         pp.id,
@@ -504,7 +543,7 @@ async def cmd_pays(message: Message):
                 WHERE {base_where}
                   AND {extra_where}
                 ORDER BY datetime(pp.created_at) ASC, pp.id ASC
-            """, (since,))
+            """, params)
             return [dict(row) for row in cursor.fetchall()]
 
         published_posts = fetch_rows("pp.status = 'published' AND pp.action_type = 'post'")
@@ -524,95 +563,55 @@ async def cmd_pays(message: Message):
             WHERE {base_where}
             GROUP BY pp.status, pp.action_type, pp.mode
             ORDER BY pp.status, pp.action_type, pp.mode
-        """, (since,))
+        """, params)
         audit_groups = [dict(row) for row in cursor.fetchall()]
 
-    def rows_sum(rows):
-        return sum(float(row.get("payment_amount") or 0) for row in rows)
+    return {
+        "published_posts": published_posts,
+        "removed_posts": removed_posts,
+        "published_reposts": published_reposts,
+        "removed_reposts": removed_reposts,
+        "published_pins": published_pins,
+        "audit_groups": audit_groups,
+    }
 
-    def append_rows(lines, title, rows):
-        if not rows:
-            return
 
-        lines.append("")
-        lines.append(title)
-        for row in rows:
-            amount = float(row.get("payment_amount") or 0)
-            created = str(row.get("created_at") or "")[:10]
-            mode = row.get("mode") or "-"
-            post_status = row.get("status") or "-"
-            tg = row.get("telegram_username") or "-"
-            phone = row.get("phone_main") or "-"
-            name = row.get("name") or "-"
-            post_id = row.get("id")
-            msg = row.get("message_id")
-            topic = row.get("topic_id")
+def _rows_sum(rows):
+    return sum(float(row.get("payment_amount") or 0) for row in rows)
 
-            if msg and topic:
-                link = f"https://t.me/proflistpt/{topic}/{msg}"
-            elif msg:
-                link = f"https://t.me/proflistpt/{msg}"
-            else:
-                link = "-"
 
-            lines.append(
-                f"- {created}; #{post_id}; {amount:.2f} €; {mode}; "
-                f"status={post_status}; {tg}; {phone}; {name}; {link}"
-            )
+def _append_billing_rows(lines, title, rows):
+    if not rows:
+        return
 
-    published_posts_total = rows_sum(published_posts)
-    removed_posts_total = rows_sum(removed_posts)
-    published_reposts_total = rows_sum(published_reposts)
-    removed_reposts_total = rows_sum(removed_reposts)
-    published_pins_total = rows_sum(published_pins)
+    lines.append("")
+    lines.append(title)
+    for row in rows:
+        amount = float(row.get("payment_amount") or 0)
+        created = str(row.get("created_at") or "")[:10]
+        mode = row.get("mode") or "-"
+        post_status = row.get("status") or "-"
+        tg = row.get("telegram_username") or "-"
+        phone = row.get("phone_main") or "-"
+        name = row.get("name") or "-"
+        post_id = row.get("id")
+        msg = row.get("message_id")
+        topic = row.get("topic_id")
 
-    payable_count = len(published_posts) + len(published_reposts) + len(published_pins)
-    payable_total = published_posts_total + published_reposts_total + published_pins_total
+        if msg and topic:
+            link = f"https://t.me/proflistpt/{topic}/{msg}"
+        elif msg:
+            link = f"https://t.me/proflistpt/{msg}"
+        else:
+            link = "-"
 
-    lines = [
-        "Платные услуги",
-        "Период: с 01.04.2026 включительно",
-        "",
-        "Реально опубликованные платные посты:",
-        f"- постов: {len(published_posts)}",
-        f"- сумма: {published_posts_total:.2f} €",
-        "",
-        "Удалённые / заменённые платные посты:",
-        f"- постов: {len(removed_posts)}",
-        f"- сумма: {removed_posts_total:.2f} €",
-        "",
-        "Перепосты в Барахолку:",
-        f"- опубликованные: {len(published_reposts)}",
-        f"- сумма опубликованных: {published_reposts_total:.2f} €",
-        f"- удалённые / заменённые: {len(removed_reposts)}",
-        f"- сумма удалённых / заменённых: {removed_reposts_total:.2f} €",
-        "",
-        "Закрепы:",
-        f"- опубликованные: {len(published_pins)}",
-        f"- сумма: {published_pins_total:.2f} €",
-        "",
-        "Итого к зачёту:",
-        f"- всего оплат: {payable_count}",
-        f"- сумма: {payable_total:.2f} €",
-    ]
+        lines.append(
+            f"- {created}; #{post_id}; {amount:.2f} €; {mode}; "
+            f"status={post_status}; {tg}; {phone}; {name}; {link}"
+        )
 
-    if audit_groups:
-        lines.append("")
-        lines.append("Аудит по status / action_type / mode:")
-        for group in audit_groups:
-            status = group.get("status") or "-"
-            action_type = group.get("action_type") or "-"
-            mode = group.get("mode") or "-"
-            cnt = int(group.get("cnt") or 0)
-            subtotal = float(group.get("total") or 0)
-            lines.append(f"- {status} / {action_type} / {mode}: {cnt} шт. — {subtotal:.2f} €")
 
-    append_rows(lines, "Детализация опубликованных постов:", published_posts)
-    append_rows(lines, "Детализация опубликованных перепостов в Барахолку:", published_reposts)
-    append_rows(lines, "Детализация удалённых / заменённых постов:", removed_posts)
-    append_rows(lines, "Детализация удалённых / заменённых перепостов:", removed_reposts)
-    append_rows(lines, "Детализация закрепов:", published_pins)
-
+async def _send_long_text(message: Message, lines):
     text = "\n".join(lines)
 
     chunks = []
@@ -626,6 +625,102 @@ async def cmd_pays(message: Message):
 
     for chunk in chunks:
         await message.answer(chunk, disable_web_page_preview=True)
+
+
+@router.message(Command("pays"))
+async def cmd_pays(message: Message):
+    if not _billing_is_allowed(message):
+        await message.answer("Нет доступа.")
+        return
+
+    period = _parse_billing_period(message)
+    if not period:
+        await message.answer("Использование: /pays или /pays MM.YYYY")
+        return
+
+    report = _fetch_billing_report(period)
+
+    published_posts = report["published_posts"]
+    removed_posts = report["removed_posts"]
+    published_reposts = report["published_reposts"]
+    removed_reposts = report["removed_reposts"]
+    published_pins = report["published_pins"]
+
+    published_posts_total = _rows_sum(published_posts)
+    removed_posts_total = _rows_sum(removed_posts)
+    published_reposts_total = _rows_sum(published_reposts)
+    removed_reposts_total = _rows_sum(removed_reposts)
+    published_pins_total = _rows_sum(published_pins)
+
+    directory_count = len(published_posts) + len(published_pins)
+    directory_total = published_posts_total + published_pins_total
+
+    lines = [
+        "Платные услуги",
+        f"Период: {period['label']}",
+        "",
+        "Реально опубликованные платные посты:",
+        f"- постов: {len(published_posts)}",
+        f"- сумма: {published_posts_total:.2f} €",
+        "",
+        "Удалённые / заменённые платные посты:",
+        f"- постов: {len(removed_posts)}",
+        f"- сумма: {removed_posts_total:.2f} €",
+        "",
+        "Закрепы:",
+        f"- опубликованные: {len(published_pins)}",
+        f"- сумма: {published_pins_total:.2f} €",
+        "",
+        "Итого по справочнику:",
+        f"- всего оплат: {directory_count}",
+        f"- сумма: {directory_total:.2f} €",
+        "",
+        "Перепосты в Барахолку:",
+        f"- опубликованные: {len(published_reposts)}",
+        f"- сумма опубликованных: {published_reposts_total:.2f} €",
+        f"- удалённые / заменённые: {len(removed_reposts)}",
+        f"- сумма удалённых / заменённых: {removed_reposts_total:.2f} €",
+    ]
+
+    await _send_long_text(message, lines)
+
+
+@router.message(Command("billing"))
+async def cmd_billing(message: Message):
+    if not _billing_is_allowed(message):
+        await message.answer("Нет доступа.")
+        return
+
+    period = _parse_billing_period(message)
+    if not period:
+        await message.answer("Использование: /billing или /billing MM.YYYY")
+        return
+
+    report = _fetch_billing_report(period)
+
+    lines = [
+        "Биллинг: детализация платных услуг",
+        f"Период: {period['label']}",
+    ]
+
+    if report["audit_groups"]:
+        lines.append("")
+        lines.append("Аудит по status / action_type / mode:")
+        for group in report["audit_groups"]:
+            status = group.get("status") or "-"
+            action_type = group.get("action_type") or "-"
+            mode = group.get("mode") or "-"
+            cnt = int(group.get("cnt") or 0)
+            subtotal = float(group.get("total") or 0)
+            lines.append(f"- {status} / {action_type} / {mode}: {cnt} шт. — {subtotal:.2f} €")
+
+    _append_billing_rows(lines, "Детализация опубликованных постов:", report["published_posts"])
+    _append_billing_rows(lines, "Детализация удалённых / заменённых постов:", report["removed_posts"])
+    _append_billing_rows(lines, "Детализация закрепов:", report["published_pins"])
+    _append_billing_rows(lines, "Детализация опубликованных перепостов в Барахолку:", report["published_reposts"])
+    _append_billing_rows(lines, "Детализация удалённых / заменённых перепостов в Барахолку:", report["removed_reposts"])
+
+    await _send_long_text(message, lines)
 
 
 
