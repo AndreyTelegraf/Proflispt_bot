@@ -641,31 +641,38 @@ async def cmd_pays(message: Message):
     report = _fetch_billing_report(period)
 
     published_posts = report["published_posts"]
-    removed_posts = report["removed_posts"]
     published_reposts = report["published_reposts"]
-    removed_reposts = report["removed_reposts"]
     published_pins = report["published_pins"]
 
+    baraholka_modes = {"owner_real_estate", "housing_wanted"}
+    directory_reposts = [
+        row for row in published_reposts
+        if (row.get("mode") or "") not in baraholka_modes
+    ]
+    baraholka_reposts = [
+        row for row in published_reposts
+        if (row.get("mode") or "") in baraholka_modes
+    ]
+
     published_posts_total = _rows_sum(published_posts)
-    removed_posts_total = _rows_sum(removed_posts)
-    published_reposts_total = _rows_sum(published_reposts)
-    removed_reposts_total = _rows_sum(removed_reposts)
+    directory_reposts_total = _rows_sum(directory_reposts)
+    baraholka_reposts_total = _rows_sum(baraholka_reposts)
     published_pins_total = _rows_sum(published_pins)
 
-    directory_count = len(published_posts) + len(published_pins)
-    directory_total = published_posts_total + published_pins_total
+    directory_count = len(published_posts) + len(directory_reposts) + len(published_pins)
+    directory_total = published_posts_total + directory_reposts_total + published_pins_total
 
     lines = [
         "Платные услуги",
         f"Период: {period['label']}",
         "",
-        "Реально опубликованные платные посты:",
-        f"- постов: {len(published_posts)}",
-        f"- сумма: {published_posts_total:.2f} €",
+        "Посты с медиа за 20 €:",
+        f"- опубликованные: {len(published_posts)}",
+        f"- сумма опубликованных: {published_posts_total:.2f} €",
         "",
-        "Удалённые / заменённые платные посты:",
-        f"- постов: {len(removed_posts)}",
-        f"- сумма: {removed_posts_total:.2f} €",
+        "Апы за 10 €:",
+        f"- опубликованные: {len(directory_reposts)}",
+        f"- сумма опубликованных: {directory_reposts_total:.2f} €",
         "",
         "Закрепы:",
         f"- опубликованные: {len(published_pins)}",
@@ -676,10 +683,8 @@ async def cmd_pays(message: Message):
         f"- сумма: {directory_total:.2f} €",
         "",
         "Перепосты в Барахолку:",
-        f"- опубликованные: {len(published_reposts)}",
-        f"- сумма опубликованных: {published_reposts_total:.2f} €",
-        f"- удалённые / заменённые: {len(removed_reposts)}",
-        f"- сумма удалённых / заменённых: {removed_reposts_total:.2f} €",
+        f"- опубликованные: {len(baraholka_reposts)}",
+        f"- сумма опубликованных: {baraholka_reposts_total:.2f} €",
     ]
 
     await _send_long_text(message, lines)
