@@ -1,0 +1,110 @@
+     1	# Billing and Pays Refactor State
+     2	
+     3	Staging billing/pays refactor finalized and stabilized.
+     4	
+     5	## Commits
+     6	
+     7	- 72027e4 — split /pays executive summary and /billing audit/details.
+     8	- 538cfc5 — fixed repost accounting and separated Directory reposts from Baraholka reposts.
+     9	
+    10	## Source of truth
+    11	
+    12	premium_posts remains the canonical accounting source.
+    13	
+    14	## What changed
+    15	
+    16	/pays became a short executive summary layer.
+    17	
+    18	Supported forms:
+    19	
+    20	- /pays
+    21	- /pays MM.YYYY
+    22	
+    23	/billing was added as the audit/detail layer.
+    24	
+    25	Supported forms:
+    26	
+    27	- /billing
+    28	- /billing MM.YYYY
+    29	
+    30	Shared billing helpers:
+    31	
+    32	- _billing_is_allowed()
+    33	- _parse_billing_period()
+    34	- _fetch_billing_report()
+    35	- _rows_sum()
+    36	- _append_billing_rows()
+    37	- _send_long_text()
+    38	
+    39	## Business semantics
+    40	
+    41	Before:
+    42	
+    43	- all reposts were mixed together
+    44	- deleted/superseded reposts polluted totals
+    45	- Baraholka reposts were double-counted as Directory апы
+    46	
+    47	After:
+    48	
+    49	- Directory reposts and Baraholka reposts are separated
+    50	- deleted/superseded items are excluded from executive summary totals
+    51	- /pays shows only actually published monetized actions
+    52	
+    53	Invariant:
+    54	
+    55	/pays intentionally excludes deleted/superseded monetization artifacts from executive totals.
+    56	
+    57	## Current /pays summary structure
+    58	
+    59	- posts with media, currently 20 EUR
+    60	- Directory reposts / апы, currently 10 EUR
+    61	- pins
+    62	- total Directory revenue
+    63	- Baraholka reposts as a separate informational block
+    64	
+    65	## Repost stream semantics
+    66	
+    67	Directory reposts are repost monetization inside the Directory lifecycle.
+    68	
+    69	Baraholka reposts are an external cross-product monetization stream and must stay separated from Directory revenue totals.
+    70	
+    71	## Current Baraholka classification
+    72	
+    73	Current Baraholka repost-capable modes:
+    74	
+    75	    baraholka_modes = {"owner_real_estate", "housing_wanted"}
+    76	
+    77	This classification remains explicit/hardcoded pending a canonical product segmentation layer.
+    78	
+    79	If additional Baraholka repost-capable modes appear later, they must be added here or extracted into a canonical helper/constant layer.
+    80	
+    81	## Verified manually
+    82	
+    83	- /pays
+    84	- /pays 04.2026
+    85	- /pays 05.2026
+    86	- /billing 04.2026
+    87	- /billing 05.2026
+    88	
+    89	## Final validated May accounting
+    90	
+    91	- media posts: 13 / 260 EUR
+    92	- Directory reposts: 6 / 60 EUR
+    93	- pins: 2 / 10 EUR
+    94	- total Directory revenue: 21 / 330 EUR
+    95	- Baraholka reposts: 23 / 230 EUR
+    96	
+    97	## Architecture outcome
+    98	
+    99	/pays = executive summary.
+   100	
+   101	/billing = accounting/audit layer.
+   102	
+   103	Directory revenue and Baraholka repost monetization are cleanly separated.
+   104	
+   105	Prepared foundation for:
+   106	
+   107	- yearly reports
+   108	- exports/CSV
+   109	- accounting segmentation
+   110	- separate product revenue streams

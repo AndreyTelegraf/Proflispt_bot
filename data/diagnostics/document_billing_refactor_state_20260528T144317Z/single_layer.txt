@@ -1,0 +1,1 @@
+document finalized /pays and /billing accounting semantics after staging stabilization
