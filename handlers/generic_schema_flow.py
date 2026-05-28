@@ -1,4 +1,4 @@
-"""Generic schema flow handler for all catalogue sections except restaurants/jobs."""
+"""Generic schema flow handler for schema-driven catalogue sections."""
 from __future__ import annotations
 
 import asyncio
