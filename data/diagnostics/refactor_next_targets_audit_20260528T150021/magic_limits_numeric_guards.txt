@@ -1,0 +1,261 @@
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:502:    if len(rendered_text) > 1024:
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:206:        if len(desc) > 100:
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:904:        if len(desc) > 120:
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:1013:        if len(desc) > 120:
+handlers/my_postings.py.bak_text_fallback_20260506_152019:203:        if len(desc) > 100:
+handlers/my_postings.py.bak_text_fallback_20260506_152019:891:        if len(desc) > 120:
+handlers/my_postings.py.bak_text_fallback_20260506_152019:1000:        if len(desc) > 120:
+handlers/my_postings.py.bak:173:        if len(desc) > 100:
+handlers/my_postings.py.bak:872:        if len(desc) > 120:
+handlers/my_postings.py.bak:981:        if len(desc) > 120:
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:748:        if len(media) > 1:
+handlers/my_postings.py.bak_logger_20260507_150437:204:        if len(desc) > 100:
+handlers/my_postings.py.bak_logger_20260507_150437:902:        if len(desc) > 120:
+handlers/my_postings.py.bak_logger_20260507_150437:1011:        if len(desc) > 120:
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:63:    "- До 4000 символов без медиа",
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:132:    if len(stripped) > 1000:
+handlers/admin.py.bak_unban_identity_20260504_085839:104:            if len(args) > 2:
+handlers/admin.py.bak_unban_identity_20260504_085839:115:                reason = args[1] if len(args) > 1 else "Нарушение правил"
+handlers/admin.py.bak_unban_identity_20260504_085839:265:    if len(bans) > 10:
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:206:        if len(desc) > 100:
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:904:        if len(desc) > 120:
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:1013:        if len(desc) > 120:
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:760:        if len(media) > 1:
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:700:        if len(media) > 1:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:477:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:524:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:603:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:477:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:524:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:603:    if len(rendered_text) > 1024:
+handlers/admin.py:104:            if len(args) > 2:
+handlers/admin.py:115:                reason = args[1] if len(args) > 1 else "Нарушение правил"
+handlers/admin.py:305:    if len(bans) > 10:
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:965:    if len(post_text) > 1024:
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:968:            "Telegram ограничивает подпись к медиа 1024 символами.\n\n"
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:741:        if len(media) > 1:
+handlers/premium_posting.py:441:        if len(media_list) > 1:
+handlers/premium_posting.py:676:            if len(media_list) > 1:
+handlers/my_postings.py:201:        if len(desc) > 100:
+handlers/my_postings.py:905:        if len(desc) > 120:
+handlers/my_postings.py:1014:        if len(desc) > 120:
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:204:        if len(desc) > 100:
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:900:        if len(desc) > 120:
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:1009:        if len(desc) > 120:
+handlers/housing_schema_flow.py.bak_20260502_125034:762:        if len(media) > 1:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:477:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:524:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:603:    if len(rendered_text) > 1024:
+handlers/housing_schema_flow.py:722:        if len(media) > 1:
+handlers/housing_schema_flow.py:793:                if len(media) > 1:
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:760:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:762:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:760:        if len(media) > 1:
+handlers/premium_admin.py:217:            if len(media_list) > 1:
+services/schema_engine.py.pre_wa_error_text_20260430T022323Z.bak:72:            max_len = step.validation.get("max_len")
+services/schema_engine.py.pre_wa_error_text_20260430T022323Z.bak:73:            if max_len and len(value) > int(max_len):
+services/schema_engine.py.pre_wa_error_text_20260430T022323Z.bak:74:                return StepResult(False, False, error_message=f"Слишком длинный ответ. Максимум {int(max_len)} символов.")
+services/formatting.py:185:        list_description = cleaned_description[:50] + ('...' if len(cleaned_description) > 50 else '')
+services/catalog_limits.py:3:TELEGRAM_MEDIA_CAPTION_LIMIT = 1024
+services/catalog_limits.py:5:REVIEW_TEXT_MAX_LEN = 4000
+services/scheduler.py:72:                await asyncio.sleep(3600)
+services/validation.py:20:    if len(username_part) < 5 or len(username_part) > 32:
+services/schema_engine.py:72:            max_len = step.validation.get("max_len")
+services/schema_engine.py:73:            if max_len and len(value) > int(max_len):
+services/schema_engine.py:74:                return StepResult(False, False, error_message=f"Слишком длинный ответ. Максимум {int(max_len)} символов.")
+config/fsm_schemas/restaurants.json.bak_virtualize_telegram_20260419T122004Z:85:        "max_len": 200
+config/fsm_schemas/restaurants.json.bak_virtualize_telegram_20260419T122004Z:95:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_virtualize_telegram_20260419T122004Z:105:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_virtualize_telegram_20260419T122004Z:115:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_virtualize_telegram_20260419T122004Z:125:        "max_len": 100
+config/fsm_schemas/restaurants.json.bak_virtualize_telegram_20260419T122004Z:155:        "max_len": 300
+config/fsm_schemas/job_offer.json:85:        "max_len": 200
+config/fsm_schemas/job_offer.json:95:        "max_len": 600
+config/fsm_schemas/job_offer.json:105:        "max_len": 1200
+config/fsm_schemas/job_offer.json:135:        "max_len": 300
+config/fsm_schemas/tourism.json:85:        "max_len": 200
+config/fsm_schemas/tourism.json:95:        "max_len": 600
+config/fsm_schemas/tourism.json:105:        "max_len": 1200
+config/fsm_schemas/tourism.json:135:        "max_len": 300
+config/fsm_schemas/passenger_transport.json:85:        "max_len": 200
+config/fsm_schemas/passenger_transport.json:95:        "max_len": 600
+config/fsm_schemas/passenger_transport.json:105:        "max_len": 1200
+config/fsm_schemas/passenger_transport.json:135:        "max_len": 300
+config/fsm_schemas/printing.json:85:        "max_len": 200
+config/fsm_schemas/printing.json:95:        "max_len": 600
+config/fsm_schemas/printing.json:105:        "max_len": 1200
+config/fsm_schemas/printing.json:135:        "max_len": 300
+config/fsm_schemas/translators.json:85:        "max_len": 200
+config/fsm_schemas/translators.json:95:        "max_len": 600
+config/fsm_schemas/translators.json:105:        "max_len": 1200
+config/fsm_schemas/translators.json:135:        "max_len": 300
+config/fsm_schemas/money_credit.json:85:        "max_len": 200
+config/fsm_schemas/money_credit.json:95:        "max_len": 600
+config/fsm_schemas/money_credit.json:105:        "max_len": 1200
+config/fsm_schemas/money_credit.json:135:        "max_len": 300
+config/fsm_schemas/housing_wanted.json:85:        "max_len": 200
+config/fsm_schemas/housing_wanted.json:112:        "max_len": 600
+config/fsm_schemas/housing_wanted.json:122:        "max_len": 1200
+config/fsm_schemas/housing_wanted.json:152:        "max_len": 300
+config/fsm_schemas/residence_lawyers.json:85:        "max_len": 200
+config/fsm_schemas/residence_lawyers.json:95:        "max_len": 600
+config/fsm_schemas/residence_lawyers.json:105:        "max_len": 1200
+config/fsm_schemas/residence_lawyers.json:135:        "max_len": 300
+config/fsm_schemas/marketing.json:85:        "max_len": 200
+config/fsm_schemas/marketing.json:95:        "max_len": 600
+config/fsm_schemas/marketing.json:105:        "max_len": 1200
+config/fsm_schemas/marketing.json:135:        "max_len": 300
+config/fsm_schemas/device_repair.json:85:        "max_len": 200
+config/fsm_schemas/device_repair.json:95:        "max_len": 600
+config/fsm_schemas/device_repair.json:105:        "max_len": 1200
+config/fsm_schemas/device_repair.json:135:        "max_len": 300
+config/fsm_schemas/restaurants.json:85:        "max_len": 200
+config/fsm_schemas/restaurants.json:95:        "max_len": 600
+config/fsm_schemas/restaurants.json:105:        "max_len": 1200
+config/fsm_schemas/restaurants.json:135:        "max_len": 300
+config/fsm_schemas/leisure.json:85:        "max_len": 200
+config/fsm_schemas/leisure.json:95:        "max_len": 600
+config/fsm_schemas/leisure.json:105:        "max_len": 1200
+config/fsm_schemas/leisure.json:135:        "max_len": 300
+config/fsm_schemas/job_seeker.json:85:        "max_len": 200
+config/fsm_schemas/job_seeker.json:95:        "max_len": 600
+config/fsm_schemas/job_seeker.json:105:        "max_len": 1200
+config/fsm_schemas/job_seeker.json:135:        "max_len": 300
+config/fsm_schemas/cleaning.json:85:        "max_len": 200
+config/fsm_schemas/cleaning.json:95:        "max_len": 600
+config/fsm_schemas/cleaning.json:105:        "max_len": 1200
+config/fsm_schemas/cleaning.json:135:        "max_len": 300
+config/fsm_schemas/health.json:85:        "max_len": 200
+config/fsm_schemas/health.json:95:        "max_len": 600
+config/fsm_schemas/health.json:105:        "max_len": 1200
+config/fsm_schemas/health.json:135:        "max_len": 300
+config/fsm_schemas/medicine.json:85:        "max_len": 200
+config/fsm_schemas/medicine.json:95:        "max_len": 600
+config/fsm_schemas/medicine.json:105:        "max_len": 1200
+config/fsm_schemas/medicine.json:135:        "max_len": 300
+config/fsm_schemas/restaurants.json.bak_20260417T161742Z:24:      "validation": { "max_len": 500 }
+config/fsm_schemas/restaurants.json.bak_20260417T161742Z:36:      "validation": { "max_len": 1200 }
+config/fsm_schemas/restaurants.json.bak_20260417T161742Z:44:      "validation": { "max_len": 1200 }
+config/fsm_schemas/restaurants.json.bak_20260417T161742Z:52:      "validation": { "max_len": 100 }
+config/fsm_schemas/restaurants.json.bak_20260417T161742Z:76:      "validation": { "max_len": 300 }
+config/fsm_schemas/beauty.json:85:        "max_len": 200
+config/fsm_schemas/beauty.json:95:        "max_len": 600
+config/fsm_schemas/beauty.json:105:        "max_len": 1200
+config/fsm_schemas/beauty.json:135:        "max_len": 300
+config/fsm_schemas/realtors.json:85:        "max_len": 200
+config/fsm_schemas/realtors.json:95:        "max_len": 600
+config/fsm_schemas/realtors.json:105:        "max_len": 1200
+config/fsm_schemas/realtors.json:135:        "max_len": 300
+config/fsm_schemas/photo_video.json:85:        "max_len": 200
+config/fsm_schemas/photo_video.json:95:        "max_len": 600
+config/fsm_schemas/photo_video.json:105:        "max_len": 1200
+config/fsm_schemas/photo_video.json:135:        "max_len": 300
+config/fsm_schemas/owner_real_estate.json:85:        "max_len": 200
+config/fsm_schemas/owner_real_estate.json:112:        "max_len": 600
+config/fsm_schemas/owner_real_estate.json:122:        "max_len": 1200
+config/fsm_schemas/owner_real_estate.json:152:        "max_len": 300
+config/fsm_schemas/restaurants.json.bak_20260417T162248Z:24:      "validation": { "max_len": 500 }
+config/fsm_schemas/restaurants.json.bak_20260417T162248Z:36:      "validation": { "max_len": 1200 }
+config/fsm_schemas/restaurants.json.bak_20260417T162248Z:44:      "validation": { "max_len": 1200 }
+config/fsm_schemas/restaurants.json.bak_20260417T162248Z:52:      "validation": { "max_len": 100 }
+config/fsm_schemas/restaurants.json.bak_20260417T162248Z:76:      "validation": { "max_len": 300 }
+config/fsm_schemas/furniture.json:85:        "max_len": 200
+config/fsm_schemas/furniture.json:95:        "max_len": 600
+config/fsm_schemas/furniture.json:105:        "max_len": 1200
+config/fsm_schemas/furniture.json:135:        "max_len": 300
+config/fsm_schemas/auto_service.json:85:        "max_len": 200
+config/fsm_schemas/auto_service.json:95:        "max_len": 600
+config/fsm_schemas/auto_service.json:105:        "max_len": 1200
+config/fsm_schemas/auto_service.json:135:        "max_len": 300
+config/fsm_schemas/sport.json:85:        "max_len": 200
+config/fsm_schemas/sport.json:95:        "max_len": 600
+config/fsm_schemas/sport.json:105:        "max_len": 1200
+config/fsm_schemas/sport.json:135:        "max_len": 300
+config/fsm_schemas/tailoring.json:85:        "max_len": 200
+config/fsm_schemas/tailoring.json:95:        "max_len": 600
+config/fsm_schemas/tailoring.json:105:        "max_len": 1200
+config/fsm_schemas/tailoring.json:135:        "max_len": 300
+config/fsm_schemas/cargo_transport.json:85:        "max_len": 200
+config/fsm_schemas/cargo_transport.json:95:        "max_len": 600
+config/fsm_schemas/cargo_transport.json:105:        "max_len": 1200
+config/fsm_schemas/cargo_transport.json:135:        "max_len": 300
+config/fsm_schemas/restaurants.json.bak_20260418T002429Z:85:        "max_len": 200
+config/fsm_schemas/restaurants.json.bak_20260418T002429Z:95:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_20260418T002429Z:105:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_20260418T002429Z:115:        "max_len": 100
+config/fsm_schemas/restaurants.json.bak_20260418T002429Z:145:        "max_len": 300
+config/fsm_schemas/cooking.json:85:        "max_len": 200
+config/fsm_schemas/cooking.json:95:        "max_len": 600
+config/fsm_schemas/cooking.json:105:        "max_len": 1200
+config/fsm_schemas/cooking.json:135:        "max_len": 300
+config/fsm_schemas/home_staff.json:85:        "max_len": 200
+config/fsm_schemas/home_staff.json:95:        "max_len": 600
+config/fsm_schemas/home_staff.json:105:        "max_len": 1200
+config/fsm_schemas/home_staff.json:135:        "max_len": 300
+config/fsm_schemas/car_rental.json:85:        "max_len": 200
+config/fsm_schemas/car_rental.json:95:        "max_len": 600
+config/fsm_schemas/car_rental.json:105:        "max_len": 1200
+config/fsm_schemas/car_rental.json:135:        "max_len": 300
+config/fsm_schemas/it_smm.json:85:        "max_len": 200
+config/fsm_schemas/it_smm.json:95:        "max_len": 600
+config/fsm_schemas/it_smm.json:105:        "max_len": 1200
+config/fsm_schemas/it_smm.json:135:        "max_len": 300
+config/fsm_schemas/home_repair.json:85:        "max_len": 200
+config/fsm_schemas/home_repair.json:95:        "max_len": 600
+config/fsm_schemas/home_repair.json:105:        "max_len": 1200
+config/fsm_schemas/home_repair.json:135:        "max_len": 300
+config/fsm_schemas/restaurants.json.bak_order_20260418T084440Z:85:        "max_len": 200
+config/fsm_schemas/restaurants.json.bak_order_20260418T084440Z:95:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_order_20260418T084440Z:105:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_order_20260418T084440Z:115:        "max_len": 1200
+config/fsm_schemas/restaurants.json.bak_order_20260418T084440Z:125:        "max_len": 100
+config/fsm_schemas/restaurants.json.bak_order_20260418T084440Z:155:        "max_len": 300
+config/fsm_schemas/insurance.json:85:        "max_len": 200
+config/fsm_schemas/insurance.json:95:        "max_len": 600
+config/fsm_schemas/insurance.json:105:        "max_len": 1200
+config/fsm_schemas/insurance.json:135:        "max_len": 300
+config/fsm_schemas/talk_to_me.json:31:      "validation": { "max_len": 1200 }
+config/fsm_schemas/talk_to_me.json:39:      "validation": { "max_len": 1200 }
+config/fsm_schemas/talk_to_me.json:47:      "validation": { "max_len": 100 }
+config/fsm_schemas/talk_to_me.json:71:      "validation": { "max_len": 300 }
+config/fsm_schemas/animals.json:85:        "max_len": 200
+config/fsm_schemas/animals.json:95:        "max_len": 600
+config/fsm_schemas/animals.json:105:        "max_len": 1200
+config/fsm_schemas/animals.json:135:        "max_len": 300
+config/fsm_schemas/teaching.json:85:        "max_len": 200
+config/fsm_schemas/teaching.json:95:        "max_len": 600
+config/fsm_schemas/teaching.json:105:        "max_len": 1200
+config/fsm_schemas/teaching.json:135:        "max_len": 300
+config/fsm_schemas/construction_repair.json:85:        "max_len": 200
+config/fsm_schemas/construction_repair.json:95:        "max_len": 600
+config/fsm_schemas/construction_repair.json:105:        "max_len": 1200
+config/fsm_schemas/construction_repair.json:135:        "max_len": 300
+config/fsm_schemas/accountants.json:85:        "max_len": 200
+config/fsm_schemas/accountants.json:95:        "max_len": 600
+config/fsm_schemas/accountants.json:105:        "max_len": 1200
+config/fsm_schemas/accountants.json:135:        "max_len": 300
+config/fsm_schemas/animals.json.bak_review_links_20260507_121345:85:        "max_len": 200
+config/fsm_schemas/animals.json.bak_review_links_20260507_121345:95:        "max_len": 1200
+config/fsm_schemas/animals.json.bak_review_links_20260507_121345:105:        "max_len": 1200
+config/fsm_schemas/animals.json.bak_review_links_20260507_121345:135:        "max_len": 300
+config/fsm_schemas/art.json:85:        "max_len": 200
+config/fsm_schemas/art.json:95:        "max_len": 600
+config/fsm_schemas/art.json:105:        "max_len": 1200
+config/fsm_schemas/art.json:135:        "max_len": 300
+main.py:618:    while len(text) > 3900:
+main.py:619:        cut = text.rfind("\n", 0, 3900)
+main.py:621:            cut = 3900
+main.py:758:    if len(pending_posts) > 10:
+main.py:780:        admin_notes = " ".join(args[1:]) if len(args) > 1 else None

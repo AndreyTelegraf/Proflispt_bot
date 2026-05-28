@@ -1,0 +1,177 @@
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:216:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:218:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:222:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:183:                group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:185:                group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:189:                await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:1137:                    await callback.bot.edit_message_caption(
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:1140:                        caption=marker_text,
+handlers/restaurants_schema.py.bak_20260502T124806:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502T124806:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502T124806:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:753:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:755:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:756:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:764:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:766:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:769:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:771:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:201:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:203:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:207:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:459:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:461:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:465:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:216:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:218:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:222:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:765:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:767:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:768:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:776:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:778:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:781:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:783:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:705:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:707:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:708:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:716:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:718:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:721:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:723:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:232:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:234:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:238:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:232:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:234:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:238:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:156:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:158:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:162:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:347:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:349:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:353:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:441:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:443:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:447:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:746:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:748:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:749:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:757:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:759:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:762:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:764:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:148:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:150:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:154:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/premium_posting.py:450:                            caption=final_post_text,
+handlers/premium_posting.py:456:                            caption=final_post_text,
+handlers/premium_posting.py:498:                    caption=final_post_text,
+handlers/premium_posting.py:505:                    caption=final_post_text,
+handlers/premium_posting.py:686:                                caption=admin_text,
+handlers/premium_posting.py:692:                                caption=admin_text,
+handlers/premium_posting.py:701:                published_messages = await callback.bot.send_media_group(
+handlers/premium_posting.py:717:                    message = await callback.bot.send_photo(
+handlers/premium_posting.py:720:                        caption=admin_text,
+handlers/premium_posting.py:725:                    message = await callback.bot.send_video(
+handlers/premium_posting.py:728:                        caption=admin_text,
+handlers/my_postings.py:1138:                    await callback.bot.edit_message_caption(
+handlers/my_postings.py:1141:                        caption=marker_text,
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:434:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:436:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:440:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py.bak_20260502_125034:767:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_20260502_125034:769:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_20260502_125034:770:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_20260502_125034:778:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_20260502_125034:780:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_20260502_125034:783:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_20260502_125034:785:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:232:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:234:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:238:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/generic_schema_flow.py.bak_20260502T124806:441:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502T124806:443:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502T124806:447:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.bak_20260502_125034:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502_125034:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502_125034:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:453:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:455:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:459:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py:727:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:729:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:730:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py:738:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py:740:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py:743:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py:745:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py:798:                            group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:800:                            group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:801:                    msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py:811:                        baraholka_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py:814:                            caption=post_text,
+handlers/housing_schema_flow.py:819:                        baraholka_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py:822:                            caption=post_text,
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:394:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:396:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:400:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:148:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:150:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:154:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:183:                group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:185:                group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:189:                await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_20260502_125034:443:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502_125034:445:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502_125034:449:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py:362:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py:364:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py:368:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:765:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:767:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:768:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:776:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:778:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:781:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:783:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:767:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:769:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:770:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:778:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:780:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:783:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:785:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:765:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:767:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:768:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:776:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:778:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:781:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:783:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:148:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:150:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:154:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:202:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:204:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:208:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py:168:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py:170:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py:174:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/premium_admin.py:226:                                caption=post_text,
+handlers/premium_admin.py:232:                                caption=post_text,
+handlers/premium_admin.py:241:                published_messages = await callback.bot.send_media_group(
+handlers/premium_admin.py:252:                    published_message = await callback.bot.send_photo(
+handlers/premium_admin.py:255:                        caption=post_text,
+handlers/premium_admin.py:261:                    published_message = await callback.bot.send_video(
+handlers/premium_admin.py:264:                        caption=post_text,
+handlers/premium_admin.py:272:                published_message = await callback.bot.send_photo(
+handlers/premium_admin.py:275:                    caption=post_text,
+handlers/premium_admin.py:281:                published_message = await callback.bot.send_video(
+handlers/premium_admin.py:284:                    caption=post_text,

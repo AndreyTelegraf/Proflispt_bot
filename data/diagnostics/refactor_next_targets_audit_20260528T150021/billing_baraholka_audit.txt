@@ -1,0 +1,117 @@
+main.py:461:def _billing_is_allowed(message: Message) -> bool:
+main.py:467:def _parse_billing_period(message: Message):
+main.py:503:def _fetch_billing_report(period):
+main.py:579:def _rows_sum(rows):
+main.py:583:def _append_billing_rows(lines, title, rows):
+main.py:632:    if not _billing_is_allowed(message):
+main.py:636:    period = _parse_billing_period(message)
+main.py:638:        await message.answer("Использование: /pays или /pays MM.YYYY")
+main.py:641:    report = _fetch_billing_report(period)
+main.py:647:    baraholka_modes = {"owner_real_estate", "housing_wanted"}
+main.py:650:        if (row.get("mode") or "") not in baraholka_modes
+main.py:654:        if (row.get("mode") or "") in baraholka_modes
+main.py:657:    published_posts_total = _rows_sum(published_posts)
+main.py:658:    directory_reposts_total = _rows_sum(directory_reposts)
+main.py:659:    baraholka_reposts_total = _rows_sum(baraholka_reposts)
+main.py:660:    published_pins_total = _rows_sum(published_pins)
+main.py:695:    if not _billing_is_allowed(message):
+main.py:699:    period = _parse_billing_period(message)
+main.py:701:        await message.answer("Использование: /billing или /billing MM.YYYY")
+main.py:704:    report = _fetch_billing_report(period)
+main.py:722:    _append_billing_rows(lines, "Детализация опубликованных постов:", report["published_posts"])
+main.py:723:    _append_billing_rows(lines, "Детализация удалённых / заменённых постов:", report["removed_posts"])
+main.py:724:    _append_billing_rows(lines, "Детализация закрепов:", report["published_pins"])
+main.py:725:    _append_billing_rows(lines, "Детализация опубликованных перепостов в Барахолку:", report["published_reposts"])
+main.py:726:    _append_billing_rows(lines, "Детализация удалённых / заменённых перепостов в Барахолку:", report["removed_reposts"])
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:1206:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/my_postings.py.bak_text_fallback_20260506_152019:1150:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/my_postings.py.bak:1122:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:885:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:910:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:924:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/my_postings.py.bak_logger_20260507_150437:1161:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:1163:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:906:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:931:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:945:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:837:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:862:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:876:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:878:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:903:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:917:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/my_postings.py:1207:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:1159:        logger.exception("Baraholka my_postings repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_20260502_125034:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.bak_20260502_125034:899:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.bak_20260502_125034:924:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_20260502_125034:938:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/housing_schema_flow.py:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py:802:                        chat_id=Config.BARAHOLKA_CHANNEL_ID,
+handlers/housing_schema_flow.py:804:                        message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+handlers/housing_schema_flow.py:812:                            chat_id=Config.BARAHOLKA_CHANNEL_ID,
+handlers/housing_schema_flow.py:815:                            message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+handlers/housing_schema_flow.py:820:                            chat_id=Config.BARAHOLKA_CHANNEL_ID,
+handlers/housing_schema_flow.py:823:                            message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+handlers/housing_schema_flow.py:829:                    chat_id=Config.BARAHOLKA_CHANNEL_ID,
+handlers/housing_schema_flow.py:831:                    message_thread_id=Config.BARAHOLKA_HOUSING_TOPIC_ID,
+handlers/housing_schema_flow.py:870:                    Config.BARAHOLKA_CHANNEL_ID,
+handlers/housing_schema_flow.py:871:                    Config.BARAHOLKA_HOUSING_TOPIC_ID,
+handlers/housing_schema_flow.py:876:                    baraholka_chat = await callback.bot.get_chat(Config.BARAHOLKA_CHANNEL_ID)
+handlers/housing_schema_flow.py:882:            logger.exception("Housing wanted auto Baraholka publish failed: %s", e)
+handlers/housing_schema_flow.py:974:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py:999:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py:1013:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:897:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:922:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:936:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:899:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:924:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:938:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:1:"""Housing schema flow — free publish to Справочник + Baraholka CTA."""
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:897:# ── Baraholka post-publish upsell ─────────────────────────────────────────────
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:922:        logger.exception("Baraholka upsell repost failed: %s", e)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:936:    """Notify admin of Baraholka repost request from an already-persisted source post."""
+handlers/premium_admin.py:169:                topic_id = Config.BARAHOLKA_HOUSING_TOPIC_ID
+handlers/premium_admin.py:183:        publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID
+database.py:1511:        """Create a pending Baraholka repost from an already-published free housing post."""
+docs/refactor/billing_pays_refactor_state.md:3:Staging billing/pays refactor finalized and stabilized.
+docs/refactor/billing_pays_refactor_state.md:7:- 72027e4 — split /pays executive summary and /billing audit/details.
+docs/refactor/billing_pays_refactor_state.md:8:- 538cfc5 — fixed repost accounting and separated Directory reposts from Baraholka reposts.
+docs/refactor/billing_pays_refactor_state.md:16:/pays became a short executive summary layer.
+docs/refactor/billing_pays_refactor_state.md:20:- /pays
+docs/refactor/billing_pays_refactor_state.md:21:- /pays MM.YYYY
+docs/refactor/billing_pays_refactor_state.md:23:/billing was added as the audit/detail layer.
+docs/refactor/billing_pays_refactor_state.md:27:- /billing
+docs/refactor/billing_pays_refactor_state.md:28:- /billing MM.YYYY
+docs/refactor/billing_pays_refactor_state.md:32:- _billing_is_allowed()
+docs/refactor/billing_pays_refactor_state.md:33:- _parse_billing_period()
+docs/refactor/billing_pays_refactor_state.md:34:- _fetch_billing_report()
+docs/refactor/billing_pays_refactor_state.md:35:- _rows_sum()
+docs/refactor/billing_pays_refactor_state.md:36:- _append_billing_rows()
+docs/refactor/billing_pays_refactor_state.md:45:- Baraholka reposts were double-counted as Directory апы
+docs/refactor/billing_pays_refactor_state.md:49:- Directory reposts and Baraholka reposts are separated
+docs/refactor/billing_pays_refactor_state.md:51:- /pays shows only actually published monetized actions
+docs/refactor/billing_pays_refactor_state.md:55:/pays intentionally excludes deleted/superseded monetization artifacts from executive totals.
+docs/refactor/billing_pays_refactor_state.md:57:## Current /pays summary structure
+docs/refactor/billing_pays_refactor_state.md:63:- Baraholka reposts as a separate informational block
+docs/refactor/billing_pays_refactor_state.md:69:Baraholka reposts are an external cross-product monetization stream and must stay separated from Directory revenue totals.
+docs/refactor/billing_pays_refactor_state.md:71:## Current Baraholka classification
+docs/refactor/billing_pays_refactor_state.md:73:Current Baraholka repost-capable modes:
+docs/refactor/billing_pays_refactor_state.md:75:    baraholka_modes = {"owner_real_estate", "housing_wanted"}
+docs/refactor/billing_pays_refactor_state.md:79:If additional Baraholka repost-capable modes appear later, they must be added here or extracted into a canonical helper/constant layer.
+docs/refactor/billing_pays_refactor_state.md:83:- /pays
+docs/refactor/billing_pays_refactor_state.md:84:- /pays 04.2026
+docs/refactor/billing_pays_refactor_state.md:85:- /pays 05.2026
+docs/refactor/billing_pays_refactor_state.md:86:- /billing 04.2026
+docs/refactor/billing_pays_refactor_state.md:87:- /billing 05.2026
+docs/refactor/billing_pays_refactor_state.md:95:- Baraholka reposts: 23 / 230 EUR
+docs/refactor/billing_pays_refactor_state.md:99:/pays = executive summary.
+docs/refactor/billing_pays_refactor_state.md:101:/billing = accounting/audit layer.
+docs/refactor/billing_pays_refactor_state.md:103:Directory revenue and Baraholka repost monetization are cleanly separated.
