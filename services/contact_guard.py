@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from services.catalog_limits import REVIEW_TEXT_MAX_LEN
 
 PLAIN_TEXT_ERROR = (
     "В описании допускается только текст. "
@@ -27,9 +28,9 @@ def _has_phone_like_contact(text: str) -> bool:
 def validate_description_text(text: str) -> tuple[bool, str | None]:
     stripped = str(text or "").strip()
 
-    if len(stripped) > 4000:
+    if len(stripped) > REVIEW_TEXT_MAX_LEN:
         return False, (
-            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+            f"Отзыв слишком длинный. Лимит для текстового отзыва — до {REVIEW_TEXT_MAX_LEN} символов. "
             "Сократите текст и отправьте его заново."
         )
 

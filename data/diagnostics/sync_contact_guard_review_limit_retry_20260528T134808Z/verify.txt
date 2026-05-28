@@ -1,0 +1,3 @@
+6:from services.catalog_limits import REVIEW_TEXT_MAX_LEN
+31:    if len(stripped) > REVIEW_TEXT_MAX_LEN:
+33:            f"Отзыв слишком длинный. Лимит для текстового отзыва — до {REVIEW_TEXT_MAX_LEN} символов. "

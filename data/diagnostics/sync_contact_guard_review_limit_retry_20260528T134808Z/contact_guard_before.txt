@@ -1,0 +1,60 @@
+     1	"""Shared validation for user-provided description text."""
+     2	
+     3	from __future__ import annotations
+     4	
+     5	import re
+     6	
+     7	PLAIN_TEXT_ERROR = (
+     8	    "В описании допускается только текст. "
+     9	    "Медиа, ссылки и контакты можно будет добавить на следующих шагах."
+    10	)
+    11	
+    12	CITY_HASHTAG_ERROR = (
+    13	    "Города и хэштеги не нужно добавлять в описание. "
+    14	    "Укажите их на шаге выбора города, через кнопку «Несколько / другой город»."
+    15	)
+    16	
+    17	
+    18	def _has_phone_like_contact(text: str) -> bool:
+    19	    """Detect phone-like numeric contacts while avoiding short numbers, years and prices."""
+    20	    for match in re.finditer(r"(?<!\w)(?:\+?\d[\s().-]*){9,}(?!\w)", text):
+    21	        digits = re.sub(r"\D", "", match.group(0))
+    22	        if len(digits) >= 9:
+    23	            return True
+    24	    return False
+    25	
+    26	
+    27	def validate_description_text(text: str) -> tuple[bool, str | None]:
+    28	    stripped = str(text or "").strip()
+    29	
+    30	    if len(stripped) > 4000:
+    31	        return False, (
+    32	            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+    33	            "Сократите текст и отправьте его заново."
+    34	        )
+    35	
+    36	    if re.search(r"(https?://|www\.|t\.me/|telegram\.me/|wa\.me/|mailto:|tel:)", text, re.I):
+    37	        return False, "В описании допускается только текст. Ссылки можно будет добавить на следующих шагах."
+    38	
+    39	    if re.search(r"[\U00010000-\U0010ffff\u2600-\u27BF\u2B00-\u2BFF\uFE0F]", text):
+    40	        return False, "В описании допускается только текст. Эмодзи использовать нельзя."
+    41	
+    42	    if re.search(r"\[.*?\]\(.*?\)|<a\s+href=", text, re.I):
+    43	        return False, PLAIN_TEXT_ERROR
+    44	
+    45	    if re.search(r"<\s*(b|strong)\b", text, re.I):
+    46	        return False, PLAIN_TEXT_ERROR
+    47	
+    48	    if re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", text):
+    49	        return False, PLAIN_TEXT_ERROR
+    50	
+    51	    if re.search(r"@[A-Za-z0-9_]{5,32}\b", text):
+    52	        return False, PLAIN_TEXT_ERROR
+    53	
+    54	    if _has_phone_like_contact(text):
+    55	        return False, PLAIN_TEXT_ERROR
+    56	
+    57	    if re.search(r"(?<!\w)#[A-Za-zÀ-ÖØ-öø-ÿА-Яа-яЁё0-9_]{2,}", text):
+    58	        return False, CITY_HASHTAG_ERROR
+    59	
+    60	    return True, None

@@ -1,0 +1,1 @@
+replace hardcoded review text limit in contact_guard with REVIEW_TEXT_MAX_LEN
