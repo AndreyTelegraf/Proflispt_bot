@@ -1,0 +1,253 @@
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:216:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:218:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:222:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py.bak_reviews_long_confirm_20260504_161531:502:    if len(rendered_text) > 1024:
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:183:                group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:185:                group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082008Z:189:                await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:206:        if len(desc) > 100:
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:904:        if len(desc) > 120:
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:1013:        if len(desc) > 120:
+handlers/my_postings.py.bak_auto_baraholka_housing_wanted_20260513_165542:1140:                        caption=marker_text,
+handlers/my_postings.py.bak_text_fallback_20260506_152019:203:        if len(desc) > 100:
+handlers/my_postings.py.bak_text_fallback_20260506_152019:891:        if len(desc) > 120:
+handlers/my_postings.py.bak_text_fallback_20260506_152019:1000:        if len(desc) > 120:
+handlers/restaurants_schema.py.bak_20260502T124806:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502T124806:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502T124806:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/my_postings.py.bak:173:        if len(desc) > 100:
+handlers/my_postings.py.bak:872:        if len(desc) > 120:
+handlers/my_postings.py.bak:981:        if len(desc) > 120:
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:748:        if len(media) > 1:
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:753:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:755:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:756:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:764:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:766:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:769:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:771:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:201:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:203:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:207:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/my_postings.py.bak_logger_20260507_150437:204:        if len(desc) > 100:
+handlers/my_postings.py.bak_logger_20260507_150437:902:        if len(desc) > 120:
+handlers/my_postings.py.bak_logger_20260507_150437:1011:        if len(desc) > 120:
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:459:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:461:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_premium_caption_guard_20260524_190723:465:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:63:    "- До 4000 символов без медиа",
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:132:    if len(stripped) > 1000:
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:216:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:218:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_reviews_dynamic_media_limit_20260504_160549:222:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/admin.py.bak_unban_identity_20260504_085839:104:            if len(args) > 2:
+handlers/admin.py.bak_unban_identity_20260504_085839:115:                reason = args[1] if len(args) > 1 else "Нарушение правил"
+handlers/admin.py.bak_unban_identity_20260504_085839:265:    if len(bans) > 10:
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:206:        if len(desc) > 100:
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:904:        if len(desc) > 120:
+handlers/my_postings.py.bak_premium_delete_atomic_20260508_153912:1013:        if len(desc) > 120:
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:760:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:765:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:767:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:768:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:776:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:778:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:781:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:783:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_auto_baraholka_housing_wanted_20260513_165542:857:        if "message caption is too long" in msg:
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:700:        if len(media) > 1:
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:705:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:707:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:708:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:716:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:718:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:721:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:723:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:232:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:234:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:238:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:477:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:524:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112516:603:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:232:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:234:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:238:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:477:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:524:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_author_username_gate_20260516_112752:603:    if len(rendered_text) > 1024:
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:156:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:158:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_residency_fsm_20260430T014040Z.bak:162:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/admin.py:104:            if len(args) > 2:
+handlers/admin.py:115:                reason = args[1] if len(args) > 1 else "Нарушение правил"
+handlers/admin.py:305:    if len(bans) > 10:
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_free_repost_guard_20260430T160418Z.bak:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:347:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:349:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:353:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:965:    if len(post_text) > 1024:
+handlers/generic_schema_flow.py.bak_media_lock_20260524_204151:968:            "Telegram ограничивает подпись к медиа 1024 символами.\n\n"
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:441:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:443:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_free_repost_guard_20260430T160418Z.bak:447:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:741:        if len(media) > 1:
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:746:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:748:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:749:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:757:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:759:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:762:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:764:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:148:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:150:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_description_newlines_20260518_122938:154:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/premium_posting.py:441:        if len(media_list) > 1:
+handlers/premium_posting.py:450:                            caption=final_post_text,
+handlers/premium_posting.py:456:                            caption=final_post_text,
+handlers/premium_posting.py:498:                    caption=final_post_text,
+handlers/premium_posting.py:505:                    caption=final_post_text,
+handlers/premium_posting.py:676:            if len(media_list) > 1:
+handlers/premium_posting.py:686:                                caption=admin_text,
+handlers/premium_posting.py:692:                                caption=admin_text,
+handlers/premium_posting.py:701:                published_messages = await callback.bot.send_media_group(
+handlers/premium_posting.py:717:                    message = await callback.bot.send_photo(
+handlers/premium_posting.py:720:                        caption=admin_text,
+handlers/premium_posting.py:725:                    message = await callback.bot.send_video(
+handlers/premium_posting.py:728:                        caption=admin_text,
+handlers/my_postings.py:201:        if len(desc) > 100:
+handlers/my_postings.py:905:        if len(desc) > 120:
+handlers/my_postings.py:1014:        if len(desc) > 120:
+handlers/my_postings.py:1141:                        caption=marker_text,
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:434:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:436:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_emoji_validation_20260430T084709Z.bak:440:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:204:        if len(desc) > 100:
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:900:        if len(desc) > 120:
+handlers/my_postings.py.bak_deleted_paid_repost_20260506_153416:1009:        if len(desc) > 120:
+handlers/housing_schema_flow.py.bak_20260502_125034:762:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_20260502_125034:767:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_20260502_125034:769:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_20260502_125034:770:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_20260502_125034:778:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_20260502_125034:780:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_20260502_125034:783:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_20260502_125034:785:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:62:    "- Длинные отзывы до 4000 символов доступны без медиа\n"
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:132:    if len(stripped) > 4000:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:134:            "Отзыв слишком длинный. Лимит для текстового отзыва — до 4000 символов. "
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:232:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:234:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:238:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:477:        if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:524:    if len(rendered_text) > 1024:
+handlers/reviews_schema_flow.py.bak_review_preview_too_long_20260504_161922:603:    if len(rendered_text) > 1024:
+handlers/generic_schema_flow.py.bak_20260502T124806:441:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502T124806:443:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502T124806:447:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.bak_20260502_125034:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502_125034:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_20260502_125034:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:453:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:455:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_description_newlines_20260518_122938:459:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py:722:        if len(media) > 1:
+handlers/housing_schema_flow.py:727:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:729:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:730:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py:738:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py:740:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py:743:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py:745:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py:793:                if len(media) > 1:
+handlers/housing_schema_flow.py:798:                            group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:800:                            group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py:801:                    msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py:811:                        baraholka_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py:814:                            caption=post_text,
+handlers/housing_schema_flow.py:819:                        baraholka_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py:822:                            caption=post_text,
+handlers/housing_schema_flow.py:925:        if "message caption is too long" in msg:
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:394:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:396:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.pre_residency_fsm_20260430T014040Z.bak:400:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:148:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:150:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_premium_caption_guard_20260524_190723:154:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:183:                group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:185:                group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_fix_geo_string_20260420T082125Z:189:                await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py.bak_20260502_125034:443:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502_125034:445:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py.bak_20260502_125034:449:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/generic_schema_flow.py:362:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py:364:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/generic_schema_flow.py:368:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:760:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:765:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:767:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:768:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:776:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:778:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:781:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175702:783:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:762:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:767:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:769:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:770:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:778:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:780:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:783:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_housing_geo_render_20260504_164610:785:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:760:        if len(media) > 1:
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:765:                    group.append(InputMediaPhoto(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:767:                    group.append(InputMediaVideo(media=item["file_id"], caption=caption, parse_mode="HTML"))
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:768:            msgs = await callback.bot.send_media_group(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:776:                published_message = await callback.bot.send_photo(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:778:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:781:                published_message = await callback.bot.send_video(
+handlers/housing_schema_flow.py.bak_caption_error_20260505_175808:783:                    caption=post_text, message_thread_id=topic_id, parse_mode="HTML",
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:148:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:150:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.bak_text_fallback_20260506_152019:154:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:202:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:204:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py.bak_review_length_20260504_154947:208:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/reviews_schema_flow.py:168:            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py:170:            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
+handlers/reviews_schema_flow.py:174:            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:157:            group.append(InputMediaPhoto(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:159:            group.append(InputMediaVideo(media=file_id, caption=caption, parse_mode="HTML"))
+handlers/restaurants_schema.py.pre_emoji_validation_20260430T084709Z.bak:163:            await bot.send_media_group(chat_id=admin_chat_id, media=group)
+handlers/premium_admin.py:217:            if len(media_list) > 1:
+handlers/premium_admin.py:226:                                caption=post_text,
+handlers/premium_admin.py:232:                                caption=post_text,
+handlers/premium_admin.py:241:                published_messages = await callback.bot.send_media_group(
+handlers/premium_admin.py:252:                    published_message = await callback.bot.send_photo(
+handlers/premium_admin.py:255:                        caption=post_text,
+handlers/premium_admin.py:261:                    published_message = await callback.bot.send_video(
+handlers/premium_admin.py:264:                        caption=post_text,
+handlers/premium_admin.py:272:                published_message = await callback.bot.send_photo(
+handlers/premium_admin.py:275:                    caption=post_text,
+handlers/premium_admin.py:281:                published_message = await callback.bot.send_video(
+handlers/premium_admin.py:284:                    caption=post_text,
+services/formatting.py:185:        list_description = cleaned_description[:50] + ('...' if len(cleaned_description) > 50 else '')
+services/catalog_limits.py:3:TELEGRAM_MEDIA_CAPTION_LIMIT = 1024
+services/catalog_limits.py:5:REVIEW_TEXT_MAX_LEN = 4000
+services/scheduler.py:72:                await asyncio.sleep(3600)
+services/validation.py:20:    if len(username_part) < 5 or len(username_part) > 32:
+main.py:618:    while len(text) > 3900:
+main.py:619:        cut = text.rfind("\n", 0, 3900)
+main.py:621:            cut = 3900
+main.py:753:    if len(pending_posts) > 10:
+main.py:775:        admin_notes = " ".join(args[1:]) if len(args) > 1 else None

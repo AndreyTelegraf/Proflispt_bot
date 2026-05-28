@@ -1,0 +1,1 @@
+AUDIT ONLY: remaining runtime numeric limits, caption risks, and refactor leftovers after contact_guard limit sync
