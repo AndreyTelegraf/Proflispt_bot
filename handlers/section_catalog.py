@@ -10,50 +10,20 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from services.section_catalog import load_section_catalog
+from services.catalog_modes import MODE_TO_SECTION_NAME
 from handlers.reviews_schema_flow import rv_entry
 
 logger = logging.getLogger(__name__)
 router = Router()
 
 ACTIVE_SECTION_CALLBACKS = {
-    "Ищу работу":                    "section:generic:job_seeker",
-    "Предлагаю работу":              "section:generic:job_offer",
-    "Рестораны":                     "section:generic:restaurants",
-    # generic sections
-    "Ищу жильё":                     "section:housing:housing_wanted",
-    "Недвижимость от хозяев":        "section:housing:owner_real_estate",
-    "Риелторы":                      "section:generic:realtors",
-    "Строительство и ремонт":        "section:generic:construction_repair",
-    "Бытовой ремонт и обустройство": "section:generic:home_repair",
-    "Ремонт техники":                "section:generic:device_repair",
-    "Мебель изготовление":           "section:generic:furniture",
-    "Клининг":                       "section:generic:cleaning",
-    "Домашний персонал":             "section:generic:home_staff",
-    "Пошив одежды":                  "section:generic:tailoring",
-    "Кулинария":                     "section:generic:cooking",
-    "Пассажирские перевозки":        "section:generic:passenger_transport",
-    "Грузовые перевозки":            "section:generic:cargo_transport",
-    "Прокат авто":                   "section:generic:car_rental",
-    "Автосервис":                    "section:generic:auto_service",
-    "Переводчики":                   "section:generic:translators",
-    "ВНЖ/Юристы":                   "section:generic:residence_lawyers",
-    "Маркетинг":                     "section:generic:marketing",
-    "IT/SMM":                        "section:generic:it_smm",
-    "Деньги/кредиты":                "section:generic:money_credit",
-    "Страхование":                   "section:generic:insurance",
-    "Бухгалтеры":                    "section:generic:accountants",
-    "Полиграфия":                    "section:generic:printing",
-    "Здоровье":                      "section:generic:health",
-    "Медицина":                      "section:generic:medicine",
-    "Красота":                       "section:generic:beauty",
-    "Преподавание":                  "section:generic:teaching",
-    "Спорт":                         "section:generic:sport",
-    "Животные":                      "section:generic:animals",
-    "Отдых":                         "section:generic:leisure",
-    "Туризм":                        "section:generic:tourism",
-    "Фото/видео":                    "section:generic:photo_video",
-    "Искусство":                     "section:generic:art",
-    "Отзывы":                        "section:reviews",
+    **{
+        section_name: f"section:generic:{slug}"
+        for slug, section_name in MODE_TO_SECTION_NAME.items()
+    },
+    "Ищу жильё": "section:housing:housing_wanted",
+    "Недвижимость от хозяев": "section:housing:owner_real_estate",
+    "Отзывы": "section:reviews",
 }
 
 
