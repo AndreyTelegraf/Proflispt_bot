@@ -23,7 +23,6 @@ from handlers.posting import router as posting_router
 from handlers.my_postings import router as my_postings_router
 from handlers.fallback import router as fallback_router
 from handlers.admin import router as admin_router
-from handlers.premium_posting import router as premium_posting_router
 from handlers.premium_admin import router as premium_admin_router
 from handlers.housing_schema_flow import router as housing_schema_flow_router
 from handlers.generic_schema_flow import router as generic_schema_flow_router
@@ -930,7 +929,6 @@ async def main():
             dp.include_router(start_router)
             dp.include_router(admin_router)
             dp.include_router(router)
-            dp.include_router(premium_posting_router)
             dp.include_router(premium_admin_router)
             dp.include_router(reviews_schema_flow_router)
             dp.include_router(section_catalog_router)
