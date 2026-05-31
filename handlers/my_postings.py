@@ -13,6 +13,7 @@ from aiogram.fsm.state import State, StatesGroup
 
 from database import db
 from config import Config
+from services.directory_links import directory_message_url
 from utils import get_first_words, escape_markdown, format_posting_card
 
 router = Router()
@@ -892,10 +893,7 @@ async def request_repost_premium(callback: CallbackQuery):
 
         old_link = ""
         if post.get('message_id'):
-            if post.get('topic_id'):
-                old_link = f"\nСтарый пост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
-            else:
-                old_link = f"\nСтарый пост: https://t.me/proflistpt/{post['message_id']}"
+            old_link = "\nСтарый пост: " + directory_message_url(post["message_id"], post.get("topic_id"))
 
         import html
         desc = html.escape((post.get('description') or "").strip().replace("\n", " "))
@@ -1001,10 +999,7 @@ async def request_pin_premium(callback: CallbackQuery):
 
         post_link = ""
         if post.get('message_id'):
-            if post.get('topic_id'):
-                post_link = f"\nПост: https://t.me/proflistpt/{post['topic_id']}/{post['message_id']}"
-            else:
-                post_link = f"\nПост: https://t.me/proflistpt/{post['message_id']}"
+            post_link = "\nПост: " + directory_message_url(post["message_id"], post.get("topic_id"))
 
         import html
         desc = html.escape((post.get('description') or "").strip().replace("\n", " "))

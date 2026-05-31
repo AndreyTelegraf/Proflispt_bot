@@ -8,6 +8,7 @@ from services.formatting import format_premium_posting_html
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
 from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
 from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
+from services.directory_links import directory_message_url
 
 logger = logging.getLogger(__name__)
 
@@ -113,10 +114,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 int(pin_old_chat_id),
                 int(pin_old_topic_id) if pin_old_topic_id else None,
             )
-            if pin_old_topic_id:
-                post_link = f"https://t.me/proflistpt/{pin_old_topic_id}/{pin_old_message_id}"
-            else:
-                post_link = f"https://t.me/proflistpt/{pin_old_message_id}"
+            post_link = directory_message_url(pin_old_message_id, pin_old_topic_id)
             await callback.bot.send_message(
                 chat_id=user['telegram_id'],
                 text=f"Ваше объявление закреплено на 24 часа!\nСсылка: {post_link}",
@@ -197,8 +195,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                     logger.warning(f"Could not delete old repost message {mid}: {delete_error}")
 
                     try:
-                        topic_part = f"/{repost_old_topic_id}" if repost_old_topic_id else ""
-                        old_link = f"https://t.me/proflistpt{topic_part}/{mid}"
+                        old_link = directory_message_url(mid, repost_old_topic_id)
 
                         await callback.bot.send_message(
                             Config.ADMIN_IDS[0],

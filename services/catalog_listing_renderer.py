@@ -4,6 +4,7 @@ import html
 import json
 
 from database import db
+from services.directory_links import directory_message_url
 from services.geo import render_geo_tags
 
 
@@ -140,7 +141,7 @@ def render_catalog_listing_html(payload: dict) -> str:
             start = total - len(latest) + 1
             for i, r in enumerate(latest):
                 num = start + i
-                link = f"https://t.me/proflistpt/{r['review_topic_id']}/{r['review_message_id']}"
+                link = directory_message_url(r["review_message_id"], r["review_topic_id"])
                 lines.append(f'- <a href="{html.escape(link, quote=True)}">Отзыв #{num}</a>')
 
     return "\n".join(lines).strip()

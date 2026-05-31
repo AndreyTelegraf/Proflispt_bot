@@ -17,6 +17,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.dispatcher.event.bases import UNHANDLED
 
 from config import Config
+from services.directory_links import directory_message_url
 from database import db
 from handlers.start import router as start_router
 from handlers.posting import router as posting_router
@@ -641,10 +642,8 @@ def _append_billing_rows(lines, title, rows):
         msg = row.get("message_id")
         topic = row.get("topic_id")
 
-        if msg and topic:
-            link = f"https://t.me/proflistpt/{topic}/{msg}"
-        elif msg:
-            link = f"https://t.me/proflistpt/{msg}"
+        if msg:
+            link = directory_message_url(msg, topic)
         else:
             link = "-"
 
