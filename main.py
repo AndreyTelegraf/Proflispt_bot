@@ -458,7 +458,7 @@ async def cmd_unban(message: Message):
 
 
 def _billing_is_allowed(message: Message) -> bool:
-    allowed_usernames = {"andreytelegraf", "kak_odin"}
+    allowed_usernames = {"andreytelegraf", "kak_odin", "kak_budto"}
     username = (message.from_user.username or "").lower()
     return username in allowed_usernames
 
