@@ -17,7 +17,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from database import db
 from keyboards.main import get_main_menu
 from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
-from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN
+from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN, REVIEW_TEXT_WITH_MEDIA_MAX_LEN
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -61,7 +61,7 @@ _PROMPTS = [
     "Важно:\n"
     "- Только текст, без ссылок и эмодзи\n"
     f"- Длинные отзывы до {REVIEW_TEXT_MAX_LEN} символов доступны без медиа\n"
-    "- Фото/видео можно добавить только если текст помещается в подпись к медиа",
+    f"- С фото/видео отзыв должен быть до {REVIEW_TEXT_WITH_MEDIA_MAX_LEN} символов",
 ]
 
 
@@ -417,6 +417,13 @@ async def rv_text_input(message: Message, state: FSMContext):
                 reply_markup=_back_kb(),
             )
             return
+        if len(raw) > REVIEW_TEXT_WITH_MEDIA_MAX_LEN:
+            media_hint = (
+                f"\n\nТекст длиннее {REVIEW_TEXT_WITH_MEDIA_MAX_LEN} символов, поэтому фото/видео добавить не получится. "
+                "Без медиа такой отзыв можно отправить."
+            )
+        else:
+            media_hint = ""
         payload["description"] = raw
         payload["author_telegram"] = message.from_user.username or ""
         await _save_rv(state, step=_STEP_DESCRIPTION, payload=payload)
@@ -424,6 +431,9 @@ async def rv_text_input(message: Message, state: FSMContext):
         rendered_text = _rv_render_html(payload)
         if len(rendered_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
             text = _media_too_long_text()
+            reply_markup = _confirm_no_media_kb()
+        elif len(raw) > REVIEW_TEXT_WITH_MEDIA_MAX_LEN:
+            text = rendered_text + media_hint
             reply_markup = _confirm_no_media_kb()
         else:
             text = rendered_text + "\n\nЕсли есть фото или видео — добавьте их ниже. Или отправьте отзыв как есть."
