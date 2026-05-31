@@ -196,6 +196,26 @@ async def admin_approve_premium(callback: CallbackQuery):
                 except Exception as delete_error:
                     logger.warning(f"Could not delete old repost message {mid}: {delete_error}")
 
+                    try:
+                        topic_part = f"/{repost_old_topic_id}" if repost_old_topic_id else ""
+                        old_link = f"https://t.me/proflistpt{topic_part}/{mid}"
+
+                        await callback.bot.send_message(
+                            Config.ADMIN_IDS[0],
+                            (
+                                "Не удалось удалить старый пост после апа.\n\n"
+                                f"Ссылка: {old_link}\n"
+                                f"post_id={old_post_id_to_supersede}\n"
+                                f"message_id={mid}\n"
+                                f"Ошибка: {delete_error}"
+                            ),
+                            disable_web_page_preview=True,
+                        )
+                    except Exception as notify_error:
+                        logger.warning(
+                            f"Could not notify admin about undeleted message {mid}: {notify_error}"
+                        )
+
         # Publish with media
         published_message = None
         published_message_ids = []
