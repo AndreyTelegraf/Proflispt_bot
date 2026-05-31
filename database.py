@@ -223,14 +223,6 @@ class Database:
                 if "duplicate column name" not in str(e):
                     logger.warning(f"Could not add published_message_ids column: {e}")
 
-            # Add review_links column if it doesn't exist (migration)
-            try:
-                cursor.execute("ALTER TABLE premium_posts ADD COLUMN review_links TEXT")
-                logger.info("Added review_links column to premium_posts table")
-            except sqlite3.OperationalError as e:
-                if "duplicate column name" not in str(e):
-                    logger.warning(f"Could not add review_links column: {e}")
-
             # Add TTL expiration columns if they don't exist (migration)
             for col, col_type in [
                 ("expires_at", "TIMESTAMP"),
@@ -1156,15 +1148,15 @@ class Database:
                     user_id, mode, cities, description, social_media,
                     telegram_username, phone_main, phone_whatsapp, name,
                     media_file_id, media_type, media_list, payment_status, payment_amount,
-                    action_type, admin_notes, review_links
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    action_type, admin_notes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 user_id, data.get('mode'), data.get('cities'), sanitize_description(data.get('description')),
                 data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
                 data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
                 data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
                 data.get('payment_amount', 20.00), data.get('action_type', 'post'),
-                data.get('admin_notes'), data.get('review_links')
+                data.get('admin_notes')
             ))
             
             post_id = cursor.lastrowid
@@ -1413,7 +1405,7 @@ class Database:
                     telegram_username, phone_main, phone_whatsapp, name,
                     media_file_id, media_type, media_list,
                     payment_status, payment_amount, action_type,
-                    admin_notes, review_links,
+                    admin_notes,
                     message_id, chat_id, topic_id,
                     status, published_message_ids, expires_at
                 ) VALUES (
@@ -1421,7 +1413,7 @@ class Database:
                     ?, ?, ?, ?,
                     NULL, NULL, '[]',
                     'approved', 0.00, 'post',
-                    NULL, ?,
+                    NULL,
                     ?, ?, ?,
                     'published', ?, ?
                 )
@@ -1435,7 +1427,6 @@ class Database:
                 payload.get("phone_main", ""),
                 payload.get("phone_whatsapp", ""),
                 payload.get("contact_name", ""),
-                payload.get("review_links", ""),
                 message_id, chat_id, topic_id,
                 json.dumps([message_id]),
                 self._premium_post_expires_at(mode),
@@ -1466,7 +1457,7 @@ class Database:
                     telegram_username, phone_main, phone_whatsapp, name,
                     media_file_id, media_type, media_list,
                     payment_status, payment_amount, action_type,
-                    admin_notes, review_links,
+                    admin_notes,
                     message_id, chat_id, topic_id,
                     status, published_message_ids, expires_at
                 ) VALUES (
@@ -1474,7 +1465,7 @@ class Database:
                     ?, ?, ?, ?,
                     ?, ?, ?,
                     'approved', 0.00, 'post',
-                    ?, ?,
+                    ?,
                     ?, ?, ?,
                     'published', ?, ?
                 )
@@ -1492,7 +1483,6 @@ class Database:
                 first_media.get("type") if first_media else None,
                 json.dumps(media_list),
                 admin_notes_val,
-                payload.get("review_links", ""),
                 message_id, chat_id, topic_id,
                 json.dumps(published_message_ids),
                 self._premium_post_expires_at(mode),

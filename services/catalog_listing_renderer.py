@@ -48,7 +48,6 @@ def build_catalog_listing_payload_from_premium_post(post: dict) -> dict:
         "phone_main": post.get("phone_main", ""),
         "phone_whatsapp": post.get("phone_whatsapp", ""),
         "contact_name": post.get("name", ""),
-        "review_links": post.get("review_links") or "",
     }
 
 
