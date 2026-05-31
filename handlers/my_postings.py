@@ -855,8 +855,6 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Это объявление нельзя переопубликовать.", show_alert=True)
         return
 
-    review_links = post.get("review_links") or ""
-
     repost_notes = {
         "old_post_id": post['id'],
         "old_message_id": post.get('message_id'),
@@ -880,7 +878,6 @@ async def request_repost_premium(callback: CallbackQuery):
         media_list=post.get('media_list') or [],
         payment_amount=10.00,
         action_type='repost',
-        review_links=review_links,
         admin_notes=json.dumps(repost_notes),
     )
 
@@ -964,8 +961,6 @@ async def request_pin_premium(callback: CallbackQuery):
         await callback.answer("Объявление удалено из канала и недоступно.", show_alert=True)
         return
 
-    review_links = post.get("review_links") or ""
-
     new_post_id = db.create_premium_post(
         user_id=user['id'],
         mode=post.get('mode'),
@@ -981,7 +976,6 @@ async def request_pin_premium(callback: CallbackQuery):
         media_list=post.get('media_list') or [],
         payment_amount=5.00,
         action_type='pin',
-        review_links=review_links,
         admin_notes=json.dumps({
             "old_post_id": post['id'],
             "old_message_id": post.get('message_id'),

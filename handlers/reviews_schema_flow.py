@@ -234,7 +234,6 @@ async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dic
             media_list=media_list,
             action_type="post",
             payment_amount=0.00,
-            review_links="",
             admin_notes="reviews_moderation",
         )
         await _rv_notify_admin(callback.bot, post_id, payload, media_list)
