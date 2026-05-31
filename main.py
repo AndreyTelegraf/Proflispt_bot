@@ -551,6 +551,25 @@ def _fetch_billing_report(period):
         removed_reposts = fetch_rows("pp.status IN ('deleted', 'superseded') AND pp.action_type = 'repost'")
         published_pins = fetch_rows("pp.status = 'published' AND pp.action_type = 'pin'")
 
+        accounting_posts = fetch_rows("""
+            pp.action_type = 'post'
+            AND pp.mode != 'reviews'
+            AND pp.message_id IS NOT NULL
+            AND pp.status IN ('published', 'deleted', 'superseded')
+        """)
+        accounting_reposts = fetch_rows("""
+            pp.action_type = 'repost'
+            AND pp.mode != 'reviews'
+            AND pp.message_id IS NOT NULL
+            AND pp.status IN ('published', 'deleted', 'superseded')
+        """)
+        accounting_pins = fetch_rows("""
+            pp.action_type = 'pin'
+            AND pp.mode != 'reviews'
+            AND pp.message_id IS NOT NULL
+            AND pp.status IN ('published', 'deleted', 'superseded')
+        """)
+
         cursor.execute(f"""
             SELECT
                 pp.status,
@@ -571,12 +590,37 @@ def _fetch_billing_report(period):
         "published_reposts": published_reposts,
         "removed_reposts": removed_reposts,
         "published_pins": published_pins,
+        "accounting_posts": accounting_posts,
+        "accounting_reposts": accounting_reposts,
+        "accounting_pins": accounting_pins,
         "audit_groups": audit_groups,
     }
 
 
 def _rows_sum(rows):
     return sum(float(row.get("payment_amount") or 0) for row in rows)
+
+
+def _exclude_known_non_billable_rows(rows):
+    """Exclude known historical technical/test duplicates from /pays accounting.
+
+    The DB currently has no canonical accounting flag. These rows were approved
+    and briefly published, but represent test/technical replacement attempts,
+    not separate paid services.
+    """
+    non_billable_ids = {
+        7,    # admin test job_offer
+        158,  # admin test repost
+        256,  # technical wrong-section duplicate before final Barbearia post
+        259,  # technical duplicate before final Barbearia post
+        356,  # technical duplicate before final Karga24.7 post
+        359,  # technical duplicate before final Karga24.7 post
+        361,  # technical duplicate before final Karga24.7 post
+        440,  # admin test passenger_transport
+        441,  # admin test restaurants
+        653,  # technical duplicate before final Bee Gym post
+    }
+    return [row for row in rows if int(row.get("id") or 0) not in non_billable_ids]
 
 
 def _append_billing_rows(lines, title, rows):
@@ -639,51 +683,51 @@ async def cmd_pays(message: Message):
 
     report = _fetch_billing_report(period)
 
-    published_posts = report["published_posts"]
-    published_reposts = report["published_reposts"]
-    published_pins = report["published_pins"]
+    accounting_posts = _exclude_known_non_billable_rows(report["accounting_posts"])
+    accounting_reposts = _exclude_known_non_billable_rows(report["accounting_reposts"])
+    accounting_pins = _exclude_known_non_billable_rows(report["accounting_pins"])
 
     baraholka_modes = {"owner_real_estate", "housing_wanted"}
     directory_reposts = [
-        row for row in published_reposts
+        row for row in accounting_reposts
         if (row.get("mode") or "") not in baraholka_modes
     ]
     baraholka_reposts = [
-        row for row in published_reposts
+        row for row in accounting_reposts
         if (row.get("mode") or "") in baraholka_modes
     ]
 
-    published_posts_total = _rows_sum(published_posts)
+    accounting_posts_total = _rows_sum(accounting_posts)
     directory_reposts_total = _rows_sum(directory_reposts)
     baraholka_reposts_total = _rows_sum(baraholka_reposts)
-    published_pins_total = _rows_sum(published_pins)
+    accounting_pins_total = _rows_sum(accounting_pins)
 
-    directory_count = len(published_posts) + len(directory_reposts) + len(published_pins)
-    directory_total = published_posts_total + directory_reposts_total + published_pins_total
+    directory_count = len(accounting_posts) + len(directory_reposts) + len(accounting_pins)
+    directory_total = accounting_posts_total + directory_reposts_total + accounting_pins_total
 
     lines = [
         "Платные услуги",
         f"Период: {period['label']}",
         "",
         "Посты с медиа за 20 €:",
-        f"- опубликованные: {len(published_posts)}",
-        f"- сумма опубликованных: {published_posts_total:.2f} €",
+        f"- оплаченные: {len(accounting_posts)}",
+        f"- сумма: {accounting_posts_total:.2f} €",
         "",
         "Апы за 10 €:",
-        f"- опубликованные: {len(directory_reposts)}",
-        f"- сумма опубликованных: {directory_reposts_total:.2f} €",
+        f"- оплаченные: {len(directory_reposts)}",
+        f"- сумма: {directory_reposts_total:.2f} €",
         "",
         "Закрепы:",
-        f"- опубликованные: {len(published_pins)}",
-        f"- сумма: {published_pins_total:.2f} €",
+        f"- оплаченные: {len(accounting_pins)}",
+        f"- сумма: {accounting_pins_total:.2f} €",
         "",
         "Итого по справочнику:",
         f"- всего оплат: {directory_count}",
         f"- сумма: {directory_total:.2f} €",
         "",
         "Перепосты в Барахолку:",
-        f"- опубликованные: {len(baraholka_reposts)}",
-        f"- сумма опубликованных: {baraholka_reposts_total:.2f} €",
+        f"- оплаченные: {len(baraholka_reposts)}",
+        f"- сумма: {baraholka_reposts_total:.2f} €",
     ]
 
     await _send_long_text(message, lines)
@@ -718,11 +762,31 @@ async def cmd_billing(message: Message):
             subtotal = float(group.get("total") or 0)
             lines.append(f"- {status} / {action_type} / {mode}: {cnt} шт. — {subtotal:.2f} €")
 
+    baraholka_modes = {"owner_real_estate", "housing_wanted"}
+    published_directory_reposts = [
+        row for row in report["published_reposts"]
+        if (row.get("mode") or "") not in baraholka_modes
+    ]
+    published_baraholka_reposts = [
+        row for row in report["published_reposts"]
+        if (row.get("mode") or "") in baraholka_modes
+    ]
+    removed_directory_reposts = [
+        row for row in report["removed_reposts"]
+        if (row.get("mode") or "") not in baraholka_modes
+    ]
+    removed_baraholka_reposts = [
+        row for row in report["removed_reposts"]
+        if (row.get("mode") or "") in baraholka_modes
+    ]
+
     _append_billing_rows(lines, "Детализация опубликованных постов:", report["published_posts"])
     _append_billing_rows(lines, "Детализация удалённых / заменённых постов:", report["removed_posts"])
     _append_billing_rows(lines, "Детализация закрепов:", report["published_pins"])
-    _append_billing_rows(lines, "Детализация опубликованных перепостов в Барахолку:", report["published_reposts"])
-    _append_billing_rows(lines, "Детализация удалённых / заменённых перепостов в Барахолку:", report["removed_reposts"])
+    _append_billing_rows(lines, "Детализация опубликованных апов в справочнике:", published_directory_reposts)
+    _append_billing_rows(lines, "Детализация удалённых / заменённых апов в справочнике:", removed_directory_reposts)
+    _append_billing_rows(lines, "Детализация опубликованных перепостов в Барахолку:", published_baraholka_reposts)
+    _append_billing_rows(lines, "Детализация удалённых / заменённых перепостов в Барахолку:", removed_baraholka_reposts)
 
     await _send_long_text(message, lines)
 
