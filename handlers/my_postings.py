@@ -313,7 +313,7 @@ async def show_posting_link(callback: CallbackQuery):
     
     if posting['message_id'] and posting['chat_id'] and posting['topic_id']:
         # Create link to the message in topic
-        chat_username = "proflistpt"  # Remove @ for URL
+        chat_username = Config.DIRECTORY_CHANNEL_USERNAME.lstrip("@")
         message_link = f"https://t.me/{chat_username}/{posting['topic_id']}/{posting['message_id']}"
         
         await callback.message.edit_text(
