@@ -153,22 +153,6 @@ def _normalize_geo(value) -> str:
     return normalize_geo_tags_json(value)
 
 
-def _extract_review_links(raw: str) -> list[str]:
-    matches = re.findall(r"https://t\.me/proflistpt/12860/\d+", raw or "")
-    seen: set[str] = set()
-    result = []
-    for lnk in matches:
-        if lnk not in seen:
-            seen.add(lnk)
-            result.append(lnk)
-    return result
-
-
-def _normalize_review_links(raw: str) -> str:
-    links = _extract_review_links(raw)
-    links = links[:3]  # limit to 3 reviews
-    return "\n".join(links)
-
 # ── keyboards ─────────────────────────────────────────────────────────────────
 
 def _back_kb(slug: str) -> InlineKeyboardMarkup:
@@ -207,13 +191,6 @@ def _step_kb(step, slug: str) -> InlineKeyboardMarkup:
     if fn == "social_links":
         b = InlineKeyboardBuilder()
         b.add(InlineKeyboardButton(text="Ссылок нет", callback_data=f"gs:social_none:{slug}"))
-        b.add(InlineKeyboardButton(text="← Назад", callback_data=f"gs:back:{slug}"))
-        b.adjust(1)
-        return b.as_markup()
-    if fn == "review_links":
-        b = InlineKeyboardBuilder()
-        b.add(InlineKeyboardButton(text="Отзывов пока нет", callback_data=f"gs:reviews_none:{slug}"))
-        b.add(InlineKeyboardButton(text="Отзывы", url="https://t.me/proflistpt/12860"))
         b.add(InlineKeyboardButton(text="← Назад", callback_data=f"gs:back:{slug}"))
         b.adjust(1)
         return b.as_markup()
@@ -532,20 +509,6 @@ async def gs_social_none(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("gs:reviews_none:"))
-async def gs_reviews_none(callback: CallbackQuery, state: FSMContext):
-    if await state.get_state() != GS_INPUT:
-        await callback.answer()
-        return
-    slug = callback.data.split(":", 2)[2]
-    section_name, _, step_idx, payload, _ = await _get_gs(state)
-    payload["review_links"] = ""
-    schema = build_schema_registry().get_by_section(section_name)
-    await _advance(callback.message, callback.from_user, state, schema, payload,
-                   step_idx + 1, slug, is_message=False)
-    await callback.answer()
-
-
 @router.callback_query(F.data.startswith("gs:wa_same:"))
 async def gs_wa_same(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != GS_INPUT:
@@ -625,8 +588,7 @@ async def gs_back(callback: CallbackQuery, state: FSMContext):
         prev_idx = next((i for i, s in enumerate(schema.steps)
                          if getattr(s, "field_name", None) == "geo_tags"), 0)
     elif cur == GS_TG_GATE:
-        prev_idx = next((i for i, s in enumerate(schema.steps)
-                         if getattr(s, "field_name", None) == "review_links"), None)
+        prev_idx = _previous_interactive_index(schema, step_idx)
     elif cur in (GS_CONFIRM, GS_MEDIA):
         prev_idx = _previous_interactive_index(schema, len(schema.steps))
     else:
@@ -724,26 +686,6 @@ async def gs_text_input(message: Message, state: FSMContext):
             return
         else:
             payload["social_links"] = normalized
-        await _advance(message, message.from_user, state, schema, payload,
-                       step_idx + 1, slug, is_message=True)
-        return
-
-    # review_links: validate or skip
-    if field == "review_links":
-        if raw.lower() in {"нет", "no", "none", "-", "—"}:
-            payload["review_links"] = ""
-        else:
-            normalized = _normalize_review_links(raw)
-            if not normalized:
-                await message.answer(
-                    'Неверная ссылка. Используйте ссылки из <a href="https://t.me/proflistpt/12860">Отзывы</a>. '
-                    'Формат: https://t.me/proflistpt/12860/&lt;id&gt;',
-                    reply_markup=_step_kb(step, slug),
-                    parse_mode="HTML",
-                    disable_web_page_preview=True,
-                )
-                return
-            payload["review_links"] = normalized
         await _advance(message, message.from_user, state, schema, payload,
                        step_idx + 1, slug, is_message=True)
         return
@@ -1035,7 +977,6 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
             media_list=media,
             action_type="post",
             payment_amount=20.00,
-            review_links=payload.get("review_links", ""),
             admin_notes=None,
         )
         await _notify_admin(callback.bot, post_id, payload, media, section_name)
