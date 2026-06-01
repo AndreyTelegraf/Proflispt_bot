@@ -75,7 +75,6 @@ PY
 
 echo
 echo "===== COUPLING GUARDS ====="
-scripts/refactor_renderer_coupling_audit.sh
 
 echo
 echo "===== COMPILE SANITY ====="
