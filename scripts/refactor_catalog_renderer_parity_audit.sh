@@ -73,8 +73,6 @@ assert "Ссылка" in rendered_from_post
 print("catalog_renderer_parity_smoke_ok")
 PY
 
-echo
-echo "===== COUPLING GUARDS ====="
 
 echo
 echo "===== COMPILE SANITY ====="
