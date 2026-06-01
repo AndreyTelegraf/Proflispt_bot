@@ -1,4 +1,4 @@
-"""Start handler for Proflistpt Bot."""
+"""Start handler."""
 
 import logging
 

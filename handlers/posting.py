@@ -1,4 +1,4 @@
-"""Posting handlers for Proflistpt Bot."""
+"""Posting handlers."""
 
 import logging
 from aiogram import Router, F

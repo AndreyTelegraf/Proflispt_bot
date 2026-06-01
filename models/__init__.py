@@ -1,1 +1,1 @@
-"""Models package for Proflistpt Bot."""
+"""Models package."""

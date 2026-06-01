@@ -1,4 +1,4 @@
-"""Admin handlers for Proflistpt Bot."""
+"""Admin handlers."""
 
 import logging
 from datetime import datetime, timedelta

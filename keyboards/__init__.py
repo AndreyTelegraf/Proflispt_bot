@@ -1,1 +1,1 @@
-"""Keyboards package for Proflistpt Bot."""
+"""Keyboards package."""

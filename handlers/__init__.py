@@ -1,1 +1,1 @@
-"""Handlers package for Proflistpt Bot."""
+"""Handlers package."""

@@ -1,4 +1,4 @@
-"""Utility functions for Proflistpt Bot."""
+"""Utility functions."""
 
 import re
 import unicodedata

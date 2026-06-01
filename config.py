@@ -1,4 +1,4 @@
-"""Configuration module for Proflistpt Bot."""
+"""Configuration module."""
 
 import os
 from dotenv import load_dotenv

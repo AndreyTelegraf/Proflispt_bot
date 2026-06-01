@@ -1,1 +1,1 @@
-"""Services package for Proflistpt Bot."""
+"""Services package."""

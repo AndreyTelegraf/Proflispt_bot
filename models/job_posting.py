@@ -1,4 +1,4 @@
-"""Job posting model for Proflistpt Bot."""
+"""Job posting model."""
 
 from dataclasses import dataclass
 from typing import List, Optional

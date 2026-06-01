@@ -1,4 +1,4 @@
-"""Main entry point for Proflistpt Bot."""
+"""Main entry point."""
 
 import asyncio
 import logging
@@ -1001,7 +1001,7 @@ async def main():
             dp.include_router(my_postings_router)
             dp.include_router(fallback_router)
 
-            logger.info("Proflistpt Bot started successfully")
+            logger.info("Bot started successfully")
 
             await start_scheduler(bot)
             logger.info("Cleanup scheduler started")

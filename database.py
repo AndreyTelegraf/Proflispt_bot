@@ -1,4 +1,4 @@
-"""Database module for Proflistpt Bot."""
+"""Database module."""
 
 import sqlite3
 import re

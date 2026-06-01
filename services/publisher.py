@@ -1,4 +1,4 @@
-"""Publisher service for Proflistpt Bot."""
+"""Publisher service."""
 
 import logging
 from typing import Optional

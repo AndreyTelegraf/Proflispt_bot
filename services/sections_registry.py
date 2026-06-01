@@ -1,4 +1,4 @@
-"""Sections registry loader for Proflistpt Bot."""
+"""Sections registry loader."""
 
 from __future__ import annotations
 

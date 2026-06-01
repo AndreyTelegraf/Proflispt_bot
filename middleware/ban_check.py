@@ -1,4 +1,4 @@
-"""Ban check middleware for Proflistpt Bot."""
+"""Ban check middleware."""
 
 import logging
 from typing import Any, Awaitable, Callable, Dict
