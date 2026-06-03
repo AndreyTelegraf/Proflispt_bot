@@ -618,7 +618,7 @@ def _exclude_known_non_billable_rows(rows):
         359,  # technical duplicate before final Karga24.7 post
         361,  # technical duplicate before final Karga24.7 post
         440,  # admin test passenger_transport
-        441,  # admin test restaurants
+        441,  # admin test catalog section
         653,  # technical duplicate before final Bee Gym post
     }
     return [row for row in rows if int(row.get("id") or 0) not in non_billable_ids]
