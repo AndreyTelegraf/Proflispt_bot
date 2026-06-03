@@ -1,4 +1,4 @@
-# Proflistpt Bot
+# Proflistpt
 
 Telegram бот для публикации объявлений о работе в Португалии.
 

@@ -1,4 +1,4 @@
-# Changelog - Proflistpt Bot
+# Changelog - Proflistpt
 
 ## Версия: Стабильная (2025-09-04)
 
