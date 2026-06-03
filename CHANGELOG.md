@@ -105,7 +105,7 @@ proflistpt_bot/
 ### 📦 Бэкап
 
 Создан бэкап стабильной версии:
-- **Файл**: `workinportugal_bot_stable_20250904_124808.tar.gz`
+- **Файл**: `legacy_stable_archive_20250904_124808.tar.gz`
 - **Размер**: ~8MB
 - **Исключения**: `__pycache__`, `*.pyc`, `bot.log`, `bot.lock`, `bot_database.db`
 

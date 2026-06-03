@@ -27,7 +27,7 @@
 - `bot.db` - пустой файл
 - `bot.err` - пустой файл
 - `bot_backup.tar.gz` - архив
-- `telegram_workinportugal_bot.tar.gz` - архив
+- `legacy_telegram_bot_archive.tar.gz` - архив
 
 ### 🧹 Очищенные файлы
 

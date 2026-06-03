@@ -17,7 +17,6 @@ bot.lock
 *.swp
 
 bot_backup.tar.gz
-telegram_workinportugal_bot.tar.gz
 
 data/diagnostics/
 opt/
