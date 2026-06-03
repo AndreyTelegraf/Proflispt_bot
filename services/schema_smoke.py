@@ -7,19 +7,19 @@ from services.schema_flow_adapter import SchemaFlowAdapter
 def run_smoke() -> None:
     registry = build_schema_registry()
     sections = registry.list_sections()
-    assert "Рестораны" in sections, sections
+    assert "Спорт" in sections, sections
     assert "Поговори" in sections, sections
 
-    restaurants = SchemaFlowAdapter("Рестораны")
-    assert restaurants.current_prompt()
-    assert restaurants.accept_answer("да").accepted
-    assert restaurants.accept_answer("lisboa").accepted
-    assert restaurants.accept_answer("кофе, завтраки, десерты").accepted
-    assert restaurants.accept_answer("https://instagram.com/example").accepted
-    assert restaurants.accept_answer("+351912345678").accepted
-    assert restaurants.accept_answer("+351912345679").accepted
-    assert restaurants.accept_answer("Andrey Telegraf, Cafe Telegraf").accepted
-    assert restaurants.state.is_finished
+    sport = SchemaFlowAdapter("Спорт")
+    assert sport.current_prompt()
+    assert sport.accept_answer("да").accepted
+    assert sport.accept_answer("lisboa").accepted
+    assert sport.accept_answer("персональные тренировки, плавание, йога").accepted
+    assert sport.accept_answer("https://instagram.com/example").accepted
+    assert sport.accept_answer("+351912345678").accepted
+    assert sport.accept_answer("+351912345679").accepted
+    assert sport.accept_answer("Andrey Telegraf, Sport Telegraf").accepted
+    assert sport.state.is_finished
 
     talk = SchemaFlowAdapter("Поговори")
     assert talk.current_prompt()
