@@ -15,7 +15,7 @@ echo "$OUT"
 
 echo
 echo "===== IMPORT AND OUTPUT SMOKE ====="
-venv/bin/python - <<'PY'
+PYTHONDONTWRITEBYTECODE=1 venv/bin/python - <<'PY'
 from services.catalog_listing_renderer import (
     build_catalog_listing_payload_from_premium_post,
     normalize_catalog_geo_tags_from_db,
@@ -75,14 +75,8 @@ PY
 
 
 echo
-echo "===== COMPILE SANITY ====="
-venv/bin/python -m py_compile \
-  services/catalog_modes.py \
-  services/catalog_listing_renderer.py \
-  handlers/premium_admin.py \
-  handlers/generic_schema_flow.py \
-  main.py \
-  database.py
+echo "===== COMPILE SANITY WITHOUT BYTECODE ====="
+PYTHONDONTWRITEBYTECODE=1 venv/bin/python -c 'from pathlib import Path; targets=["services/catalog_modes.py","services/catalog_listing_renderer.py","handlers/premium_admin.py","handlers/generic_schema_flow.py","main.py","database.py"]; [compile(Path(t).read_text(encoding="utf-8"), t, "exec") for t in targets]; print("compile_sanity_without_bytecode_ok")'
 
 {
   echo "catalog_renderer_parity_audit=$OUT"
