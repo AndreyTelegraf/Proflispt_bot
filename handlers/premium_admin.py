@@ -381,7 +381,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         
     except Exception as e:
         logger.error(f"Failed to approve premium post: {e}")
-        await callback.answer("🚫 Ошибка при одобрении поста\\.", show_alert=True)
+        await callback.answer("Не удалось одобрить пост. Проверьте лог и попробуйте ещё раз.", show_alert=True)
         return
     
     await callback.answer("✅ Пост одобрен!")

@@ -844,7 +844,7 @@ async def request_repost_premium(callback: CallbackQuery):
 
     user = db.get_user(callback.from_user.id)
     if not user or post['user_id'] != user['id']:
-        await callback.answer("Нет доступа.", show_alert=True)
+        await callback.answer("Это объявление недоступно для вашего аккаунта.", show_alert=True)
         return
 
     if post.get('status') not in ('published', 'deleted'):
@@ -951,7 +951,7 @@ async def confirm_delete_premium(callback: CallbackQuery):
 
     user = db.get_user(callback.from_user.id)
     if not user or post['user_id'] != user['id']:
-        await callback.answer("Нет доступа.", show_alert=True)
+        await callback.answer("Это объявление недоступно для вашего аккаунта.", show_alert=True)
         return
 
     view = build_premium_post_identity_view(post)
@@ -985,7 +985,7 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
 
     user = db.get_user(callback.from_user.id)
     if not user or post['user_id'] != user['id']:
-        await callback.answer("Нет доступа.", show_alert=True)
+        await callback.answer("Это объявление недоступно для вашего аккаунта.", show_alert=True)
         return
 
     message_ids = post.get('published_message_ids') or []
@@ -1086,7 +1086,7 @@ async def hs_baraholka_mypostings(callback: CallbackQuery):
     try:
         post_id = int(raw_id)
     except ValueError:
-        await callback.answer("Ошибка.", show_alert=True)
+        await callback.answer("Не удалось обработать действие. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)
         return
 
     user = db.get_user(callback.from_user.id)
@@ -1105,7 +1105,7 @@ async def hs_baraholka_mypostings(callback: CallbackQuery):
         await _notify_admin_baraholka_from_post(callback.bot, repost_id, post)
     except Exception as e:
         logger.exception("Baraholka my_postings repost failed: %s", e)
-        await callback.answer("Ошибка при отправке заявки.", show_alert=True)
+        await callback.answer("Не удалось отправить заявку. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)
         return
 
     await callback.message.edit_text(

@@ -247,7 +247,7 @@ async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dic
         )
     except Exception as e:
         logger.exception("Reviews submit failed: %s", e)
-        await callback.answer("Ошибка при отправке. Попробуйте позже.", show_alert=True)
+        await callback.answer("Не удалось отправить отзыв на модерацию. Вернитесь к превью и попробуйте ещё раз.", show_alert=True)
         return
     await callback.answer()
 

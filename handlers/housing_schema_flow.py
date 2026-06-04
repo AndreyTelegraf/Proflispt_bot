@@ -929,7 +929,7 @@ async def hs_publish_free(callback: CallbackQuery, state: FSMContext):
                 "Сократите текст или отправьте объявление без медиа."
             )
         else:
-            await callback.message.edit_text("Ошибка при публикации. Попробуйте позже.")
+            await callback.message.edit_text("Не удалось опубликовать объявление. Вернитесь к превью и попробуйте ещё раз.")
     await callback.answer()
 
 
@@ -979,7 +979,7 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
     try:
         source_post_id = int(raw_id)
     except ValueError:
-        await callback.answer("Ошибка.", show_alert=True)
+        await callback.answer("Не удалось обработать действие. Вернитесь назад и попробуйте ещё раз.", show_alert=True)
         return
 
     user = db.get_user(callback.from_user.id)
@@ -997,7 +997,7 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
         await _notify_admin_baraholka_from_post(callback.bot, repost_id, source_post)
     except Exception as e:
         logger.exception("Baraholka upsell repost failed: %s", e)
-        await callback.answer("Ошибка при отправке заявки.", show_alert=True)
+        await callback.answer("Не удалось отправить заявку на перепост. Попробуйте ещё раз из этого объявления.", show_alert=True)
         return
 
     b = InlineKeyboardBuilder()

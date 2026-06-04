@@ -849,7 +849,7 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
     except Exception as e:
         logger.exception("Generic free publish failed: %s", e)
         await state.clear()
-        msg = locals().get("limit_message") or "Ошибка при публикации. Попробуйте позже."
+        msg = locals().get("limit_message") or "Не удалось опубликовать объявление. Вернитесь к превью и попробуйте ещё раз."
         await callback.message.edit_text(
             msg,
             reply_markup=_back_kb(slug),
@@ -991,7 +991,7 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
         )
     except Exception as e:
         logger.exception("Generic premium submit failed: %s", e)
-        await callback.answer("Ошибка при отправке заявки.", show_alert=True)
+        await callback.answer("Не удалось отправить премиум-заявку. Вернитесь к объявлению и попробуйте ещё раз.", show_alert=True)
         return
 
     await callback.answer()
