@@ -14,6 +14,7 @@ from aiogram.fsm.state import State, StatesGroup
 from database import db
 from config import Config
 from services.directory_links import directory_message_url
+from services.post_identity import build_premium_post_identity_view
 from utils import get_first_words, escape_markdown, format_posting_card
 
 router = Router()
@@ -192,17 +193,15 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
                 return
             return await render_my_posting(callback, state)
 
-        cities = post.get('cities') or []
-        if isinstance(cities, list):
-            cities_str = ", ".join(str(c) for c in cities)
-        else:
-            cities_str = str(cities)
-
-        desc = (post.get('description') or "").strip().replace("\n", " ")
-        if len(desc) > 100:
-            desc = desc[:100].rstrip() + "…"
-
-        text = f"📋 Мои объявления {counter}\n\n{post.get('name', '')} ({cities_str})\n\n{desc}"
+        view = build_premium_post_identity_view(post)
+        link_line = f"\nСсылка: {view.canonical_post_url}" if view.canonical_post_url else ""
+        text = (
+            f"📋 Мои объявления {counter}\n\n"
+            f"Раздел: {view.section_name}\n"
+            f"Объявление: {view.display_title}\n"
+            f"Статус: {view.publication_status}"
+            f"{link_line}"
+        )
 
         is_deleted = post.get('status') == 'deleted'
         is_housing = post.get('mode') in ('housing_wanted', 'owner_real_estate') and post.get('action_type') == 'post'
