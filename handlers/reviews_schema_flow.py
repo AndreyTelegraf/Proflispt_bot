@@ -46,7 +46,7 @@ _GEO_OPTIONS = [
     ("leiria",  "Leiria"),
     ("setubal", "Setúbal"),
     ("online",  "Онлайн"),
-    ("custom",  "Другие города"),
+    ("custom",  "Несколько / другой город"),
 ]
 
 _PROMPTS = [
