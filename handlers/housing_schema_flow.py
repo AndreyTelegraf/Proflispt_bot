@@ -498,11 +498,36 @@ async def hs_back(callback: CallbackQuery, state: FSMContext):
         prev_idx = _previous_interactive_index(schema, prev_idx)
         if prev_idx is None:
             await state.clear()
-            await callback.message.edit_text(
-                "Здравствуйте!\n\nЭтот бот поможет вам опубликовать объявления "
-                "в разделы Справочника.\n\nВыберите действие:",
-                reply_markup=get_main_menu(),
-            )
+            try:
+                from handlers.section_catalog import _sections_keyboard
+                from services.section_catalog import load_section_catalog
+
+                catalog = load_section_catalog()
+                group_key = None
+                group_title = None
+                for group in catalog.list_groups():
+                    if section_name in group.sections:
+                        group_key = group.key
+                        group_title = group.title
+                        break
+
+                if group_key:
+                    await callback.message.edit_text(
+                        f"Группа: {group_title}\n\nТеперь выберите подходящий вам раздел:",
+                        reply_markup=_sections_keyboard(group_key),
+                    )
+                else:
+                    await callback.message.edit_text(
+                        "Здравствуйте!\n\nЭтот бот поможет вам опубликовать объявления "
+                        "в разделы Справочника.\n\nВыберите действие:",
+                        reply_markup=get_main_menu(),
+                    )
+            except Exception:
+                await callback.message.edit_text(
+                    "Здравствуйте!\n\nЭтот бот поможет вам опубликовать объявления "
+                    "в разделы Справочника.\n\nВыберите действие:",
+                    reply_markup=get_main_menu(),
+                )
             await callback.answer()
             return
 

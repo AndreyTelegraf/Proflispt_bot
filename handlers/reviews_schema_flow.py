@@ -94,7 +94,7 @@ def _geo_kb() -> InlineKeyboardMarkup:
     for val, label in _GEO_OPTIONS:
         b.add(InlineKeyboardButton(text=label, callback_data=f"rv:geo:{val}"))
     b.add(InlineKeyboardButton(text="← Назад", callback_data="rv:back"))
-    b.adjust(3, 3, 3, 2, 1)
+    b.adjust(3, 3, 3, 1, 1)
     return b.as_markup()
 
 
@@ -310,7 +310,7 @@ async def rv_geo_choice(callback: CallbackQuery, state: FSMContext):
     if val == "custom":
         await state.set_state(RV_GEO_CUSTOM)
         await callback.message.edit_text(
-            "Введите город или регион вручную, например: #cascais или #madeira",
+            "Введите все нужные города одним сообщением.\n\nНапример: #lisboa #sintra #cascais или #online.\n\nНе добавляйте города потом в отзыв — они попадут в публикацию отдельной строкой.",
             reply_markup=_back_kb(),
         )
         await callback.answer()
@@ -328,7 +328,7 @@ async def rv_geo_choice(callback: CallbackQuery, state: FSMContext):
 async def rv_geo_custom_input(message: Message, state: FSMContext):
     raw = str(message.text or "").strip()
     if not raw:
-        await message.answer("Введите хотя бы один город.", reply_markup=_back_kb())
+        await message.answer("Введите хотя бы один город одним сообщением, например: #lisboa #porto #online", reply_markup=_back_kb())
         return
     _, payload, _ = await _get_rv(state)
     payload["geo_tags"] = raw
