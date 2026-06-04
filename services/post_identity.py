@@ -9,6 +9,12 @@ from services.catalog_modes import get_catalog_section_name
 from services.directory_links import directory_message_url
 
 
+_HOUSING_SECTION_NAMES = {
+    "housing_wanted": "Ищу жильё",
+    "owner_real_estate": "Недвижимость от хозяев",
+}
+
+
 @dataclass(frozen=True)
 class PostIdentityView:
     """Stable display identity for a user-manageable post."""
@@ -51,7 +57,7 @@ def build_premium_post_identity_view(post: dict[str, Any]) -> PostIdentityView:
 
     post_id = int(post["id"])
     mode = str(post.get("mode") or "")
-    section_name = get_catalog_section_name(mode) or mode or "Объявление"
+    section_name = get_catalog_section_name(mode) or _HOUSING_SECTION_NAMES.get(mode) or mode or "Объявление"
 
     raw_title = post.get("name") or post.get("description") or "Объявление"
     display_title = _compact_text(raw_title, limit=80) or "Объявление"
