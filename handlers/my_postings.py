@@ -954,14 +954,22 @@ async def confirm_delete_premium(callback: CallbackQuery):
         await callback.answer("Нет доступа.", show_alert=True)
         return
 
+    view = build_premium_post_identity_view(post)
+    link_line = f"\nСсылка: {view.canonical_post_url}" if view.canonical_post_url else ""
+
     await callback.message.edit_text(
-        "Удалить объявление? Это действие нельзя отменить.",
+        "Удалить объявление? Это действие нельзя отменить.\n\n"
+        f"Раздел: {view.section_name}\n"
+        f"Объявление: {view.display_title}\n"
+        f"Статус: {view.publication_status}"
+        f"{link_line}",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [
                 InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"do_delete_premium_{post_id}"),
                 InlineKeyboardButton(text="❌ Отмена", callback_data="back_to_my_postings"),
             ],
         ]),
+        disable_web_page_preview=True,
     )
     await callback.answer()
 
@@ -1044,6 +1052,7 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
         )
         return
 
+    view = build_premium_post_identity_view(post)
     db.delete_premium_post(post_id)
 
     _del_data = await state.get_data()
@@ -1057,10 +1066,13 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
         await render_my_posting(callback, state)
     else:
         await callback.message.edit_text(
-            "Объявление удалено.",
+            "Объявление удалено.\n\n"
+            f"Раздел: {view.section_name}\n"
+            f"Объявление: {view.display_title}",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="В главное меню", callback_data="go:main")],
             ]),
+            disable_web_page_preview=True,
         )
     await callback.answer()
 
