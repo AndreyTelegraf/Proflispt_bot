@@ -213,19 +213,16 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
             ]
         elif is_housing_wanted:
             action_rows = [
-                [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
                 [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
         elif is_housing:
             action_rows = [
                 [InlineKeyboardButton(text="Платный перепост в Барахолку — €10", callback_data=f"hs:baraholka_mypostings:{post_id}")],
-                [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
                 [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
         else:
             action_rows = [
                 [InlineKeyboardButton(text="Поднять — €10", callback_data=f"repost_premium_{post_id}")],
-                [InlineKeyboardButton(text="Закрепить — €5", callback_data=f"pin_premium_{post_id}")],
                 [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
             ]
 
