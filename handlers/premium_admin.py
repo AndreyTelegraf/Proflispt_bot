@@ -9,6 +9,7 @@ from services.catalog_listing_renderer import build_catalog_listing_payload_from
 from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
 from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
 from services.directory_links import directory_message_url
+from services.post_identity import format_premium_post_identity_text
 
 logger = logging.getLogger(__name__)
 
@@ -325,31 +326,23 @@ async def admin_approve_premium(callback: CallbackQuery):
             except Exception as e:
                 logger.warning(f"Could not build premium post link: {e}")
 
+        identity = format_premium_post_identity_text(post)
+
         if post.get("action_type") == "repost" and _baraholka_publish:
-            if message_link:
-                user_text = (
-                    f"Ваше объявление опубликовано в Барахолке: {message_link}\n\n"
-                    "Удалить его можно через администратора @baraholka_pt"
-                )
-            else:
-                user_text = (
-                    "Ваше объявление опубликовано в Барахолке.\n\n"
-                    "Удалить его можно через администратора @baraholka_pt"
-                )
+            user_text = (
+                f"{identity}\n\n"
+                "Опубликовано в Барахолке.\n\n"
+                "Удалить его можно через администратора @baraholka_pt"
+            )
             main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
             ])
         elif post.get("action_type") == "repost":
-            if message_link:
-                user_text = (
-                    f"Ваше объявление теперь самое новое в разделе: {message_link}\n\n"
-                    "Удалить его можно через раздел \"Мои объявления\"."
-                )
-            else:
-                user_text = (
-                    "Ваше объявление теперь самое новое в разделе.\n\n"
-                    "Удалить его можно через раздел \"Мои объявления\"."
-                )
+            user_text = (
+                f"{identity}\n\n"
+                "Теперь это самое новое объявление в разделе.\n\n"
+                "Удалить его можно через раздел \"Мои объявления\"."
+            )
             main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
             ])
@@ -362,17 +355,11 @@ async def admin_approve_premium(callback: CallbackQuery):
                 [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
             ])
         else:
-            if message_link:
-                user_text = (
-                    "Ваше объявление с медиа опубликовано!\n"
-                    f"Ссылка: {message_link}\n\n"
-                    "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
-                )
-            else:
-                user_text = (
-                    "Ваше объявление с медиа опубликовано!\n\n"
-                    "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
-                )
+            user_text = (
+                f"{identity}\n\n"
+                "Объявление с медиа опубликовано.\n\n"
+                "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
+            )
             main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
             ])
