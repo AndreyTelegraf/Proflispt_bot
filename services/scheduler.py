@@ -8,6 +8,7 @@ from aiogram import Bot
 
 from database import db
 from services.publisher import Publisher
+from services.post_identity import format_premium_post_identity_text
 
 logger = logging.getLogger(__name__)
 
@@ -185,10 +186,11 @@ class CleanupScheduler:
         for post in posts:
             try:
                 if post.get('telegram_id'):
-                    name = post.get('name') or 'Ваше объявление'
+                    identity = format_premium_post_identity_text(post)
                     await bot.send_message(
                         chat_id=post['telegram_id'],
-                        text=f"{name} будет автоматически удалено через 1 день."
+                        text=f"{identity}\n\nБудет автоматически удалено через 1 день.",
+                        disable_web_page_preview=True,
                     )
             except Exception:
                 pass
@@ -214,10 +216,11 @@ class CleanupScheduler:
 
             try:
                 if post.get('telegram_id'):
-                    name = post.get('name') or 'Ваше объявление'
+                    identity = format_premium_post_identity_text(post)
                     await bot.send_message(
                         chat_id=post['telegram_id'],
-                        text=f"{name} удалено по истечении срока публикации."
+                        text=f"{identity}\n\nУдалено по истечении срока публикации.",
+                        disable_web_page_preview=True,
                     )
             except Exception:
                 pass
