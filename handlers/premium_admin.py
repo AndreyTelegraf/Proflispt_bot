@@ -75,59 +75,20 @@ async def admin_approve_premium(callback: CallbackQuery):
         from datetime import datetime, timedelta
 
         if post.get("action_type") == "pin":
-            pin_fail_reason = None
-            if not pin_old_chat_id or not pin_old_message_id:
-                pin_fail_reason = "Нет координат поста"
-            else:
-                try:
-                    await callback.bot.pin_chat_message(
-                        chat_id=int(pin_old_chat_id),
-                        message_id=int(pin_old_message_id),
-                    )
-                except Exception as pin_error:
-                    logger.warning(f"pin_chat_message failed for post #{post_id}: {pin_error}")
-                    pin_fail_reason = str(pin_error)
-
-            if pin_fail_reason:
-                db.reject_premium_post(post_id, callback.from_user.id, f"Pin failed: {pin_fail_reason}")
-                main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-                ])
-                await callback.bot.send_message(
-                    chat_id=user['telegram_id'],
-                    text="Не удалось закрепить объявление — оригинальный пост недоступен. Обратитесь к администратору.",
-                    reply_markup=main_menu_keyboard,
-                    disable_web_page_preview=True,
-                )
-                await callback.message.edit_text(
-                    f"❌ <b>Закреп #{post_id} не выполнен.</b>\n\n{pin_fail_reason}",
-                    parse_mode="HTML",
-                )
-                await callback.answer("❌ Закреп не выполнен.", show_alert=True)
-                return
-
-            pinned_until = datetime.now() + timedelta(hours=24)
-            db.set_premium_post_pinned_until(post_id, pinned_until)
-            db.update_premium_post_publication(
-                post_id,
-                int(pin_old_message_id),
-                int(pin_old_chat_id),
-                int(pin_old_topic_id) if pin_old_topic_id else None,
-            )
-            post_link = directory_message_url(pin_old_message_id, pin_old_topic_id)
+            db.reject_premium_post(post_id, callback.from_user.id, "Pin product disabled")
             await callback.bot.send_message(
                 chat_id=user['telegram_id'],
-                text=f"Ваше объявление закреплено на 24 часа!\nСсылка: {post_link}",
-                disable_web_page_preview=True,
+                text="Закрепление больше недоступно. Если вы уже оплатили закрепление, обратитесь к администратору.",
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
+                    [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
                 ]),
+                disable_web_page_preview=True,
             )
             await callback.message.edit_text(
-                f"✅ <b>Закреп #{post_id} одобрен.</b>",
+                f"<b>Pin #{post_id} отклонён.</b>\n\nЗакрепление отключено.",
                 parse_mode="HTML",
             )
-            await callback.answer("✅ Закреп одобрен!")
+            await callback.answer("Закрепление отключено.", show_alert=True)
             return
 
         # Format the post text
