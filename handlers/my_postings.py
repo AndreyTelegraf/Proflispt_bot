@@ -382,11 +382,11 @@ async def show_posting_statistics(callback: CallbackQuery):
     # Format statistics text
     stats_text = f"📊 Статистика публикаций\n\n"
     stats_text += f"*Текущие лимиты:*\n"
-    stats_text += f"• Активных объявлений: {stats['current_count']}/{stats['max_count']}\n"
-    stats_text += f"• Можно публиковать: {'✅ Да' if stats['can_post'] else '🚫 Нет'}\n"
+    stats_text += f"- Активных объявлений: {stats['current_count']}/{stats['max_count']}\n"
+    stats_text += f"- Можно публиковать: {'✅ Да' if stats['can_post'] else '🚫 Нет'}\n"
     
     if stats['earliest_next_post_date']:
-        stats_text += f"• Следующая публикация: {escape_markdown(stats['earliest_next_post_date'].strftime('%d.%m.%Y %H:%M'))}\n"
+        stats_text += f"- Следующая публикация: {escape_markdown(stats['earliest_next_post_date'].strftime('%d.%m.%Y %H:%M'))}\n"
     
     stats_text += f"\n*Ваши активные объявления:*\n"
     for i, p in enumerate(stats['all_active_postings'], 1):
@@ -521,9 +521,9 @@ async def delete_posting(callback: CallbackQuery, state: FSMContext):
             )
         else:
             await callback.message.edit_text(
-                "�� Ошибка при удалении объявления.",
+                "Ошибка при удалении объявления.",
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                    InlineKeyboardButton(text="⬅️ Назад", callback_data=f"posting_{posting_id}")
+                    InlineKeyboardButton(text="← Назад", callback_data=f"posting_{posting_id}")
                 ]])
             )
         

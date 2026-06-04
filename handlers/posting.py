@@ -168,11 +168,11 @@ async def handle_text_input(message: Message, state: FSMContext):
             await message.answer(
                 f"Обнаружены недопустимые геотеги: {invalid_tags_text}\n\n"
                 f"Допустимые геотеги:\n"
-                f"• Основные города: Lisboa, Porto, Coimbra, Braga, Faro, Leiria, Sintra, Cascais\n"
-                f"• Регионы: Algarve, Alentejo, Centro, Norte, Madeira, Açores\n"
-                f"• Другие города: Amadora, Almada, Setúbal, Évora, Funchal, Aveiro, Guimarães\n"
-                f"• Туристические города: Albufeira, Lagos, Nazaré, Óbidos, Tomar, Viana do Castelo\n"
-                f"• Специальные теги: \\#online, \\#europe, \\#remote, \\#worldwide\n\n"
+                f"- Основные города: Lisboa, Porto, Coimbra, Braga, Faro, Leiria, Sintra, Cascais\n"
+                f"- Регионы: Algarve, Alentejo, Centro, Norte, Madeira, Açores\n"
+                f"- Другие города: Amadora, Almada, Setúbal, Évora, Funchal, Aveiro, Guimarães\n"
+                f"- Туристические города: Albufeira, Lagos, Nazaré, Óbidos, Tomar, Viana do Castelo\n"
+                f"- Специальные теги: \\#online, \\#europe, \\#remote, \\#worldwide\n\n"
                 f"Полный список доступен в меню выбора городов.\n"
                 f"Пожалуйста, введите только допустимые геотеги:",
                 reply_markup=get_smart_back_button("waiting_for_custom_city")
@@ -190,11 +190,11 @@ async def handle_text_input(message: Message, state: FSMContext):
             description_text = (
                 f"Города: {', '.join(cities)}\n\n"
                 "Отправьте описание работы, которую вы ищите, например:\n"
-                "• 'Ищу работу водителем с личным авто'\n"
-                "• 'Ищу вакансию в разработке python'\n"
-                "• 'Ищу подработку в сфере услуг'\n"
-                "• 'Ищу парт-тайм официантом'\n"
-                "• 'Ищу работу на стройке'\n"
+                "- 'Ищу работу водителем с личным авто'\n"
+                "- 'Ищу вакансию в разработке python'\n"
+                "- 'Ищу подработку в сфере услуг'\n"
+                "- 'Ищу парт-тайм официантом'\n"
+                "- 'Ищу работу на стройке'\n"
                 "Плюс ваше резюме или описание опыта и навыков.\n"
                 "КОНТАКТЫ ПОКА НЕ НУЖНО"
             )
@@ -204,11 +204,11 @@ async def handle_text_input(message: Message, state: FSMContext):
                 "Отправьте описание вашей вакансии.\n"
                 "Если вакансий несколько, сформируйте описание так, чтобы это было понятно.\n"
                 "Начните с ключевых слов, например:\n"
-                "• 'Предлагаю работу водителю с личным авто'\n"
-                "• 'Требуется официант в кафе-ресторан'\n"
-                "• 'Ищу кто сможет починить жалюзи'\n"
-                "• 'Нужны разнорабочие на стройку'\n"
-                "• 'Ищем уборщицу на парт-тайм'\n"
+                "- 'Предлагаю работу водителю с личным авто'\n"
+                "- 'Требуется официант в кафе-ресторан'\n"
+                "- 'Ищу кто сможет починить жалюзи'\n"
+                "- 'Нужны разнорабочие на стройку'\n"
+                "- 'Ищем уборщицу на парт-тайм'\n"
                 "КОНТАКТЫ ПОКА НЕ НУЖНО"
             )
 
@@ -234,14 +234,14 @@ async def handle_text_input(message: Message, state: FSMContext):
         is_valid, violations = validate_description_content(description)
         
         if not is_valid:
-            violations_text = "\n• ".join(violations)
+            violations_text = "\n- ".join(violations)
             await message.answer(
                 f"🚫 В описании не допускаются контакты и ссылки, их нужно будет вводить на следующих шагах. Это лишнее:\n\n"
-                f"• {violations_text}\n\n"
+                f"- {violations_text}\n\n"
                 f"Пожалуйста, переделайте описание в соответствии с правилами:\n"
-                f"• Геотеги вы уже ввели\n"
-                f"• Описание должно содержать только текст, без эмодзи\n"
-                f"• Контакты (@username, телефоны, email) и ссылки – на следующих шагах\n\n"
+                f"- Геотеги вы уже ввели\n"
+                f"- Описание должно содержать только текст, без эмодзи\n"
+                f"- Контакты (@username, телефоны, email) и ссылки – на следующих шагах\n\n"
                 f"Отправьте исправленное описание заново:",
                 reply_markup=get_smart_back_button("waiting_for_description")
             )
@@ -252,7 +252,7 @@ async def handle_text_input(message: Message, state: FSMContext):
         # Ask for links
         preview_description = format_description_for_preview(description)
         await message.answer(
-            f"Описание: {preview_description}\n\nТеперь укажите любые ссылки, имеющие отношение к делу: ваш сайт, социальные сети, портфолио и т.д.\n\nМожно указать несколько ссылок через запятую, точку с запятой или с новой строки.\nНапример:\n• https://instagram.com/username, https://linkedin.com/in/username\n• https://mycompany.com\n• Или напишите 'нет'",
+            f"Описание: {preview_description}\n\nТеперь укажите любые ссылки, имеющие отношение к делу: ваш сайт, социальные сети, портфолио и т.д.\n\nМожно указать несколько ссылок через запятую, точку с запятой или с новой строки.\nНапример:\n- https://instagram.com/username, https://linkedin.com/in/username\n- https://mycompany.com\n- Или напишите 'нет'",
             reply_markup=get_smart_back_button("waiting_for_social_media"),
             disable_web_page_preview=True
         )
@@ -295,13 +295,13 @@ async def handle_text_input(message: Message, state: FSMContext):
                     await message.answer(
                         f"🚫 Неверный формат ссылки: {cleaned_link}\n\n"
                         "Вы можете указать:\n"
-                        "• Любой веб-сайт: https://example.com\n"
-                        "• Социальные сети: https://instagram.com/username, @username\n"
-                        "• LinkedIn: https://linkedin.com/in/username\n"
-                        "• YouTube: https://youtube.com/@channel\n"
-                        "• GitHub: https://github.com/username\n"
-                        "• Или любую другую ссылку\n"
-                        "• Или напишите 'нет'",
+                        "- Любой веб-сайт: https://example.com\n"
+                        "- Социальные сети: https://instagram.com/username, @username\n"
+                        "- LinkedIn: https://linkedin.com/in/username\n"
+                        "- YouTube: https://youtube.com/@channel\n"
+                        "- GitHub: https://github.com/username\n"
+                        "- Или любую другую ссылку\n"
+                        "- Или напишите 'нет'",
                         reply_markup=get_smart_back_button("waiting_for_social_media")
                     )
                     return
@@ -399,9 +399,9 @@ async def handle_text_input(message: Message, state: FSMContext):
         reminder_note = (
             "\n\n"
             "📌 *Памятка:*\n"
-            "• Публикация бесплатна, пожалуйста, будьте на связи\\.\n"
-            "• Если объявление утратило актуальность – удалите его\\.\n"
-            "• Игнор входящих звонков и сообщений может привести к бану\\."
+            "- Публикация бесплатна, пожалуйста, будьте на связи\\.\n"
+            "- Если объявление утратило актуальность – удалите его\\.\n"
+            "- Игнор входящих звонков и сообщений может привести к бану\\."
         )
         confirmation_text += reminder_note
 
@@ -723,9 +723,9 @@ async def back_to_description(callback: CallbackQuery, state: FSMContext):
         description_text = (
             f"Города: {cities_text}\n\n"
             "Теперь оправьте описание работы, которую вы ищите, начинающееся например с фразы:\n\n"
-            "• Ищу подработку в сфере услуг\n"
-            "• Ищу парт-тайм официантом\n"
-            "• Ищу работу на стройке...\n"
+            "- Ищу подработку в сфере услуг\n"
+            "- Ищу парт-тайм официантом\n"
+            "- Ищу работу на стройке...\n"
             "...дальше опишите свои навыки и опыт. \n\n"
             "⚠️ Контактов и ссылок в описании быть не должно, они вводятся на следующих шагах."
         )
@@ -735,11 +735,11 @@ async def back_to_description(callback: CallbackQuery, state: FSMContext):
             "Теперь отправьте описание вашей вакансии.\n"
             "Если вакансий несколько, сформируйте описание так, чтобы это было понятно.\n"
             "Начните с ключевых слов, например:\n\n"
-            "• Предлагаю работу водителю с личным авто\n"
-            "• Требуется официант в кафе-ресторан\n"
-            "• Ищу кто сможет починить жалюзи\n"
-            "• Нужны разнорабочие на стройку\n"
-            "• Ищем уборщицу на парт-тайм...\n\n"
+            "- Предлагаю работу водителю с личным авто\n"
+            "- Требуется официант в кафе-ресторан\n"
+            "- Ищу кто сможет починить жалюзи\n"
+            "- Нужны разнорабочие на стройку\n"
+            "- Ищем уборщицу на парт-тайм...\n\n"
             "⚠️ Контактов и ссылок в описании быть не должно, они вводятся в отдельные поля. Публикация одной и той же вакансии допускается не чаще раза в месяц. При наличии нескольких вакансий рекомендуется объединить их в одно объявление."
         )
     
@@ -765,9 +765,9 @@ async def back_to_social_media(callback: CallbackQuery, state: FSMContext):
         f"Теперь укажите любые ссылки, имеющие отношение к делу: ваш сайт, социальные сети, портфолио и т.д.\n\n"
         f"Можно указать несколько ссылок через запятую, точку с запятой или с новой строки.\n"
         f"Например:\n"
-        f"• https://instagram.com/username, https://linkedin.com/in/username\n"
-        f"• https://mycompany.com\n"
-        f"• Или напишите 'нет'",
+        f"- https://instagram.com/username, https://linkedin.com/in/username\n"
+        f"- https://mycompany.com\n"
+        f"- Или напишите 'нет'",
         reply_markup=get_smart_back_button("waiting_for_social_media"),
         disable_web_page_preview=True
     )
