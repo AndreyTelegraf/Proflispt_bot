@@ -382,12 +382,12 @@ async def admin_approve_premium(callback: CallbackQuery):
             if message_link:
                 user_text = (
                     f"Ваше объявление теперь самое новое в разделе: {message_link}\n\n"
-                    "Закрепить или удалить его можно через раздел \"Мои объявления\"."
+                    "Удалить его можно через раздел \"Мои объявления\"."
                 )
             else:
                 user_text = (
                     "Ваше объявление теперь самое новое в разделе.\n\n"
-                    "Закрепить или удалить его можно через раздел \"Мои объявления\"."
+                    "Удалить его можно через раздел \"Мои объявления\"."
                 )
             main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
