@@ -36,7 +36,7 @@ from services.listing_validation import (
 logger = logging.getLogger(__name__)
 router = Router()
 
-from services.catalog_limits import CATALOG_DESCRIPTION_MAX_LEN, TELEGRAM_MEDIA_CAPTION_LIMIT
+from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, TELEGRAM_TEXT_MESSAGE_SAFE_LIMIT
 
 _GS_MEDIA_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
 
@@ -668,14 +668,6 @@ async def gs_text_input(message: Message, state: FSMContext):
                 disable_web_page_preview=True,
             )
             return
-        if len(raw) > CATALOG_DESCRIPTION_MAX_LEN:
-            await message.answer(
-                f"Описание слишком длинное. Максимум {CATALOG_DESCRIPTION_MAX_LEN} символов. "
-                "Это нужно, чтобы публикация с фото/видео помещалась в лимит Telegram вместе с городом, ссылками, контактами и отзывами.\n\n"
-                "Сократите описание и отправьте его заново:",
-                disable_web_page_preview=True,
-            )
-            return
 
     if field == "social_links":
         normalized = _normalize_social_links(raw)
@@ -798,9 +790,21 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
         channel_id = int(registry.channel_id)
         topic_id = int(registry.get_topic_id(section_name))
 
+        post_text = render_catalog_listing_html(payload)
+        if len(post_text) > TELEGRAM_TEXT_MESSAGE_SAFE_LIMIT:
+            await callback.message.edit_text(
+                "Текст объявления слишком длинный для публикации без медиа. "
+                f"Максимум {TELEGRAM_TEXT_MESSAGE_SAFE_LIMIT} символов с учётом города, ссылок, контактов и отзывов.\n\n"
+                "Сократите описание и попробуйте снова.",
+                reply_markup=_back_kb(slug),
+                disable_web_page_preview=True,
+            )
+            await callback.answer()
+            return
+
         published = await callback.bot.send_message(
             chat_id=channel_id,
-            text=render_catalog_listing_html(payload),
+            text=post_text,
             message_thread_id=topic_id,
             disable_web_page_preview=True,
             parse_mode="HTML",

@@ -70,7 +70,7 @@ class SchemaEngine:
                 return StepResult(False, False, error_message="Поле обязательно.")
 
             max_len = step.validation.get("max_len")
-            if max_len and len(value) > int(max_len):
+            if step.field_name != "description" and max_len and len(value) > int(max_len):
                 return StepResult(False, False, error_message=f"Слишком длинный ответ. Максимум {int(max_len)} символов.")
 
             if step.field_name:
