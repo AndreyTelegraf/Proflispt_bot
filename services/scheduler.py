@@ -189,7 +189,12 @@ class CleanupScheduler:
                     identity = format_premium_post_identity_text(post)
                     await bot.send_message(
                         chat_id=post['telegram_id'],
-                        text=f"{identity}\n\nБудет автоматически удалено через 1 день.",
+                        text=(
+                            f"{identity}\n\n"
+                            "Через 1 день будет автоматически удалено ваше объявление.\n\n"
+                            "Если объявление ещё актуально, поднимите его или опубликуйте новую версию.\n"
+                            "Если ничего не делать, объявление будет удалено автоматически."
+                        ),
                         disable_web_page_preview=True,
                     )
             except Exception:
@@ -219,7 +224,11 @@ class CleanupScheduler:
                     identity = format_premium_post_identity_text(post)
                     await bot.send_message(
                         chat_id=post['telegram_id'],
-                        text=f"{identity}\n\nУдалено по истечении срока публикации.",
+                        text=(
+                            f"{identity}\n\n"
+                            "Объявление удалено по истечении срока публикации.\n\n"
+                            "Если объявление всё ещё актуально, создайте новую публикацию через бота."
+                        ),
                         disable_web_page_preview=True,
                     )
             except Exception:
