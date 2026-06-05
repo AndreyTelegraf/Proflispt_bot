@@ -104,7 +104,7 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
         reverse=True,
     )
 
-    ids = [f"posting:{p['id']}" for p in postings[:3]] + [f"premium:{p['id']}" for p in all_posts]
+    ids = [f"posting:{p['id']}" for p in postings] + [f"premium:{p['id']}" for p in all_posts]
 
     if not ids:
         await callback.message.edit_text(
