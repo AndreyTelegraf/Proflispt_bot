@@ -1225,7 +1225,7 @@ class Database:
         user_id: int,
         mode: str,
         *,
-        per_mode_limit: int = 5,
+        per_mode_limit: int = 3,
         total_limit: int = 10,
     ) -> tuple[bool, str | None]:
         """Check free directory posting limits in premium_posts for rolling 30 days.
@@ -1365,14 +1365,14 @@ class Database:
         if not rows:
             return True, None
 
+        if mode == "job_offer":
+            return True, None
+
         if any(row["status"] in ("published", "pending") for row in rows):
             return False, (
                 "Похожее бесплатное объявление в этом разделе уже опубликовано. "
                 "Сначала удалите старое объявление через раздел «Мои объявления»."
             )
-
-        if mode == "job_offer":
-            return True, None
 
         first_created = datetime.fromisoformat(rows[0]["created_at"])
         now = datetime.now()
