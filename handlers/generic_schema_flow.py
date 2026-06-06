@@ -205,9 +205,10 @@ def _step_kb(step, slug: str) -> InlineKeyboardMarkup:
     return _back_kb(slug)
 
 
-def _preview_kb(slug: str) -> InlineKeyboardMarkup:
+def _preview_kb(slug: str, *, can_publish_free: bool = True) -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
-    b.add(InlineKeyboardButton(text="Опубликовать", callback_data=f"gs:confirm:{slug}"))
+    if can_publish_free:
+        b.add(InlineKeyboardButton(text="Опубликовать", callback_data=f"gs:confirm:{slug}"))
     b.add(InlineKeyboardButton(text="Опубликовать с фото/видео — €20", callback_data=f"gs:premium:{slug}"))
     b.add(InlineKeyboardButton(text="← Назад", callback_data=f"gs:back:{slug}"))
     b.adjust(1)
@@ -307,7 +308,27 @@ async def _advance(
     if next_index >= len(schema.steps):
         await state.set_state(GS_CONFIRM)
         text = render_catalog_listing_html(payload)
-        kb = _preview_kb(slug)
+
+        can_publish_free = True
+        free_limit_message = None
+        user = db.get_user(from_user.id)
+        if user:
+            can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
+            if can_publish_free:
+                can_publish_free, free_limit_message = db.check_free_repost_guard(
+                    user["id"],
+                    slug,
+                    payload.get("phone_main", ""),
+                )
+
+        if not can_publish_free:
+            text = (
+                f"{text}\n\n"
+                f"Бесплатная публикация сейчас недоступна: {free_limit_message}\n\n"
+                "Можно отправить объявление на платную публикацию с фото/видео."
+            )
+
+        kb = _preview_kb(slug, can_publish_free=can_publish_free)
         if is_message:
             await target.answer(text, reply_markup=kb, parse_mode="HTML", disable_web_page_preview=True)
         else:
@@ -1007,9 +1028,29 @@ async def gs_media_cancel(callback: CallbackQuery, state: FSMContext):
     _, _, _, payload, _ = await _get_gs(state)
     await state.update_data(gs_media=[], gs_media_status_id=None)
     await state.set_state(GS_CONFIRM)
+    can_publish_free = True
+    free_limit_message = None
+    user = db.get_user(callback.from_user.id)
+    if user:
+        can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
+        if can_publish_free:
+            can_publish_free, free_limit_message = db.check_free_repost_guard(
+                user["id"],
+                slug,
+                payload.get("phone_main", ""),
+            )
+
+    text = render_catalog_listing_html(payload)
+    if not can_publish_free:
+        text = (
+            f"{text}\n\n"
+            f"Бесплатная публикация сейчас недоступна: {free_limit_message}\n\n"
+            "Можно отправить объявление на платную публикацию с фото/видео."
+        )
+
     await callback.message.edit_text(
-        render_catalog_listing_html(payload),
-        reply_markup=_preview_kb(slug),
+        text,
+        reply_markup=_preview_kb(slug, can_publish_free=can_publish_free),
         parse_mode="HTML",
         disable_web_page_preview=True,
     )

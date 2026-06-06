@@ -1280,6 +1280,7 @@ class Database:
                   AND mode = ?
                   AND mode != 'reviews'
                   AND action_type = 'post'
+                  AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
                   AND datetime(created_at) > datetime(?)
                   AND (
                       status IN ('published', 'pending')
@@ -1304,6 +1305,7 @@ class Database:
                 WHERE user_id = ?
                   AND mode != 'reviews'
                   AND action_type = 'post'
+                  AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
                   AND datetime(created_at) > datetime(?)
                   AND (
                       status IN ('published', 'pending')
