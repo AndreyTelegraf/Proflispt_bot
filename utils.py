@@ -156,19 +156,8 @@ def clean_text(text: str) -> str:
     if not text:
         return ""
     
-    # Split into lines and remove empty lines
-    lines = text.split('\n')
-    cleaned_lines = []
-    
-    for line in lines:
-        # Remove leading/trailing whitespace
-        stripped_line = line.strip()
-        # Only add non-empty lines
-        if stripped_line:
-            cleaned_lines.append(stripped_line)
-    
-    # Join lines back together
-    return '\n'.join(cleaned_lines)
+    lines = [line.strip() for line in text.split('\n')]
+    return '\n'.join(lines).strip()
 
 
 def clean_user_input(text: str) -> str:
@@ -440,8 +429,8 @@ def remove_urls_from_text(text: str) -> str:
     # Additional pattern for domains that might not be caught by the above
     text = re.sub(r'\b[a-zA-Z0-9-]+\.[a-zA-Z]{2,}\b(?:\s|,|$)', ' ', text)
     
-    # Clean up extra whitespace and punctuation artifacts
-    text = re.sub(r'\s+', ' ', text)
+    # Clean up spaces but preserve line breaks
+    text = re.sub(r'[ \t]+', ' ', text)
     text = re.sub(r'\s*,\s*', ', ', text)  # Fix comma spacing
     text = re.sub(r'\s*\.\s*', '. ', text)  # Fix period spacing
     text = text.strip()
