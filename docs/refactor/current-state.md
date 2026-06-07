@@ -64,6 +64,8 @@ Updated after cleanup through commit d7cf6a2.
 - reviews is a valid special-case handled by reviews_schema_flow.
 - restaurants is handled as an ordinary live catalog mode, not as a template artifact.
 - No live restaurants_schema.py or posting.py handler remains.
+- generic_schema_flow and housing_schema_flow share similar FSM mechanics, but housing remains a valid product special-case because it has different media, publish, and Baraholka repost behavior.
+- Do not extract a shared flow base until there is a concrete bug or repeated product change requiring it.
 
 ## Legacy names
 
