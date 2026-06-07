@@ -43,6 +43,8 @@ async def admin_approve_premium(callback: CallbackQuery):
     old_post_id_to_supersede = None
     repost_old_chat_id = None
     repost_old_message_id = None
+    repost_old_topic_id = None
+    repost_old_published_message_ids = []
 
     if post.get("action_type") == "repost":
         import json
@@ -53,6 +55,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         old_post_id_to_supersede = repost_notes.get("old_post_id")
         repost_old_chat_id = repost_notes.get("old_chat_id")
         repost_old_message_id = repost_notes.get("old_message_id")
+        repost_old_topic_id = repost_notes.get("old_topic_id")
         repost_old_published_message_ids = repost_notes.get("old_published_message_ids") or []
 
     pin_old_chat_id = None
