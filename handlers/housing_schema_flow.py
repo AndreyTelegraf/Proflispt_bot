@@ -368,7 +368,7 @@ async def hs_geo_custom_nontext(message: Message, state: FSMContext):
             return
         seen.append(message.media_group_id)
         await state.update_data(non_text_media_group_ids=seen[-20:])
-    await message.answer("В описании допускается только текст. Фото, видео, ссылки и контакты можно будет добавить на следующих шагах.\n\nПовторите отправку текстового описания:")
+    await message.answer("В этом поле принимается только текст. Отправьте ответ обычным текстовым сообщением.")
 
 # ── skip / fast-path callbacks ────────────────────────────────────────────────
 
@@ -613,7 +613,7 @@ async def hs_text_nontext(message: Message, state: FSMContext):
             return
         seen.append(message.media_group_id)
         await state.update_data(non_text_media_group_ids=seen[-20:])
-    await message.answer("В описании допускается только текст. Фото, видео, ссылки и контакты можно будет добавить на следующих шагах.\n\nПовторите отправку текстового описания:")
+    await message.answer("В этом поле принимается только текст. Отправьте ответ обычным текстовым сообщением.")
 
 # ── media upload screen ───────────────────────────────────────────────────────
 
