@@ -5,7 +5,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
-from services.catalog_modes import get_catalog_mode_slugs, get_catalog_topic_id
+from services.catalog_modes import get_catalog_mode_slugs, get_catalog_section_name, get_catalog_topic_id
 from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
 from services.directory_links import directory_message_url
 from services.post_identity import format_premium_post_identity_text
@@ -110,12 +110,11 @@ async def admin_approve_premium(callback: CallbackQuery):
         _baraholka_publish = False
         if post['mode'] in ('job_seeker', 'job_offer'):
             from services.sections_registry import load_sections_registry
-            _job_sec = {
-                'job_seeker': 'Ищу работу',
-                'job_offer': 'Предлагаю работу',
-            }[post['mode']]
+            section_name = get_catalog_section_name(post['mode'])
+            if not section_name:
+                raise ValueError(f"Unknown catalog section for mode {post['mode']!r}")
             registry = load_sections_registry()
-            topic_id = int(registry.get_topic_id(_job_sec))
+            topic_id = int(registry.get_topic_id(section_name))
         elif post['mode'] in ('housing_wanted', 'owner_real_estate'):
             import json as _json_hn
             try:
@@ -131,9 +130,10 @@ async def admin_approve_premium(callback: CallbackQuery):
                     'housing_wanted': 'Ищу жильё',
                     'owner_real_estate': 'Недвижимость от хозяев',
                 }.get(post['mode'])
-                if _hs_sec:
-                    registry = load_sections_registry()
-                    topic_id = int(registry.get_topic_id(_hs_sec))
+                if not _hs_sec:
+                    raise ValueError(f"Unknown housing section for mode {post['mode']!r}")
+                registry = load_sections_registry()
+                topic_id = int(registry.get_topic_id(_hs_sec))
         elif post['mode'] == 'reviews':
             from services.sections_registry import load_sections_registry
             registry = load_sections_registry()
