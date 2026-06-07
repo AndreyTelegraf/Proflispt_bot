@@ -45,10 +45,16 @@ Updated after cleanup through commit d7cf6a2.
 ## My postings
 
 - My postings is now premium-post based.
-- Remaining acceptance target:
-  - published/deleted/superseded/pending states are shown clearly
-  - multi-message publications are managed consistently
-  - expiry/repost/delete actions identify the concrete post
+- Final manual smoke accepted across active modes:
+  - job_seeker
+  - job_offer
+  - housing_wanted
+  - owner_real_estate multi-message
+  - ordinary generic catalog mode
+  - pending repost/payment states
+  - deleted state
+  - superseded state
+- Status labels, section identity, post title, links, navigation, and action buttons are accepted.
 
 ## Generic/schema-driven flow
 
@@ -67,6 +73,4 @@ Updated after cleanup through commit d7cf6a2.
 
 ## Remaining refactor priorities
 
-1. My postings final manual smoke across active modes.
-2. Docs consolidation: old docs/refactor files are historical notes unless superseded here.
-3. Repository hygiene pass for temporary scripts, diagnostics policy, and stale README/spec sections.
+1. Repository hygiene pass for temporary scripts, diagnostics policy, and stale README/spec sections.
