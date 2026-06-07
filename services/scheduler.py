@@ -94,8 +94,6 @@ class CleanupScheduler:
         try:
             logger.info("Starting cleanup of expired postings and bans...")
             
-            # Legacy job_postings expiry disabled: job_postings creation flow is no longer routed.
-            
             # Clean up expired bans
             try:
                 cleaned_bans = db.cleanup_expired_bans()
