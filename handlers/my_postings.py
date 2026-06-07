@@ -15,7 +15,7 @@ from database import db
 from config import Config
 from services.directory_links import directory_message_url
 from services.post_identity import build_premium_post_identity_view
-from utils import get_first_words, escape_markdown, format_posting_card
+from utils import get_first_words, escape_markdown
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -146,54 +146,33 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
     if index < len(ids) - 1:
         nav_row.append(InlineKeyboardButton(text="→", callback_data="mynext"))
 
-    if post_type == "posting":
-        posting = db.get_posting_by_id(post_id)
-        if not posting:
-            new_ids = [x for x in ids if x != item_key]
-            new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
-            await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
-            if not new_ids:
-                await callback.message.edit_text(
-                    "У вас нет объявлений.",
-                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                        InlineKeyboardButton(text="← Назад", callback_data="go:main")
-                    ]])
-                )
-                return
-            return await render_my_posting(callback, state)
+    post = db.get_premium_post(post_id)
+    if not post:
+        new_ids = [x for x in ids if x != item_key]
+        new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
+        await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
+        if not new_ids:
+            await callback.message.edit_text(
+                "У вас нет объявлений.",
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
+                    InlineKeyboardButton(text="← Назад", callback_data="go:main")
+                ]])
+            )
+            return
+        return await render_my_posting(callback, state)
 
-        text = f"📋 Мои объявления {counter}\n\n{format_posting_card(posting)}"
-        action_rows = [
-            [InlineKeyboardButton(text="Управлять объявлением", callback_data=f"posting_{post_id}")]
-        ]
-    else:
-        post = db.get_premium_post(post_id)
-        if not post:
-            new_ids = [x for x in ids if x != item_key]
-            new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
-            await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
-            if not new_ids:
-                await callback.message.edit_text(
-                    "У вас нет объявлений.",
-                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                        InlineKeyboardButton(text="← Назад", callback_data="go:main")
-                    ]])
-                )
-                return
-            return await render_my_posting(callback, state)
+    view = build_premium_post_identity_view(post)
+    status_label = _premium_post_status_label(post)
+    link_line = f"\nСсылка: {view.canonical_post_url}" if view.canonical_post_url else ""
+    text = (
+        f"📋 Мои объявления {counter}\n\n"
+        f"Раздел: {view.section_name}\n"
+        f"Объявление: {view.display_title}\n"
+        f"Статус: {status_label}"
+        f"{link_line}"
+    )
 
-        view = build_premium_post_identity_view(post)
-        status_label = _premium_post_status_label(post)
-        link_line = f"\nСсылка: {view.canonical_post_url}" if view.canonical_post_url else ""
-        text = (
-            f"📋 Мои объявления {counter}\n\n"
-            f"Раздел: {view.section_name}\n"
-            f"Объявление: {view.display_title}\n"
-            f"Статус: {status_label}"
-            f"{link_line}"
-        )
-
-        action_rows = _premium_post_action_rows(post, post_id)
+    action_rows = _premium_post_action_rows(post, post_id)
 
     inline_keyboard = []
     if nav_row:
