@@ -20,7 +20,6 @@ from config import Config
 from services.directory_links import directory_message_url
 from database import db
 from handlers.start import router as start_router
-from handlers.posting import router as posting_router
 from handlers.my_postings import router as my_postings_router
 from handlers.fallback import router as fallback_router
 from handlers.admin import router as admin_router
@@ -839,7 +838,6 @@ async def main():
             dp.include_router(section_catalog_router)
             dp.include_router(housing_schema_flow_router)
             dp.include_router(generic_schema_flow_router)
-            dp.include_router(posting_router)
             dp.include_router(my_postings_router)
             dp.include_router(fallback_router)
 
