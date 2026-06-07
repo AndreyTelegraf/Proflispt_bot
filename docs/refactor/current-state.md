@@ -50,6 +50,15 @@ Updated after cleanup through commit d7cf6a2.
   - multi-message publications are managed consistently
   - expiry/repost/delete actions identify the concrete post
 
+## Generic/schema-driven flow
+
+- Generic catalog flow topology is accepted.
+- 34 ordinary catalog modes are handled by generic_schema_flow through config/fsm_schemas.
+- housing_wanted and owner_real_estate are valid housing special-cases handled by housing_schema_flow.
+- reviews is a valid special-case handled by reviews_schema_flow.
+- restaurants is handled as an ordinary live catalog mode, not as a template artifact.
+- No live restaurants_schema.py or posting.py handler remains.
+
 ## Legacy names
 
 - workinportugal references may remain only as historical refactor documentation or venv metadata.
@@ -59,6 +68,5 @@ Updated after cleanup through commit d7cf6a2.
 ## Remaining refactor priorities
 
 1. My postings final manual smoke across active modes.
-2. Generic/schema-driven flow audit.
-4. Docs consolidation: old docs/refactor files are historical notes unless superseded here.
-5. Repository hygiene pass for temporary scripts, diagnostics policy, and stale README/spec sections.
+2. Docs consolidation: old docs/refactor files are historical notes unless superseded here.
+3. Repository hygiene pass for temporary scripts, diagnostics policy, and stale README/spec sections.
