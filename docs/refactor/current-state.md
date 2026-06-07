@@ -66,6 +66,8 @@ Updated after cleanup through commit d7cf6a2.
 - No live restaurants_schema.py or posting.py handler remains.
 - generic_schema_flow and housing_schema_flow share similar FSM mechanics, but housing remains a valid product special-case because it has different media, publish, and Baraholka repost behavior.
 - Do not extract a shared flow base until there is a concrete bug or repeated product change requiring it.
+- Runtime mode-specific branch audit is accepted: remaining explicit mode checks are valid product semantics, not legacy leakage.
+- Valid remaining mode-specific branches: reviews indexing/limits, job_offer TTL, housing/Baraholka behavior, post identity labels.
 
 ## Legacy names
 
