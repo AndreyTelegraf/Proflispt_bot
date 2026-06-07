@@ -334,7 +334,7 @@ class Database:
                     LOWER(LTRIM(TRIM(social_media), '@')) AS performer_username,
                     id AS review_post_id,
                     message_id AS review_message_id,
-                    COALESCE(topic_id, 12860) AS review_topic_id,
+                    COALESCE(topic_id, ?) AS review_topic_id,
                     created_at
                 FROM premium_posts
                 WHERE mode = 'reviews'
@@ -342,7 +342,7 @@ class Database:
                   AND message_id IS NOT NULL
                   AND TRIM(COALESCE(social_media, '')) LIKE '@%'
                   AND LENGTH(TRIM(COALESCE(social_media, ''))) > 1
-            """)
+            """, (self.DEFAULT_REVIEW_TOPIC_ID,))
             inserted = cursor.rowcount
             conn.commit()
             return int(inserted or 0)
