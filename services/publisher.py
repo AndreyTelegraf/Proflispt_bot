@@ -7,11 +7,23 @@ from aiogram.types import Message
 
 from config import Config
 from models.job_posting import JobPosting
-from services.formatting import format_job_posting_html
+from services.catalog_listing_renderer import render_catalog_listing_html
 from services.sections_registry import load_sections_registry
 from database import db
 
 logger = logging.getLogger(__name__)
+
+
+def _job_posting_catalog_payload(posting: JobPosting) -> dict:
+    return {
+        "geo_tags": posting.cities,
+        "description": posting.description,
+        "social_links": posting.social_media,
+        "telegram": posting.telegram_username,
+        "phone_main": posting.phone_main,
+        "phone_whatsapp": posting.phone_whatsapp,
+        "contact_name": posting.name,
+    }
 
 
 class Publisher:
@@ -36,7 +48,7 @@ class Publisher:
     async def publish_posting(self, posting: JobPosting, user_id: int) -> Optional[Message]:
         """Publish job posting to channel."""
         try:
-            posting_text = format_job_posting_html(posting)
+            posting_text = render_catalog_listing_html(_job_posting_catalog_payload(posting))
             channel_id, topic_id = self._resolve_job_target(posting)
 
             message = await self.bot.send_message(
@@ -90,7 +102,7 @@ class Publisher:
         """Edit posting in channel."""
         try:
             if posting.message_id and posting.chat_id:
-                posting_text = format_job_posting_html(posting)
+                posting_text = render_catalog_listing_html(_job_posting_catalog_payload(posting))
 
                 await self.bot.edit_message_text(
                     chat_id=posting.chat_id,
