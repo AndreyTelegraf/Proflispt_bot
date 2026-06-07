@@ -31,6 +31,7 @@ from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
+from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     validate_publish_payload,
@@ -48,10 +49,7 @@ from handlers.generic_schema_flow import (
 logger = logging.getLogger(__name__)
 router = Router()
 
-HOUSING_SLUGS: dict[str, str] = {
-    "housing_wanted":    "Ищу жильё",
-    "owner_real_estate": "Недвижимость от хозяев",
-}
+HOUSING_SLUGS: dict[str, str] = dict(HOUSING_MODE_TO_SECTION_NAME)
 
 _DESCRIPTION_PROMPTS: dict[str, str] = {
     "housing_wanted": (

@@ -19,6 +19,23 @@ def get_catalog_topic_id(mode: str) -> int | None:
     return int(registry.get_topic_id(section_name))
 
 
+HOUSING_MODE_TO_SECTION_NAME = {
+    "housing_wanted": "Ищу жильё",
+    "owner_real_estate": "Недвижимость от хозяев",
+}
+
+
+REVIEWS_SECTION_NAME = "Отзывы"
+
+
+def get_housing_section_name(mode: str) -> str | None:
+    return HOUSING_MODE_TO_SECTION_NAME.get(mode)
+
+
+def get_section_name_for_mode(mode: str) -> str | None:
+    return get_catalog_section_name(mode) or get_housing_section_name(mode)
+
+
 MODE_TO_SECTION_NAME = {
     "job_seeker":           "Ищу работу",
     "job_offer":            "Предлагаю работу",

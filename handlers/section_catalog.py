@@ -10,7 +10,7 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from services.section_catalog import load_section_catalog
-from services.catalog_modes import MODE_TO_SECTION_NAME
+from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME, MODE_TO_SECTION_NAME, REVIEWS_SECTION_NAME
 from handlers.reviews_schema_flow import rv_entry
 
 logger = logging.getLogger(__name__)
@@ -21,9 +21,11 @@ ACTIVE_SECTION_CALLBACKS = {
         section_name: f"section:generic:{slug}"
         for slug, section_name in MODE_TO_SECTION_NAME.items()
     },
-    "Ищу жильё": "section:housing:housing_wanted",
-    "Недвижимость от хозяев": "section:housing:owner_real_estate",
-    "Отзывы": "section:reviews",
+    **{
+        section_name: f"section:housing:{slug}"
+        for slug, section_name in HOUSING_MODE_TO_SECTION_NAME.items()
+    },
+    REVIEWS_SECTION_NAME: "section:reviews",
 }
 
 

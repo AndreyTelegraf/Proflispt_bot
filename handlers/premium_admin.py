@@ -5,7 +5,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
 from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
-from services.catalog_modes import get_catalog_mode_slugs, get_catalog_section_name, get_catalog_topic_id
+from services.catalog_modes import REVIEWS_SECTION_NAME, get_catalog_mode_slugs, get_catalog_section_name, get_catalog_topic_id, get_housing_section_name
 from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
 from services.directory_links import directory_message_url
 from services.post_identity import format_premium_post_identity_text
@@ -126,10 +126,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 topic_id = Config.BARAHOLKA_HOUSING_TOPIC_ID
             else:
                 from services.sections_registry import load_sections_registry
-                _hs_sec = {
-                    'housing_wanted': 'Ищу жильё',
-                    'owner_real_estate': 'Недвижимость от хозяев',
-                }.get(post['mode'])
+                _hs_sec = get_housing_section_name(post['mode'])
                 if not _hs_sec:
                     raise ValueError(f"Unknown housing section for mode {post['mode']!r}")
                 registry = load_sections_registry()
@@ -137,7 +134,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         elif post['mode'] == 'reviews':
             from services.sections_registry import load_sections_registry
             registry = load_sections_registry()
-            topic_id = int(registry.get_topic_id('Отзывы'))
+            topic_id = int(registry.get_topic_id(REVIEWS_SECTION_NAME))
         else:
             topic_id = get_catalog_topic_id(post['mode'])
         publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID
