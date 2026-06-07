@@ -146,15 +146,14 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
         return
 
     user_id_db = user['id']
-    postings = db.get_user_active_postings(user_id_db)
-    generic_posts = db.get_user_manageable_premium_posts(user_id_db)
+    manageable_posts = db.get_user_manageable_premium_posts(user_id_db)
     all_posts = sorted(
-        generic_posts,
+        manageable_posts,
         key=lambda p: p.get('created_at') or '',
         reverse=True,
     )
 
-    ids = [f"posting:{p['id']}" for p in postings] + [f"premium:{p['id']}" for p in all_posts]
+    ids = [f"premium:{p['id']}" for p in all_posts]
 
     if not ids:
         await callback.message.edit_text(
