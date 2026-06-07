@@ -1362,8 +1362,10 @@ class Database:
                 JOIN users u ON pp.user_id = u.id
                 WHERE pp.user_id = ?
                   AND pp.mode != 'reviews'
-                  AND pp.status IN ('published', 'deleted', 'superseded')
-                  AND pp.payment_status = 'approved'
+                  AND (
+                      (pp.status IN ('published', 'deleted', 'superseded') AND pp.payment_status = 'approved')
+                      OR (pp.status = 'pending' AND pp.payment_status IN ('pending', 'approved'))
+                  )
                   AND pp.action_type IN ('post', 'repost')
                   AND INSTR(COALESCE(pp.admin_notes, ''), 'baraholka_repost_target') = 0
                 ORDER BY pp.created_at DESC
