@@ -32,6 +32,11 @@ def _premium_post_status_label(post: dict) -> str:
     if status == "superseded":
         return "Заменено новым апом"
     if status == "pending":
+        payment_status = post.get("payment_status")
+        if payment_status == "approved":
+            return "Оплачено, ждёт публикации"
+        if payment_status == "pending":
+            return "Ожидает оплаты или модерации"
         return "На модерации"
     if status == "rejected":
         return "Отклонено"
