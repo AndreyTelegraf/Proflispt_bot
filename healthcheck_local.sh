@@ -22,7 +22,7 @@ if db.exists():
     cur = conn.cursor()
     tables = [r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
     print("TABLES", ",".join(tables))
-    for t in ["users", "job_postings", "drafts", "user_bans", "premium_posts", "payments"]:
+    for t in ["users", "drafts", "user_bans", "premium_posts", "payments"]:
         try:
             n = cur.execute(f'SELECT COUNT(*) FROM "{t}"').fetchone()[0]
             print(f"COUNT {t} {n}")

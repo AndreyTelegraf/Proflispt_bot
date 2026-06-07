@@ -149,29 +149,6 @@ CREATE TABLE users (
 );
 ```
 
-### Таблица job_postings
-```sql
-CREATE TABLE job_postings (
-    id INTEGER PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    mode TEXT NOT NULL, -- 'seeking' or 'offering'
-    cities TEXT NOT NULL, -- JSON array
-    description TEXT NOT NULL,
-    instagram TEXT,
-    telegram_username TEXT NOT NULL,
-    phone_main TEXT NOT NULL,
-    phone_whatsapp TEXT,
-    name TEXT NOT NULL,
-    message_id INTEGER, -- ID сообщения в канале
-    chat_id INTEGER, -- ID канала
-    topic_id INTEGER, -- ID топика
-    status TEXT DEFAULT 'active', -- 'active', 'deleted', 'expired'
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-```
-
 ### Таблица drafts
 ```sql
 CREATE TABLE drafts (
