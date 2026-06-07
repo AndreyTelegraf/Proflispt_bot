@@ -28,6 +28,7 @@ Updated after cleanup through commit d7cf6a2.
 - premium_posts is the canonical managed publication table.
 - job_seeker and job_offer are normal premium_posts modes.
 - restaurants is a live section mode, not a template artifact.
+- restaurants is present in premium_posts runtime data and must remain stable.
 - restaurants must not be renamed without a separate data migration and full mode-reference audit.
 
 ## Scheduler
