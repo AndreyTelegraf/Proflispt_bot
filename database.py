@@ -1703,7 +1703,7 @@ class Database:
             conn.commit()
             return cursor.rowcount > 0
 
-    def get_user_published_generic_premium_posts(self, user_id: int) -> List[Dict[str, Any]]:
+    def get_user_manageable_premium_posts(self, user_id: int) -> List[Dict[str, Any]]:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -1712,7 +1712,7 @@ class Database:
                 JOIN users u ON pp.user_id = u.id
                 WHERE pp.user_id = ?
                   AND pp.mode != 'reviews'
-                  AND pp.status IN ('published', 'deleted')
+                  AND pp.status IN ('published', 'deleted', 'superseded')
                   AND pp.payment_status = 'approved'
                   AND pp.action_type IN ('post', 'repost')
                   AND INSTR(COALESCE(pp.admin_notes, ''), 'baraholka_repost_target') = 0

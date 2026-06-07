@@ -147,7 +147,7 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
 
     user_id_db = user['id']
     postings = db.get_user_active_postings(user_id_db)
-    generic_posts = db.get_user_published_generic_premium_posts(user_id_db)
+    generic_posts = db.get_user_manageable_premium_posts(user_id_db)
     all_posts = sorted(
         generic_posts,
         key=lambda p: p.get('created_at') or '',
