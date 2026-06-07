@@ -6,6 +6,7 @@ import json
 from database import db
 from services.directory_links import directory_message_url
 from services.geo import render_geo_tags
+from services.catalog_modes import REVIEWS_SECTION_NAME
 
 
 def normalize_catalog_geo_tags_from_db(value: object) -> str:
@@ -135,7 +136,7 @@ def render_catalog_listing_html(payload: dict) -> str:
         if total > 0 and latest:
             if lines:
                 lines.append("")
-            lines.append(f"Отзывы ({total}):")
+            lines.append(f"{REVIEWS_SECTION_NAME} ({total}):")
 
             start = total - len(latest) + 1
             for i, r in enumerate(latest):

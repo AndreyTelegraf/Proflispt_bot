@@ -18,6 +18,7 @@ from database import db
 from keyboards.main import get_main_menu
 from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
 from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN, REVIEW_TEXT_WITH_MEDIA_MAX_LEN
+from services.catalog_modes import REVIEWS_SECTION_NAME
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -188,7 +189,7 @@ async def _rv_notify_admin(bot, post_id: int, payload: dict, media_list: list) -
     ])
     await bot.send_message(
         chat_id=ADMIN_CHAT_ID,
-        text=f"[Отзывы] Управление заявкой #{post_id}",
+        text=f"[{REVIEWS_SECTION_NAME}] Управление заявкой #{post_id}",
         reply_markup=controls,
         disable_web_page_preview=True,
     )
@@ -242,7 +243,7 @@ async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dic
         b = InlineKeyboardBuilder()
         b.add(InlineKeyboardButton(text="← Главное меню", callback_data="go:main"))
         await callback.message.edit_text(
-            "Ваш отзыв отправлен на модерацию. Администратор проверит его и опубликует в разделе Отзывы.",
+            f"Ваш отзыв отправлен на модерацию. Администратор проверит его и опубликует в разделе {REVIEWS_SECTION_NAME}.",
             reply_markup=b.as_markup(),
         )
     except Exception as e:
@@ -285,7 +286,7 @@ async def rv_residency(callback: CallbackQuery, state: FSMContext):
         b = InlineKeyboardBuilder()
         b.add(InlineKeyboardButton(text="← Главное меню", callback_data="go:main"))
         await callback.message.edit_text(
-            "Раздел Отзывы доступен только для резидентов Португалии.",
+            f"Раздел {REVIEWS_SECTION_NAME} доступен только для резидентов Португалии.",
             reply_markup=b.as_markup(),
         )
         await callback.answer()
