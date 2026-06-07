@@ -15,8 +15,6 @@ class Config:
     
     # Channel and topic IDs
     CHANNEL_ID: int = int(os.getenv("CHANNEL_ID", "-1001788799608"))
-    JOB_SEEKING_TOPIC_ID: int = int(os.getenv("JOB_SEEKING_TOPIC_ID", "9039"))
-    JOB_OFFERING_TOPIC_ID: int = int(os.getenv("JOB_OFFERING_TOPIC_ID", "9040"))
     BARAHOLKA_CHANNEL_ID: int = int(os.getenv("BARAHOLKA_CHANNEL_ID", "-1001620950645"))
     BARAHOLKA_HOUSING_TOPIC_ID: int = int(os.getenv("BARAHOLKA_HOUSING_TOPIC_ID", "53479"))
     DIRECTORY_CHANNEL_USERNAME: str = os.getenv("DIRECTORY_CHANNEL_USERNAME", "proflistpt")
