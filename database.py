@@ -40,6 +40,8 @@ def sanitize_description(text: str) -> str:
     return "\n".join("" if line is None else line for line in lines)
 
 class Database:
+    DEFAULT_REVIEW_TOPIC_ID = 12860
+
     """Database manager for the bot."""
 
     def __init__(self, db_path: str = "bot_database.db"):
@@ -288,7 +290,7 @@ class Database:
         review_post_id: int,
         review_message_id: int,
         *,
-        review_topic_id: int = 12860,
+        review_topic_id: int | None = None,
         created_at: str | None = None,
     ) -> bool:
         """Insert or ignore one published review into review_index."""
@@ -310,7 +312,7 @@ class Database:
                 normalized,
                 int(review_post_id),
                 int(review_message_id),
-                int(review_topic_id or 12860),
+                int(review_topic_id or self.DEFAULT_REVIEW_TOPIC_ID),
                 created_at,
             ))
             conn.commit()

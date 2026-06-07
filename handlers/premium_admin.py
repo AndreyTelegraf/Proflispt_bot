@@ -306,7 +306,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                         post.get("social_media", ""),
                         post_id,
                         published_message.message_id,
-                        review_topic_id=12860,
+                        review_topic_id=topic_id,
                     )
                 except Exception as e:
                     logger.warning(f"review_index insert failed for post #{post_id}: {e}")
