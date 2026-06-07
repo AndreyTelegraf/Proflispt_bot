@@ -126,27 +126,7 @@ class CleanupScheduler:
         try:
             logger.info("Starting cleanup of expired postings and bans...")
             
-            # Clean up expired postings
-            deleted_count, deleted_postings = db.cleanup_expired_postings()
-            
-            if deleted_count > 0:
-                logger.info(f"Cleaned up {deleted_count} expired postings")
-                
-                # Delete messages from Telegram channel
-                await self._delete_telegram_messages(deleted_postings)
-
-                # Notify users with concrete posting identity
-                await self._notify_expired_job_postings(deleted_postings)
-                
-                # Log detailed information
-                for posting in deleted_postings:
-                    logger.info(
-                        f"Deleted posting ID {posting['id']} by user {posting['user_id']} "
-                        f"({posting['mode']}, {posting['cities']}, {posting['name']}) "
-                        f"created at {posting['created_at']}"
-                    )
-            else:
-                logger.info("No expired postings found")
+            # Legacy job_postings expiry disabled: job_postings creation flow is no longer routed.
             
             # Clean up expired bans
             try:
@@ -167,41 +147,6 @@ class CleanupScheduler:
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
     
-    async def _delete_telegram_messages(self, deleted_postings: list[dict]):
-        """Delete messages from Telegram channel."""
-        for posting in deleted_postings:
-            try:
-                if posting['message_id'] and posting['chat_id']:
-                    await self.bot.delete_message(
-                        chat_id=posting['chat_id'],
-                        message_id=posting['message_id']
-                    )
-                    logger.info(f"Deleted Telegram message {posting['message_id']} for posting {posting['id']}")
-            except Exception as e:
-                logger.warning(f"Failed to delete Telegram message for posting {posting['id']}: {e}")
-
-    async def _notify_expired_job_postings(self, deleted_postings: list[dict]):
-        """Notify users about expired legacy job_postings with concrete identity."""
-        for posting in deleted_postings:
-            telegram_id = posting.get('telegram_id')
-            if not telegram_id:
-                continue
-
-            identity = _format_expired_job_posting_identity(posting)
-            try:
-                await self.bot.send_message(
-                    chat_id=int(telegram_id),
-                    text=(
-                        "Ваше объявление удалено по истечении срока публикации.\n\n"
-                        f"{identity}"
-                    ),
-                    disable_web_page_preview=True,
-                )
-            except Exception as e:
-                logger.warning(
-                    f"Failed to notify user about expired posting {posting['id']}: {e}"
-                )
-
     async def _unpin_expired_premium_posts(self):
         """Unpin premium pin posts whose pinned_until has passed."""
         posts = db.get_premium_posts_to_unpin()
