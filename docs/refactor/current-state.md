@@ -39,6 +39,8 @@ Updated after cleanup through commit d7cf6a2.
   - expired premium pins
   - premium post TTL warnings/expiry
   - auto-repost related runtime handled outside this document where applicable
+- Premium post expiry UX is accepted: warning and deletion notifications include section, concrete post title, and post link when available.
+- Expiry cleanup runs at 00:00 and 12:00 UTC, so posts expiring between runs may remain published until the next scheduled cleanup.
 
 ## My postings
 
@@ -57,7 +59,6 @@ Updated after cleanup through commit d7cf6a2.
 ## Remaining refactor priorities
 
 1. My postings final manual smoke across active modes.
-2. Expiry UX final audit for all premium_posts notifications.
-3. Generic/schema-driven flow audit.
+2. Generic/schema-driven flow audit.
 4. Docs consolidation: old docs/refactor files are historical notes unless superseded here.
 5. Repository hygiene pass for temporary scripts, diagnostics policy, and stale README/spec sections.
