@@ -2,7 +2,7 @@
 
 Status: canonical current refactor snapshot.
 
-Updated after cleanup through commit d7cf6a2.
+Updated after cleanup through commit d52f721.
 
 ## Runtime
 
@@ -77,4 +77,5 @@ Updated after cleanup through commit d7cf6a2.
 
 ## Remaining refactor priorities
 
-1. Repository hygiene pass for temporary scripts, diagnostics policy, and stale README/spec sections.
+1. Diagnostics scripts review: decide which audit scripts remain as useful runbooks and which should be deleted.
+2. Final README/spec stale-section pass if needed.
