@@ -108,10 +108,14 @@ async def admin_approve_premium(callback: CallbackQuery):
         # Determine topic ID based on mode
         topic_id = None
         _baraholka_publish = False
-        if post['mode'] == 'job_seeker':
-            topic_id = Config.JOB_SEEKING_TOPIC_ID
-        elif post['mode'] == 'job_offer':
-            topic_id = Config.JOB_OFFERING_TOPIC_ID
+        if post['mode'] in ('job_seeker', 'job_offer'):
+            from services.sections_registry import load_sections_registry
+            _job_sec = {
+                'job_seeker': 'Ищу работу',
+                'job_offer': 'Предлагаю работу',
+            }[post['mode']]
+            registry = load_sections_registry()
+            topic_id = int(registry.get_topic_id(_job_sec))
         elif post['mode'] in ('housing_wanted', 'owner_real_estate'):
             import json as _json_hn
             try:
