@@ -7,7 +7,6 @@ from typing import Optional
 from aiogram import Bot
 
 from database import db
-from services.publisher import Publisher
 from services.post_identity import format_premium_post_identity_text
 from services.directory_links import directory_message_url
 
@@ -49,7 +48,6 @@ class CleanupScheduler:
     def __init__(self, bot: Bot, db_instance=None):
         self.bot = bot
         self.db = db_instance or db
-        self.publisher = Publisher(bot)
         self._task: Optional[asyncio.Task] = None
         self._running = False
     
