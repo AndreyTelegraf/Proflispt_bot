@@ -15,8 +15,8 @@ class Config:
     
     # Channel and topic IDs
     CHANNEL_ID: int = int(os.getenv("CHANNEL_ID", "-1001788799608"))
-    BARAHOLKA_CHANNEL_ID: int = int(os.getenv("BARAHOLKA_CHANNEL_ID", "-1001620950645"))
-    BARAHOLKA_HOUSING_TOPIC_ID: int = int(os.getenv("BARAHOLKA_HOUSING_TOPIC_ID", "53479"))
+    BARAHOLKA_CHANNEL_ID: int = int(os.getenv("BARAHOLKA_CHANNEL_ID", "0"))
+    BARAHOLKA_HOUSING_TOPIC_ID: int = int(os.getenv("BARAHOLKA_HOUSING_TOPIC_ID", "0"))
     DIRECTORY_CHANNEL_USERNAME: str = os.getenv("DIRECTORY_CHANNEL_USERNAME", "proflistpt")
     
     # Features
