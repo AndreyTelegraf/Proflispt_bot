@@ -20,10 +20,6 @@ class Config:
     DIRECTORY_CHANNEL_USERNAME: str = os.getenv("DIRECTORY_CHANNEL_USERNAME", "proflistpt")
     
     # Features
-    ENABLE_EDITING: bool = True
-    ENABLE_DELETION: bool = True
-    AUTO_EXPIRE_DAYS: int = 30
-    MAX_POSTINGS_PER_USER: int = 3
     POSTING_COOLDOWN_DAYS: int = 30
 
     # Admins
