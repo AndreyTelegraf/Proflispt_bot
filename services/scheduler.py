@@ -9,8 +9,38 @@ from aiogram import Bot
 from database import db
 from services.publisher import Publisher
 from services.post_identity import format_premium_post_identity_text
+from services.directory_links import directory_message_url
 
 logger = logging.getLogger(__name__)
+
+
+def _compact_job_posting_text(value, limit: int = 100) -> str:
+    text = str(value or "").strip().replace("\n", " ")
+    text = " ".join(text.split())
+    if len(text) > limit:
+        return text[:limit].rstrip() + "…"
+    return text
+
+
+def _format_expired_job_posting_identity(posting: dict) -> str:
+    section = posting.get("mode") or "Объявление"
+    title = _compact_job_posting_text(
+        posting.get("name") or posting.get("description") or "Объявление",
+        limit=80,
+    )
+
+    lines = [
+        f"Раздел: {section}",
+        f"Объявление: {title}",
+    ]
+
+    if posting.get("message_id"):
+        lines.append(
+            "Ссылка: "
+            + directory_message_url(posting.get("message_id"), posting.get("topic_id"))
+        )
+
+    return "\n".join(lines)
 
 
 class CleanupScheduler:
@@ -104,6 +134,9 @@ class CleanupScheduler:
                 
                 # Delete messages from Telegram channel
                 await self._delete_telegram_messages(deleted_postings)
+
+                # Notify users with concrete posting identity
+                await self._notify_expired_job_postings(deleted_postings)
                 
                 # Log detailed information
                 for posting in deleted_postings:
@@ -146,6 +179,28 @@ class CleanupScheduler:
                     logger.info(f"Deleted Telegram message {posting['message_id']} for posting {posting['id']}")
             except Exception as e:
                 logger.warning(f"Failed to delete Telegram message for posting {posting['id']}: {e}")
+
+    async def _notify_expired_job_postings(self, deleted_postings: list[dict]):
+        """Notify users about expired legacy job_postings with concrete identity."""
+        for posting in deleted_postings:
+            telegram_id = posting.get('telegram_id')
+            if not telegram_id:
+                continue
+
+            identity = _format_expired_job_posting_identity(posting)
+            try:
+                await self.bot.send_message(
+                    chat_id=int(telegram_id),
+                    text=(
+                        "Ваше объявление удалено по истечении срока публикации.\n\n"
+                        f"{identity}"
+                    ),
+                    disable_web_page_preview=True,
+                )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to notify user about expired posting {posting['id']}: {e}"
+                )
 
     async def _unpin_expired_premium_posts(self):
         """Unpin premium pin posts whose pinned_until has passed."""

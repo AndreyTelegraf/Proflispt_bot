@@ -1998,9 +1998,13 @@ class Database:
             
             # Получаем информацию об объявлениях для удаления
             cursor.execute("""
-                SELECT id, user_id, mode, cities, name, message_id, chat_id, topic_id, created_at
-                FROM job_postings 
-                WHERE status = 'active' AND created_at < ?
+                SELECT 
+                    jp.id, jp.user_id, jp.mode, jp.cities, jp.description, jp.name,
+                    jp.message_id, jp.chat_id, jp.topic_id, jp.created_at,
+                    u.telegram_id
+                FROM job_postings jp
+                LEFT JOIN users u ON u.id = jp.user_id
+                WHERE jp.status = 'active' AND jp.created_at < ?
             """, (thirty_days_ago,))
             
             expired_postings = cursor.fetchall()
@@ -2012,8 +2016,10 @@ class Database:
                 posting_info = {
                     'id': posting['id'],
                     'user_id': posting['user_id'],
+                    'telegram_id': posting['telegram_id'],
                     'mode': posting['mode'],
                     'cities': posting['cities'],
+                    'description': posting['description'],
                     'name': posting['name'],
                     'message_id': posting['message_id'],
                     'chat_id': posting['chat_id'],
