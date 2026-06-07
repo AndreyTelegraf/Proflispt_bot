@@ -135,7 +135,9 @@ async def admin_approve_premium(callback: CallbackQuery):
                     registry = load_sections_registry()
                     topic_id = int(registry.get_topic_id(_hs_sec))
         elif post['mode'] == 'reviews':
-            topic_id = 12860
+            from services.sections_registry import load_sections_registry
+            registry = load_sections_registry()
+            topic_id = int(registry.get_topic_id('Отзывы'))
         else:
             topic_id = get_catalog_topic_id(post['mode'])
         publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID
