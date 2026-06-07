@@ -392,8 +392,11 @@ async def handle_text_input(message: Message, state: FSMContext):
             updated_at=datetime.now()
         )
         
-        from services.formatting import format_preview
-        confirmation_text = format_preview(temp_posting)
+        from services.catalog_listing_renderer import render_catalog_listing_html
+        from services.publisher import _job_posting_catalog_payload
+        confirmation_text = "📋 Предварительный просмотр\n" + render_catalog_listing_html(
+            _job_posting_catalog_payload(temp_posting)
+        )
         
         # Add reminder note
         reminder_note = (
