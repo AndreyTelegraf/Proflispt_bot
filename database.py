@@ -257,13 +257,13 @@ class Database:
             """)
 
             # Review index: normalized performer username -> published review message
-            cursor.execute("""
+            cursor.execute(f"""
                 CREATE TABLE IF NOT EXISTS review_index (
                     id INTEGER PRIMARY KEY,
                     performer_username TEXT NOT NULL,
                     review_post_id INTEGER NOT NULL,
                     review_message_id INTEGER NOT NULL,
-                    review_topic_id INTEGER NOT NULL DEFAULT 12860,
+                    review_topic_id INTEGER NOT NULL DEFAULT {self.DEFAULT_REVIEW_TOPIC_ID},
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(performer_username, review_message_id)
                 )
