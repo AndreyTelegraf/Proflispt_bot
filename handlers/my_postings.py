@@ -29,6 +29,7 @@ from services.my_postings_callbacks import (
 from services.my_postings_session import (
     get_my_postings_session,
     move_my_postings_index,
+    remove_my_postings_key,
     set_my_postings_session,
     set_my_postings_index,
 )
