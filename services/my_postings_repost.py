@@ -36,3 +36,27 @@ async def create_and_notify_my_postings_repost(
         include_old_post_link=True,
     )
     return new_post_id
+
+async def handle_my_postings_repost_request(
+    callback,
+    *,
+    db,
+    post: dict,
+    user: dict,
+    admin_chat_id: int,
+) -> None:
+    if post.get("status") not in ("published", "deleted"):
+        await callback.answer("Это объявление нельзя переопубликовать.", show_alert=True)
+        return
+
+    await create_and_notify_my_postings_repost(
+        callback.bot,
+        db=db,
+        source_post=post,
+        user=user,
+        requester=callback.from_user,
+        admin_chat_id=admin_chat_id,
+    )
+
+    await callback.answer("Заявка на переопубликацию отправлена", show_alert=True)
+

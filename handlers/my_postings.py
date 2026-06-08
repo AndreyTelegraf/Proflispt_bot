@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 
 from database import db
 from config import Config
-from services.my_postings_repost import create_and_notify_my_postings_repost
+from services.my_postings_repost import handle_my_postings_repost_request
 from services.my_postings_baraholka import create_and_notify_my_postings_baraholka_repost
 from services.premium_post_delete import delete_premium_post_publication
 from services.my_postings_render import (
@@ -134,20 +134,13 @@ async def request_repost_premium(callback: CallbackQuery):
     if not post:
         return
 
-    if post.get('status') not in ('published', 'deleted'):
-        await callback.answer("Это объявление нельзя переопубликовать.", show_alert=True)
-        return
-
-    await create_and_notify_my_postings_repost(
-        callback.bot,
+    await handle_my_postings_repost_request(
+        callback,
         db=db,
-        source_post=post,
+        post=post,
         user=user,
-        requester=callback.from_user,
         admin_chat_id=Config.ADMIN_IDS[0],
     )
-
-    await callback.answer("Заявка на переопубликацию отправлена", show_alert=True)
 
 
 @router.callback_query(F.data.startswith("pin_premium_"))
