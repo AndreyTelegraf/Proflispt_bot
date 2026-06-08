@@ -14,6 +14,7 @@ from services.admin_moderation_notice import send_admin_moderation_notice_from_p
 from services.premium_repost_request import create_premium_repost_request
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.premium_post_delete import delete_premium_post_publication
+from services.my_postings_render import build_my_posting_screen
 from services.my_postings_view import premium_post_action_rows, premium_post_status_label
 
 router = Router()
@@ -110,26 +111,14 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
             return
         return await render_my_posting(callback, state)
 
-    status_label = premium_post_status_label(post)
-    identity = format_premium_post_identity_text(post)
-    text = (
-        f"📋 Мои объявления {counter}\n\n"
-        f"{identity}\n"
-        f"Статус: {status_label}"
+    screen_text, reply_markup = build_my_posting_screen(
+        post=post,
+        post_id=post_id,
+        counter=counter,
+        nav_row=nav_row,
     )
 
-    action_rows = premium_post_action_rows(post, post_id)
-
-    inline_keyboard = []
-    if nav_row:
-        inline_keyboard.append(nav_row)
-    inline_keyboard.extend(action_rows)
-    inline_keyboard.append([InlineKeyboardButton(text="← Назад", callback_data="go:main")])
-
-    await callback.message.edit_text(
-        text,
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
-    )
+    await callback.message.edit_text(screen_text, reply_markup=reply_markup)
 
 
 @router.callback_query(F.data == "back_to_my_postings")
