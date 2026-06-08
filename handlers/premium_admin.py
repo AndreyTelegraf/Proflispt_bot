@@ -4,11 +4,9 @@ import logging
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from database import db
-from services.catalog_listing_renderer import build_catalog_listing_payload_from_premium_post, render_catalog_listing_html
-from services.catalog_modes import REVIEWS_SECTION_NAME, get_catalog_mode_slugs, get_catalog_section_name, get_catalog_topic_id, get_housing_section_name
-from services.catalog_specialized_renderers import build_housing_listing_payload_from_premium_post, build_review_listing_html_from_premium_post, render_housing_listing_html
 from services.directory_links import directory_message_url
 from services.post_identity import format_premium_post_identity_text
+from services.premium_publish_plan import build_premium_publish_plan
 
 logger = logging.getLogger(__name__)
 
@@ -93,51 +91,11 @@ async def admin_approve_premium(callback: CallbackQuery):
             await callback.answer("Закрепление отключено.", show_alert=True)
             return
 
-        # Format the post text
-        if post.get('mode') in ('housing_wanted', 'owner_real_estate'):
-            _hs_payload = build_housing_listing_payload_from_premium_post(post)
-            post_text = render_housing_listing_html(_hs_payload)
-        elif post.get('mode') == 'reviews':
-            post_text = build_review_listing_html_from_premium_post(post)
-        elif post.get('mode') in get_catalog_mode_slugs():
-            _generic_payload = build_catalog_listing_payload_from_premium_post(post)
-            post_text = render_catalog_listing_html(_generic_payload)
-        else:
-            raise ValueError(f"Unknown mode {post.get('mode')!r} for premium post #{post.get('id')}")
-
-        # Determine topic ID based on mode
-        topic_id = None
-        _baraholka_publish = False
-        if post['mode'] in ('job_seeker', 'job_offer'):
-            from services.sections_registry import load_sections_registry
-            section_name = get_catalog_section_name(post['mode'])
-            if not section_name:
-                raise ValueError(f"Unknown catalog section for mode {post['mode']!r}")
-            registry = load_sections_registry()
-            topic_id = int(registry.get_topic_id(section_name))
-        elif post['mode'] in ('housing_wanted', 'owner_real_estate'):
-            import json as _json_hn
-            try:
-                _hn = _json_hn.loads(post.get('admin_notes') or '{}')
-                _baraholka_publish = bool(_hn.get('baraholka_repost_target'))
-            except Exception:
-                pass
-            if _baraholka_publish:
-                topic_id = Config.BARAHOLKA_HOUSING_TOPIC_ID
-            else:
-                from services.sections_registry import load_sections_registry
-                _hs_sec = get_housing_section_name(post['mode'])
-                if not _hs_sec:
-                    raise ValueError(f"Unknown housing section for mode {post['mode']!r}")
-                registry = load_sections_registry()
-                topic_id = int(registry.get_topic_id(_hs_sec))
-        elif post['mode'] == 'reviews':
-            from services.sections_registry import load_sections_registry
-            registry = load_sections_registry()
-            topic_id = int(registry.get_topic_id(REVIEWS_SECTION_NAME))
-        else:
-            topic_id = get_catalog_topic_id(post['mode'])
-        publish_chat_id = Config.BARAHOLKA_CHANNEL_ID if _baraholka_publish else Config.CHANNEL_ID
+        publish_plan = build_premium_publish_plan(post, Config)
+        post_text = publish_plan.post_text
+        topic_id = publish_plan.topic_id
+        publish_chat_id = publish_plan.publish_chat_id
+        _baraholka_publish = publish_plan.is_baraholka_publish
         
         if post.get("action_type") == "repost" and repost_old_chat_id:
             ids_to_delete = repost_old_published_message_ids if repost_old_published_message_ids else (
