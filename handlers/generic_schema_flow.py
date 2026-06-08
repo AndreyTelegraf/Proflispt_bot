@@ -449,7 +449,7 @@ async def gs_choice(callback: CallbackQuery, state: FSMContext):
     if getattr(step, "field_name", "") == "geo_tags" and raw_value == "custom":
         await state.set_state(GS_GEO_CUSTOM)
         await callback.message.edit_text(
-            "Введите все нужные города одним сообщением.\n\nНапример: #lisboa #sintra #cascais или #online.\n\nНе добавляйте города потом в описание — они попадут в объявление отдельной строкой.",
+            'Введите все нужные города одним сообщением, например: #lisboa #sintra #cascais\n\nВажно: города указываются только на этом шаге, в текст объявления их добавлять запрещено!',
             reply_markup=_back_kb(slug),
         )
         await callback.answer()

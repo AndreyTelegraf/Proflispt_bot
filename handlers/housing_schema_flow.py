@@ -302,7 +302,7 @@ async def hs_choice(callback: CallbackQuery, state: FSMContext):
     if getattr(step, "field_name", "") == "geo_tags" and raw_value == "custom":
         await state.set_state(HS_GEO_CUSTOM)
         await callback.message.edit_text(
-            "Введите все нужные города одним сообщением.\n\nНапример: #lisboa #sintra #cascais.\n\nНе добавляйте города потом в описание — они попадут в объявление отдельной строкой.",
+            'Введите все нужные города одним сообщением, например: #lisboa #sintra #cascais\n\nВажно: города указываются только на этом шаге, в текст объявления их добавлять запрещено!',
             reply_markup=_hs_back_kb(slug),
         )
         await callback.answer()
