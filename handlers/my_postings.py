@@ -15,6 +15,7 @@ from services.premium_repost_request import create_premium_repost_request
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.premium_post_delete import delete_premium_post_publication
 from services.my_postings_render import build_my_posting_screen
+from services.my_postings_access import load_owned_premium_post
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -153,14 +154,9 @@ async def my_postings_next(callback: CallbackQuery, state: FSMContext):
 async def request_repost_premium(callback: CallbackQuery):
     post_id = int(callback.data.split("_")[2])
 
-    post = db.get_premium_post(post_id)
-    if not post:
-        await callback.answer("Объявление не найдено.", show_alert=True)
-        return
-
-    user = db.get_user(callback.from_user.id)
-    if not user or post['user_id'] != user['id']:
-        await callback.answer("Это объявление недоступно для вашего аккаунта.", show_alert=True)
+    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
+    if error:
+        await callback.answer(error, show_alert=True)
         return
 
     if post.get('status') not in ('published', 'deleted'):
@@ -203,14 +199,9 @@ async def request_pin_premium(callback: CallbackQuery):
 async def confirm_delete_premium(callback: CallbackQuery):
     post_id = int(callback.data.split("_")[2])
 
-    post = db.get_premium_post(post_id)
-    if not post:
-        await callback.answer("Объявление не найдено.", show_alert=True)
-        return
-
-    user = db.get_user(callback.from_user.id)
-    if not user or post['user_id'] != user['id']:
-        await callback.answer("Это объявление недоступно для вашего аккаунта.", show_alert=True)
+    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
+    if error:
+        await callback.answer(error, show_alert=True)
         return
 
     view = build_premium_post_identity_view(post)
@@ -235,14 +226,9 @@ async def confirm_delete_premium(callback: CallbackQuery):
 async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     post_id = int(callback.data.split("_")[3])
 
-    post = db.get_premium_post(post_id)
-    if not post:
-        await callback.answer("Объявление не найдено.", show_alert=True)
-        return
-
-    user = db.get_user(callback.from_user.id)
-    if not user or post['user_id'] != user['id']:
-        await callback.answer("Это объявление недоступно для вашего аккаунта.", show_alert=True)
+    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
+    if error:
+        await callback.answer(error, show_alert=True)
         return
 
     deleted = await delete_premium_post_publication(
@@ -293,14 +279,9 @@ async def hs_baraholka_mypostings(callback: CallbackQuery):
         await callback.answer("Не удалось обработать действие. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)
         return
 
-    user = db.get_user(callback.from_user.id)
-    if not user:
-        await callback.answer("Пользователь не найден.", show_alert=True)
-        return
-
-    post = db.get_premium_post(post_id)
-    if not post or post["user_id"] != user["id"]:
-        await callback.answer("Объявление не найдено.", show_alert=True)
+    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
+    if error:
+        await callback.answer(error, show_alert=True)
         return
 
     try:
