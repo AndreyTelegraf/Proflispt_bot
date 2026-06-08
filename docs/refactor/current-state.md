@@ -6,8 +6,8 @@ Updated after cleanup through commit d52f721.
 
 ## Runtime
 
-- Active staging service: proflistpt_bot_staging.service
-- Active bot code path: /opt/bots/proflistpt_bot_staging
+- Active service: proflistpt_bot.service
+- Active bot code path: /opt/bots/proflistpt_bot
 - Runtime DB no longer contains job_postings.
 - Active publication source is premium_posts.
 - healthcheck_local.sh no longer expects job_postings.

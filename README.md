@@ -4,11 +4,11 @@ Telegram bot for the Proflistpt directory.
 
 Current staging service:
 
-- `proflistpt_bot_staging.service`
+- `proflistpt_bot.service`
 
 Current staging path:
 
-- `/opt/bots/proflistpt_bot_staging`
+- `/opt/bots/proflistpt_bot`
 
 ## Current architecture
 
@@ -43,13 +43,13 @@ Run from the project root:
 - `./venv/bin/python -m py_compile database.py main.py handlers/*.py services/*.py`
 - `./venv/bin/python -m services.schema_smoke`
 - `./healthcheck_local.sh`
-- `systemctl is-active proflistpt_bot_staging.service`
+- `systemctl is-active proflistpt_bot.service`
 
 ## Restart staging
 
-- `sudo systemctl restart proflistpt_bot_staging.service`
+- `sudo systemctl restart proflistpt_bot.service`
 - `sleep 2`
-- `systemctl is-active proflistpt_bot_staging.service`
+- `systemctl is-active proflistpt_bot.service`
 
 ## Refactor state
 
