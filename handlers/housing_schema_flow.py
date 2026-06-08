@@ -32,7 +32,7 @@ from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
 from services.premium_request_labels import premium_request_label
-from services.baraholka_repost_request import notify_baraholka_repost_request
+from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -1018,8 +1018,13 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
         return
 
     try:
-        repost_id = db.create_baraholka_housing_repost_from_post(source_post_id, user['id'])
-        await _notify_admin_baraholka_from_post(callback.bot, repost_id, source_post)
+        await create_and_notify_baraholka_repost_request(
+            callback.bot,
+            db=db,
+            source_post_id=source_post_id,
+            user=user,
+            admin_chat_id=Config.ADMIN_IDS[0],
+        )
     except Exception as e:
         logger.exception("Baraholka upsell repost failed: %s", e)
         await callback.answer("Не удалось отправить заявку на перепост. Попробуйте ещё раз из этого объявления.", show_alert=True)
@@ -1034,11 +1039,3 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-async def _notify_admin_baraholka_from_post(bot, post_id: int, source_post: dict) -> None:
-    """Notify admin of Baraholka repost request from an already-persisted source post."""
-    await notify_baraholka_repost_request(
-        bot,
-        post_id=post_id,
-        source_post=source_post,
-        admin_chat_id=Config.ADMIN_IDS[0],
-    )
