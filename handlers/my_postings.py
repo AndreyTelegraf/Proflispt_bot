@@ -8,7 +8,6 @@ from aiogram.fsm.context import FSMContext
 
 from database import db
 from config import Config
-from services.post_identity import format_premium_post_identity_text
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice_from_post
 from services.premium_repost_request import create_premium_repost_request
@@ -220,8 +219,6 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
             show_alert=True,
         )
         return
-
-    identity = format_premium_post_identity_text(post)
 
     _del_data = await state.get_data()
     _del_ids = _del_data.get("my_postings_ids", [])
