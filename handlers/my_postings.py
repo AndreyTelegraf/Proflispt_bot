@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from database import db
 from config import Config
 from services.my_postings_repost import handle_my_postings_repost_request
-from services.my_postings_baraholka import create_and_notify_my_postings_baraholka_repost
+from services.my_postings_baraholka import handle_my_postings_baraholka_request
 from services.premium_post_delete import delete_premium_post_publication
 from services.my_postings_render import (
     build_my_posting_screen,
@@ -214,18 +214,10 @@ async def hs_baraholka_mypostings(callback: CallbackQuery):
     if not post:
         return
 
-    ok = await create_and_notify_my_postings_baraholka_repost(
-        callback.bot,
+    await handle_my_postings_baraholka_request(
+        callback,
         db=db,
         source_post_id=post_id,
         user=user,
         admin_chat_id=Config.ADMIN_IDS[0],
     )
-    if not ok:
-        await callback.answer("Не удалось отправить заявку. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)
-        return
-
-    await callback.message.edit_text(
-        "Заявка на перепост в Барахолку отправлена на модерацию. Администратор проверит и свяжется с вами."
-    )
-    await callback.answer()
