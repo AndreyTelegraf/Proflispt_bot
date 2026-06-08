@@ -1,10 +1,10 @@
 """State/list helpers for My Postings handlers."""
 
-POST_KEY_PREFIX = "premium"
+from services.my_postings_identity import build_premium_post_key
 
 
 def build_post_key(post_id):
-    return f"{POST_KEY_PREFIX}:{post_id}"
+    return build_premium_post_key(post_id)
 
 
 def build_user_post_keys(db, user_id_db):

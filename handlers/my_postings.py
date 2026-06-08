@@ -20,6 +20,7 @@ from services.my_postings_render import (
 )
 from services.my_postings_access import load_owned_premium_post
 from services.my_postings_state import build_user_post_keys
+from services.my_postings_identity import build_premium_post_key, parse_post_key
 from services.my_postings_session import (
     get_my_postings_session,
     move_my_postings_index,
@@ -71,8 +72,7 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
     index = await set_my_postings_index(state, index)
 
     item_key = ids[index]
-    post_type, post_id_str = item_key.split(":", 1)
-    post_id = int(post_id_str)
+    post_type, post_id = parse_post_key(item_key)
     counter = f"({index + 1}/{len(ids)})"
 
     nav_row = build_my_postings_nav_row(index=index, total=len(ids))
@@ -191,7 +191,7 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
         )
         return
 
-    _del_key = f"premium:{post_id}"
+    _del_key = build_premium_post_key(post_id)
     _del_new_ids, _del_new_idx = await remove_my_postings_key(state, _del_key)
 
     if _del_new_ids:
