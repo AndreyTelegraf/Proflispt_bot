@@ -77,5 +77,4 @@ Updated after cleanup through commit d52f721.
 
 ## Remaining refactor priorities
 
-1. Diagnostics scripts review: decide which audit scripts remain as useful runbooks and which should be deleted.
-2. Final README/spec stale-section pass if needed.
+1. Final README/spec stale-section pass if needed.
