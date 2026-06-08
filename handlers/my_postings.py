@@ -21,6 +21,12 @@ from services.my_postings_render import (
 from services.my_postings_access import load_owned_premium_post
 from services.my_postings_state import build_user_post_keys
 from services.my_postings_identity import build_premium_post_key, parse_post_key
+from services.my_postings_callbacks import (
+    parse_baraholka_mypostings_callback_id,
+    parse_delete_premium_callback_id,
+    parse_do_delete_premium_callback_id,
+    parse_repost_premium_callback_id,
+)
 from services.my_postings_session import (
     get_my_postings_session,
     move_my_postings_index,
@@ -122,7 +128,7 @@ async def my_postings_next(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("repost_premium_"))
 async def request_repost_premium(callback: CallbackQuery):
-    post_id = int(callback.data.split("_")[2])
+    post_id = parse_repost_premium_callback_id(callback.data)
 
     post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
     if error:
@@ -153,7 +159,7 @@ async def request_pin_premium(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("delete_premium_"))
 async def confirm_delete_premium(callback: CallbackQuery):
-    post_id = int(callback.data.split("_")[2])
+    post_id = parse_delete_premium_callback_id(callback.data)
 
     post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
     if error:
@@ -171,7 +177,7 @@ async def confirm_delete_premium(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("do_delete_premium_"))
 async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
-    post_id = int(callback.data.split("_")[3])
+    post_id = parse_do_delete_premium_callback_id(callback.data)
 
     post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
     if error:
@@ -208,9 +214,8 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("hs:baraholka_mypostings:"))
 async def hs_baraholka_mypostings(callback: CallbackQuery):
-    raw_id = callback.data.split(":", 2)[2]
     try:
-        post_id = int(raw_id)
+        post_id = parse_baraholka_mypostings_callback_id(callback.data)
     except ValueError:
         await callback.answer("Не удалось обработать действие. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)
         return
