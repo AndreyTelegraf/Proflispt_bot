@@ -77,4 +77,4 @@ Updated after cleanup through commit d52f721.
 
 ## Remaining refactor priorities
 
-1. Final README/spec stale-section pass if needed.
+1. Optional admin docs audit: ADMIN_COMMANDS.md and BAN_INSTRUCTIONS.md should be checked against live admin handlers before being treated as canonical.
