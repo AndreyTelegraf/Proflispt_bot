@@ -3,10 +3,8 @@
 import logging
 
 from aiogram import Router, F
-from aiogram.filters import StateFilter
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 
 from database import db
 from config import Config
@@ -16,7 +14,6 @@ from services.admin_moderation_notice import send_admin_moderation_notice_from_p
 from services.premium_repost_request import create_premium_repost_request
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.premium_post_delete import delete_premium_post_publication
-from utils import get_first_words, escape_markdown
 
 router = Router()
 logger = logging.getLogger(__name__)
