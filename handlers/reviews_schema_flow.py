@@ -366,15 +366,6 @@ async def rv_back(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(_PROMPTS[_STEP_DESCRIPTION], reply_markup=_back_kb())
     elif cur == RV_INPUT:
         if step == _STEP_GEO:
-            if db.is_residency_confirmed(callback.from_user.id):
-                await state.clear()
-                await callback.message.edit_text(
-                    "Здравствуйте!\n\nЭтот бот поможет вам опубликовать объявления "
-                    "в разделы Справочника.\n\nВыберите действие:",
-                    reply_markup=get_main_menu(),
-                )
-                await callback.answer()
-                return
             await _save_rv(state, step=_STEP_RESIDENCY, payload=payload)
             await callback.message.edit_text(_PROMPTS[_STEP_RESIDENCY], reply_markup=_residency_kb())
         elif step == _STEP_CONTACTS:
