@@ -14,7 +14,13 @@ from services.admin_moderation_notice import send_admin_moderation_notice_from_p
 from services.premium_repost_request import create_premium_repost_request
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.premium_post_delete import delete_premium_post_publication
-from services.my_postings_render import build_my_posting_screen
+from services.my_postings_render import (
+    build_my_posting_screen,
+    build_my_postings_empty_screen,
+    build_my_postings_missing_user_screen,
+    build_my_postings_nav_row,
+    build_my_postings_no_items_screen,
+)
 from services.my_postings_access import load_owned_premium_post
 
 router = Router()
@@ -26,12 +32,8 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     user = db.get_user(user_id)
     if not user:
-        await callback.message.edit_text(
-            "🚫 Пользователь не найден в базе данных.",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text="← Назад", callback_data="go:main")
-            ]])
-        )
+        screen_text, reply_markup = build_my_postings_missing_user_screen()
+        await callback.message.edit_text(screen_text, reply_markup=reply_markup)
         await callback.answer()
         return
 
@@ -46,14 +48,8 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
     ids = [f"premium:{p['id']}" for p in all_posts]
 
     if not ids:
-        await callback.message.edit_text(
-            "📋 Мои объявления\n\n"
-            "У вас пока нет активных объявлений.\n"
-            "Подайте первое объявление нажав на кнопку «Опубликовать» в главном меню:",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text="← Назад", callback_data="go:main")
-            ]])
-        )
+        screen_text, reply_markup = build_my_postings_empty_screen()
+        await callback.message.edit_text(screen_text, reply_markup=reply_markup)
         try:
             await callback.answer()
         except Exception:
@@ -74,12 +70,8 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
     index = data.get("my_postings_index", 0)
 
     if not ids:
-        await callback.message.edit_text(
-            "У вас нет объявлений.",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                InlineKeyboardButton(text="← Назад", callback_data="go:main")
-            ]])
-        )
+        screen_text, reply_markup = build_my_postings_no_items_screen()
+        await callback.message.edit_text(screen_text, reply_markup=reply_markup)
         return
 
     index = max(0, min(index, len(ids) - 1))
@@ -90,11 +82,7 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
     post_id = int(post_id_str)
     counter = f"({index + 1}/{len(ids)})"
 
-    nav_row = []
-    if index > 0:
-        nav_row.append(InlineKeyboardButton(text="←", callback_data="myprev"))
-    if index < len(ids) - 1:
-        nav_row.append(InlineKeyboardButton(text="→", callback_data="mynext"))
+    nav_row = build_my_postings_nav_row(index=index, total=len(ids))
 
     post = db.get_premium_post(post_id)
     if not post:
@@ -102,12 +90,8 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
         new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
         await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
         if not new_ids:
-            await callback.message.edit_text(
-                "У вас нет объявлений.",
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[
-                    InlineKeyboardButton(text="← Назад", callback_data="go:main")
-                ]])
-            )
+            screen_text, reply_markup = build_my_postings_no_items_screen()
+            await callback.message.edit_text(screen_text, reply_markup=reply_markup)
             return
         return await render_my_posting(callback, state)
 
