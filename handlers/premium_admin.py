@@ -8,6 +8,7 @@ from services.directory_links import directory_message_url
 from services.post_identity import format_premium_post_identity_text
 from services.premium_publish_plan import build_premium_publish_plan
 from services.premium_publisher import publish_premium_post_to_telegram
+from services.premium_publication_effects import apply_premium_publication_effects
 
 logger = logging.getLogger(__name__)
 
@@ -143,35 +144,17 @@ async def admin_approve_premium(callback: CallbackQuery):
 
         # Update post with publication info
         if published_message:
-            db.update_premium_post_publication(post_id, published_message.message_id, publish_chat_id, topic_id, published_message_ids=published_message_ids)
-            logger.info(f"Premium post #{post_id} published to channel with message_id: {published_message.message_id}")
-
-            try:
-                from services.auto_repost import maybe_auto_repost_cargo
-                await maybe_auto_repost_cargo(
-                    callback.bot,
-                    db,
-                    chat_id=publish_chat_id,
-                    topic_id=topic_id,
-                    mode=post.get("mode"),
-                    action_type=post.get("action_type") or "post",
-                )
-            except Exception as auto_repost_error:
-                logger.warning("Cargo auto repost failed for premium post #%s: %s", post_id, auto_repost_error)
-
-            if post.get('mode') == 'reviews':
-                try:
-                    db.add_review_index(
-                        post.get("social_media", ""),
-                        post_id,
-                        published_message.message_id,
-                        review_topic_id=topic_id,
-                    )
-                except Exception as e:
-                    logger.warning(f"review_index insert failed for post #{post_id}: {e}")
-
-            if post.get("action_type") == "repost" and old_post_id_to_supersede:
-                db.mark_premium_post_superseded(int(old_post_id_to_supersede))
+            await apply_premium_publication_effects(
+                bot=callback.bot,
+                db=db,
+                post=post,
+                post_id=post_id,
+                published_message=published_message,
+                published_message_ids=published_message_ids,
+                publish_chat_id=publish_chat_id,
+                topic_id=topic_id,
+                old_post_id_to_supersede=old_post_id_to_supersede,
+            )
 
         # Notify user
         message_link = None
