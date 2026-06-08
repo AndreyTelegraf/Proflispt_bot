@@ -8,9 +8,7 @@ from aiogram.fsm.context import FSMContext
 
 from database import db
 from config import Config
-from services.premium_request_labels import premium_request_label
-from services.admin_moderation_notice import send_admin_moderation_notice_from_post
-from services.premium_repost_request import create_premium_repost_request
+from services.my_postings_repost import create_and_notify_my_postings_repost
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.premium_post_delete import delete_premium_post_publication
 from services.my_postings_render import (
@@ -148,28 +146,14 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Это объявление нельзя переопубликовать.", show_alert=True)
         return
 
-    new_post_id = create_premium_repost_request(
-        db,
+    await create_and_notify_my_postings_repost(
+        callback.bot,
+        db=db,
         source_post=post,
-        user_id=user['id'],
+        user=user,
+        requester=callback.from_user,
+        admin_chat_id=Config.ADMIN_IDS[0],
     )
-
-    try:
-        await send_admin_moderation_notice_from_post(
-            callback.bot,
-            post_id=new_post_id,
-            source_post=post,
-            requester=callback.from_user,
-            label=premium_request_label(
-                action_type='repost',
-                mode=post.get('mode'),
-                payment_amount=10,
-            ),
-            admin_chat_id=Config.ADMIN_IDS[0],
-            include_old_post_link=True,
-        )
-    except Exception:
-        pass
 
     await callback.answer("Заявка на переопубликацию отправлена", show_alert=True)
 
