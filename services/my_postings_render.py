@@ -62,3 +62,31 @@ def build_my_postings_nav_row(*, index: int, total: int) -> list[InlineKeyboardB
         nav_row.append(InlineKeyboardButton(text="→", callback_data="mynext"))
     return nav_row
 
+def build_premium_delete_confirm_screen(*, post: dict, post_id: int) -> tuple[str, InlineKeyboardMarkup]:
+    from services.post_identity import build_premium_post_identity_view
+
+    view = build_premium_post_identity_view(post)
+    identity = format_premium_post_identity_text(post)
+    text = (
+        "Удалить объявление? Это действие нельзя отменить.\n\n"
+        f"{identity}\n"
+        f"Статус: {view.publication_status}"
+    )
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"do_delete_premium_{post_id}"),
+            InlineKeyboardButton(text="❌ Отмена", callback_data="back_to_my_postings"),
+        ],
+    ])
+    return text, markup
+
+
+def build_premium_delete_done_screen(*, post: dict) -> tuple[str, InlineKeyboardMarkup]:
+    identity = format_premium_post_identity_text(post)
+    return (
+        f"Объявление удалено.\n\n{identity}",
+        InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="В главное меню", callback_data="go:main")],
+        ]),
+    )
+

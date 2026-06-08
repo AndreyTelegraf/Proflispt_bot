@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 
 from database import db
 from config import Config
-from services.post_identity import build_premium_post_identity_view, format_premium_post_identity_text
+from services.post_identity import format_premium_post_identity_text
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice_from_post
 from services.premium_repost_request import create_premium_repost_request
@@ -20,6 +20,8 @@ from services.my_postings_render import (
     build_my_postings_missing_user_screen,
     build_my_postings_nav_row,
     build_my_postings_no_items_screen,
+    build_premium_delete_confirm_screen,
+    build_premium_delete_done_screen,
 )
 from services.my_postings_access import load_owned_premium_post
 
@@ -188,19 +190,10 @@ async def confirm_delete_premium(callback: CallbackQuery):
         await callback.answer(error, show_alert=True)
         return
 
-    view = build_premium_post_identity_view(post)
-    identity = format_premium_post_identity_text(post)
-
+    screen_text, reply_markup = build_premium_delete_confirm_screen(post=post, post_id=post_id)
     await callback.message.edit_text(
-        "Удалить объявление? Это действие нельзя отменить.\n\n"
-        f"{identity}\n"
-        f"Статус: {view.publication_status}",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"do_delete_premium_{post_id}"),
-                InlineKeyboardButton(text="❌ Отмена", callback_data="back_to_my_postings"),
-            ],
-        ]),
+        screen_text,
+        reply_markup=reply_markup,
         disable_web_page_preview=True,
     )
     await callback.answer()
@@ -240,12 +233,10 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     if _del_new_ids:
         await render_my_posting(callback, state)
     else:
+        screen_text, reply_markup = build_premium_delete_done_screen(post=post)
         await callback.message.edit_text(
-            "Объявление удалено.\n\n"
-            f"{identity}",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")],
-            ]),
+            screen_text,
+            reply_markup=reply_markup,
             disable_web_page_preview=True,
         )
     await callback.answer()
