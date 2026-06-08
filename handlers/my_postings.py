@@ -18,7 +18,7 @@ from services.my_postings_render import (
     build_premium_delete_confirm_screen,
     build_premium_delete_done_screen,
 )
-from services.my_postings_access import load_owned_premium_post
+from services.my_postings_access import answer_if_not_owned_premium_post
 from services.my_postings_state import build_user_post_keys
 from services.my_postings_identity import build_premium_post_key, parse_post_key
 from services.my_postings_callbacks import (
@@ -130,9 +130,8 @@ async def my_postings_next(callback: CallbackQuery, state: FSMContext):
 async def request_repost_premium(callback: CallbackQuery):
     post_id = parse_repost_premium_callback_id(callback.data)
 
-    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
-    if error:
-        await callback.answer(error, show_alert=True)
+    post, user = await answer_if_not_owned_premium_post(callback, db, post_id)
+    if not post:
         return
 
     if post.get('status') not in ('published', 'deleted'):
@@ -161,9 +160,8 @@ async def request_pin_premium(callback: CallbackQuery):
 async def confirm_delete_premium(callback: CallbackQuery):
     post_id = parse_delete_premium_callback_id(callback.data)
 
-    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
-    if error:
-        await callback.answer(error, show_alert=True)
+    post, user = await answer_if_not_owned_premium_post(callback, db, post_id)
+    if not post:
         return
 
     screen_text, reply_markup = build_premium_delete_confirm_screen(post=post, post_id=post_id)
@@ -179,9 +177,8 @@ async def confirm_delete_premium(callback: CallbackQuery):
 async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     post_id = parse_do_delete_premium_callback_id(callback.data)
 
-    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
-    if error:
-        await callback.answer(error, show_alert=True)
+    post, user = await answer_if_not_owned_premium_post(callback, db, post_id)
+    if not post:
         return
 
     deleted = await delete_premium_post_publication(
@@ -220,9 +217,8 @@ async def hs_baraholka_mypostings(callback: CallbackQuery):
         await callback.answer("Не удалось обработать действие. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)
         return
 
-    post, user, error = load_owned_premium_post(db, post_id=post_id, telegram_user_id=callback.from_user.id)
-    if error:
-        await callback.answer(error, show_alert=True)
+    post, user = await answer_if_not_owned_premium_post(callback, db, post_id)
+    if not post:
         return
 
     ok = await create_and_notify_my_postings_baraholka_repost(
