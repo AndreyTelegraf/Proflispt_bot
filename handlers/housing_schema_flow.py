@@ -1069,7 +1069,6 @@ async def _notify_admin_baraholka_from_post(bot, post_id: int, source_post: dict
             InlineKeyboardButton(text="✅ Одобрить", callback_data=f"admin:approve_premium:{post_id}"),
             InlineKeyboardButton(text="❌ Отклонить", callback_data=f"admin:reject_premium:{post_id}"),
         ],
-        [InlineKeyboardButton(text="📋 Список заявок", callback_data="admin:list_premium")],
     ])
     await bot.send_message(
         chat_id=admin_chat_id,

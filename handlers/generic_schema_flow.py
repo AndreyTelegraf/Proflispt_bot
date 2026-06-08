@@ -376,7 +376,6 @@ async def _notify_admin(bot, post_id: int, payload: dict, media_list: list, sect
             InlineKeyboardButton(text="✅ Одобрить", callback_data=f"admin:approve_premium:{post_id}"),
             InlineKeyboardButton(text="❌ Отклонить", callback_data=f"admin:reject_premium:{post_id}"),
         ],
-        [InlineKeyboardButton(text="📋 Список заявок", callback_data="admin:list_premium")],
     ])
     await bot.send_message(
         chat_id=admin_chat_id,
