@@ -1,7 +1,5 @@
 """Handlers for 'My Postings' section."""
 
-import logging
-
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
@@ -23,7 +21,6 @@ from services.my_postings_render import (
 from services.my_postings_access import load_owned_premium_post
 
 router = Router()
-logger = logging.getLogger(__name__)
 
 
 @router.callback_query(F.data == "my_postings")
