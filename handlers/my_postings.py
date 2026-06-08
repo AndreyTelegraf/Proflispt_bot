@@ -16,6 +16,7 @@ from config import Config
 from services.directory_links import directory_message_url
 from services.post_identity import build_premium_post_identity_view, format_premium_post_identity_text
 from services.premium_request_labels import premium_request_label
+from services.admin_moderation_notice import send_admin_moderation_notice_from_post
 from utils import get_first_words, escape_markdown
 
 router = Router()
@@ -263,54 +264,18 @@ async def request_repost_premium(callback: CallbackQuery):
     )
 
     try:
-        cities = post.get('cities') or []
-        if isinstance(cities, list):
-            cities_str = ", ".join(str(c) for c in cities)
-        else:
-            cities_str = str(cities)
-
-        old_link = ""
-        if post.get('message_id'):
-            old_link = "\nСтарый пост: " + directory_message_url(post["message_id"], post.get("topic_id"))
-
-        import html
-        desc = html.escape((post.get('description') or "").strip().replace("\n", " "))
-        name = html.escape(str(post.get('name') or ""))
-        cities_safe = html.escape(cities_str)
-
-        if len(desc) > 120:
-            desc = desc[:120].rstrip() + "…"
-
-        if callback.from_user.username:
-            user_ref = f'<a href="https://t.me/{callback.from_user.username}">@{callback.from_user.username}</a>'
-        else:
-            user_ref = f'<a href="tg://user?id={callback.from_user.id}">{html.escape(callback.from_user.first_name or str(callback.from_user.id))}</a>'
-
-        admin_text = (
-            f"<b>{premium_request_label(action_type='repost', mode=post.get('mode'), payment_amount=10)} #{new_post_id}</b>\n\n"
-            f"<b>{name}</b> ({cities_safe})\n"
-            f"{desc}"
-            f"{old_link}\n\n"
-            f"Пользователь: {user_ref}"
-        )
-
-        await callback.bot.send_message(
-            Config.ADMIN_IDS[0],
-            admin_text,
-            parse_mode="HTML",
-            disable_web_page_preview=True,
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="✅ Одобрить",
-                        callback_data=f"admin:approve_premium:{new_post_id}",
-                    ),
-                    InlineKeyboardButton(
-                        text="❌ Отклонить",
-                        callback_data=f"admin:reject_premium:{new_post_id}",
-                    ),
-                ],
-            ]),
+        await send_admin_moderation_notice_from_post(
+            callback.bot,
+            post_id=new_post_id,
+            source_post=post,
+            requester=callback.from_user,
+            label=premium_request_label(
+                action_type='repost',
+                mode=post.get('mode'),
+                payment_amount=10,
+            ),
+            admin_chat_id=Config.ADMIN_IDS[0],
+            include_old_post_link=True,
         )
     except Exception:
         pass

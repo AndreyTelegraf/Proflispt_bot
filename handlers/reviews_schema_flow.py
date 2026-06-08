@@ -20,6 +20,7 @@ from services.catalog_specialized_renderers import render_review_listing_html as
 from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN, REVIEW_TEXT_WITH_MEDIA_MAX_LEN
 from services.catalog_modes import REVIEWS_SECTION_NAME
 from services.premium_request_labels import premium_request_label
+from services.admin_moderation_notice import send_admin_moderation_notice
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -157,41 +158,14 @@ async def _save_rv(state: FSMContext, *, step: int, payload: dict) -> None:
 # ── admin notify ───────────────────────────────────────────────────────────────
 
 async def _rv_notify_admin(bot, post_id: int, payload: dict, media_list: list) -> None:
-    from aiogram.types import InputMediaPhoto, InputMediaVideo
-
     post_text = _rv_render_html(payload)
-    group = []
-    for idx, item in enumerate(media_list[:10]):
-        fid = item.get("file_id")
-        if not fid:
-            continue
-        caption = post_text if idx == 0 else None
-        if item.get("type") == "photo":
-            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
-        elif item.get("type") == "video":
-            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
-
-    if group:
-        try:
-            await bot.send_media_group(chat_id=ADMIN_CHAT_ID, media=group)
-        except Exception:
-            await bot.send_message(chat_id=ADMIN_CHAT_ID, text=post_text, parse_mode="HTML",
-                                   disable_web_page_preview=True)
-    else:
-        await bot.send_message(chat_id=ADMIN_CHAT_ID, text=post_text, parse_mode="HTML",
-                               disable_web_page_preview=True)
-
-    controls = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="✅ Одобрить", callback_data=f"admin:approve_premium:{post_id}"),
-            InlineKeyboardButton(text="❌ Отклонить", callback_data=f"admin:reject_premium:{post_id}"),
-        ],
-    ])
-    await bot.send_message(
-        chat_id=ADMIN_CHAT_ID,
-        text=f"[{REVIEWS_SECTION_NAME}] {premium_request_label(action_type='post', mode='reviews', payment_amount=0)} #{post_id}",
-        reply_markup=controls,
-        disable_web_page_preview=True,
+    await send_admin_moderation_notice(
+        bot,
+        admin_chat_id=ADMIN_CHAT_ID,
+        post_id=post_id,
+        preview_text=post_text,
+        control_text=f"[{REVIEWS_SECTION_NAME}] {premium_request_label(action_type='post', mode='reviews', payment_amount=0)} #{post_id}",
+        media_list=media_list,
     )
 
 

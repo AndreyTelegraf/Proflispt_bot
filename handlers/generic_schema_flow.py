@@ -28,6 +28,7 @@ from services.catalog_modes import MODE_TO_SECTION_NAME as SLUG_TO_SECTION
 from services.geo import normalize_geo_tags_json
 from services.catalog_listing_renderer import render_catalog_listing_html
 from services.premium_request_labels import premium_request_label
+from services.admin_moderation_notice import send_admin_moderation_notice
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     is_valid_pt_mobile,
@@ -346,43 +347,15 @@ async def _advance(
 # ── admin notify ──────────────────────────────────────────────────────────────
 
 async def _notify_admin(bot, post_id: int, payload: dict, media_list: list, section_name: str) -> None:
-    from aiogram.types import InputMediaPhoto, InputMediaVideo
-
     admin_chat_id = 336224597
     post_text = render_catalog_listing_html(payload)
-
-    group = []
-    for idx, item in enumerate(media_list[:10]):
-        fid = item.get("file_id")
-        if not fid:
-            continue
-        caption = post_text if idx == 0 else None
-        if item.get("type") == "photo":
-            group.append(InputMediaPhoto(media=fid, caption=caption, parse_mode="HTML"))
-        elif item.get("type") == "video":
-            group.append(InputMediaVideo(media=fid, caption=caption, parse_mode="HTML"))
-
-    if group:
-        try:
-            await bot.send_media_group(chat_id=admin_chat_id, media=group)
-        except Exception:
-            await bot.send_message(chat_id=admin_chat_id, text=post_text, parse_mode="HTML",
-                                   disable_web_page_preview=True)
-    else:
-        await bot.send_message(chat_id=admin_chat_id, text=post_text, parse_mode="HTML",
-                               disable_web_page_preview=True)
-
-    controls = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="✅ Одобрить", callback_data=f"admin:approve_premium:{post_id}"),
-            InlineKeyboardButton(text="❌ Отклонить", callback_data=f"admin:reject_premium:{post_id}"),
-        ],
-    ])
-    await bot.send_message(
-        chat_id=admin_chat_id,
-        text=f"[{section_name}] {premium_request_label(action_type='post', mode=None, payment_amount=20)} #{post_id}",
-        reply_markup=controls,
-        disable_web_page_preview=True,
+    await send_admin_moderation_notice(
+        bot,
+        admin_chat_id=admin_chat_id,
+        post_id=post_id,
+        preview_text=post_text,
+        control_text=f"[{section_name}] {premium_request_label(action_type='post', mode=None, payment_amount=20)} #{post_id}",
+        media_list=media_list,
     )
 
 # ── entry ─────────────────────────────────────────────────────────────────────
