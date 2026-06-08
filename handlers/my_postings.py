@@ -8,7 +8,7 @@ from database import db
 from config import Config
 from services.my_postings_repost import handle_my_postings_repost_request
 from services.my_postings_baraholka import handle_my_postings_baraholka_request
-from services.premium_post_delete import delete_premium_post_publication
+from services.my_postings_delete import handle_my_postings_delete_request
 from services.my_postings_render import (
     build_my_posting_screen,
     build_my_postings_empty_screen,
@@ -16,11 +16,10 @@ from services.my_postings_render import (
     build_my_postings_nav_row,
     build_my_postings_no_items_screen,
     build_premium_delete_confirm_screen,
-    build_premium_delete_done_screen,
 )
 from services.my_postings_access import answer_if_not_owned_premium_post
 from services.my_postings_state import build_user_post_keys
-from services.my_postings_identity import build_premium_post_key, parse_post_key
+from services.my_postings_identity import parse_post_key
 from services.my_postings_callbacks import (
     parse_baraholka_mypostings_callback_id,
     parse_delete_premium_callback_id,
@@ -30,7 +29,6 @@ from services.my_postings_callbacks import (
 from services.my_postings_session import (
     get_my_postings_session,
     move_my_postings_index,
-    remove_my_postings_key,
     set_my_postings_session,
     set_my_postings_index,
 )
@@ -174,32 +172,14 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     if not post:
         return
 
-    deleted = await delete_premium_post_publication(
-        callback.bot,
+    await handle_my_postings_delete_request(
+        callback,
+        state,
         db=db,
         post=post,
         post_id=post_id,
+        render_next=render_my_posting,
     )
-    if not deleted:
-        await callback.answer(
-            "Не удалось удалить объявление из канала. Обратитесь к администратору.",
-            show_alert=True,
-        )
-        return
-
-    _del_key = build_premium_post_key(post_id)
-    _del_new_ids, _del_new_idx = await remove_my_postings_key(state, _del_key)
-
-    if _del_new_ids:
-        await render_my_posting(callback, state)
-    else:
-        screen_text, reply_markup = build_premium_delete_done_screen(post=post)
-        await callback.message.edit_text(
-            screen_text,
-            reply_markup=reply_markup,
-            disable_web_page_preview=True,
-        )
-    await callback.answer()
 
 
 @router.callback_query(F.data.startswith("hs:baraholka_mypostings:"))
