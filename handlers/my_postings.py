@@ -19,6 +19,7 @@ from services.my_postings_render import (
     build_premium_delete_done_screen,
 )
 from services.my_postings_access import load_owned_premium_post
+from services.my_postings_state import build_user_post_keys, clamp_index, remove_post_key
 
 router = Router()
 
@@ -33,15 +34,7 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
         await callback.answer()
         return
 
-    user_id_db = user['id']
-    manageable_posts = db.get_user_manageable_premium_posts(user_id_db)
-    all_posts = sorted(
-        manageable_posts,
-        key=lambda p: p.get('created_at') or '',
-        reverse=True,
-    )
-
-    ids = [f"premium:{p['id']}" for p in all_posts]
+    ids = build_user_post_keys(db, user["id"])
 
     if not ids:
         screen_text, reply_markup = build_my_postings_empty_screen()
@@ -70,7 +63,7 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(screen_text, reply_markup=reply_markup)
         return
 
-    index = max(0, min(index, len(ids) - 1))
+    index = clamp_index(index, len(ids))
     await state.update_data(my_postings_index=index)
 
     item_key = ids[index]
@@ -82,8 +75,7 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
 
     post = db.get_premium_post(post_id)
     if not post:
-        new_ids = [x for x in ids if x != item_key]
-        new_index = max(0, min(index, len(new_ids) - 1)) if new_ids else 0
+        new_ids, new_index = remove_post_key(ids, item_key, index)
         await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
         if not new_ids:
             screen_text, reply_markup = build_my_postings_no_items_screen()
@@ -204,8 +196,11 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     _del_data = await state.get_data()
     _del_ids = _del_data.get("my_postings_ids", [])
     _del_key = f"premium:{post_id}"
-    _del_new_ids = [x for x in _del_ids if x != _del_key]
-    _del_new_idx = min(_del_data.get("my_postings_index", 0), max(0, len(_del_new_ids) - 1))
+    _del_new_ids, _del_new_idx = remove_post_key(
+        _del_ids,
+        _del_key,
+        _del_data.get("my_postings_index", 0),
+    )
     await state.update_data(my_postings_ids=_del_new_ids, my_postings_index=_del_new_idx)
 
     if _del_new_ids:
