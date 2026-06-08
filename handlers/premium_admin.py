@@ -4,10 +4,10 @@ import logging
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from database import db
-from services.directory_links import directory_message_url
 from services.premium_publish_plan import build_premium_publish_plan
 from services.premium_publisher import publish_premium_post_to_telegram
 from services.premium_publication_effects import apply_premium_publication_effects
+from services.premium_repost_cleanup import build_repost_cleanup_plan, cleanup_old_repost_messages
 from services.premium_admin_notifications import (
     build_approval_admin_text,
     build_approval_user_notification,
@@ -45,37 +45,7 @@ async def admin_approve_premium(callback: CallbackQuery):
     # Approve premium post
     db.approve_premium_post(post_id, callback.from_user.id)
 
-    old_post_id_to_supersede = None
-    repost_old_chat_id = None
-    repost_old_message_id = None
-    repost_old_topic_id = None
-    repost_old_published_message_ids = []
-
-    if post.get("action_type") == "repost":
-        import json
-        try:
-            repost_notes = json.loads(post.get("admin_notes") or "{}")
-        except Exception:
-            repost_notes = {}
-        old_post_id_to_supersede = repost_notes.get("old_post_id")
-        repost_old_chat_id = repost_notes.get("old_chat_id")
-        repost_old_message_id = repost_notes.get("old_message_id")
-        repost_old_topic_id = repost_notes.get("old_topic_id")
-        repost_old_published_message_ids = repost_notes.get("old_published_message_ids") or []
-
-    pin_old_chat_id = None
-    pin_old_message_id = None
-    pin_old_topic_id = None
-
-    if post.get("action_type") == "pin":
-        import json
-        try:
-            pin_notes = json.loads(post.get("admin_notes") or "{}")
-        except Exception:
-            pin_notes = {}
-        pin_old_chat_id = pin_notes.get("old_chat_id")
-        pin_old_message_id = pin_notes.get("old_message_id")
-        pin_old_topic_id = pin_notes.get("old_topic_id")
+    repost_cleanup_plan = build_repost_cleanup_plan(post)
 
     try:
         # Publish premium post to channel
@@ -104,38 +74,7 @@ async def admin_approve_premium(callback: CallbackQuery):
         publish_chat_id = publish_plan.publish_chat_id
         _baraholka_publish = publish_plan.is_baraholka_publish
         
-        if post.get("action_type") == "repost" and repost_old_chat_id:
-            ids_to_delete = repost_old_published_message_ids if repost_old_published_message_ids else (
-                [repost_old_message_id] if repost_old_message_id else []
-            )
-            for mid in ids_to_delete:
-                try:
-                    await callback.bot.delete_message(
-                        chat_id=int(repost_old_chat_id),
-                        message_id=int(mid),
-                    )
-                    logger.info(f"Deleted old repost message {mid} from chat {repost_old_chat_id}")
-                except Exception as delete_error:
-                    logger.warning(f"Could not delete old repost message {mid}: {delete_error}")
-
-                    try:
-                        old_link = directory_message_url(mid, repost_old_topic_id)
-
-                        await callback.bot.send_message(
-                            Config.ADMIN_IDS[0],
-                            (
-                                "Не удалось удалить старый пост после апа.\n\n"
-                                f"Ссылка: {old_link}\n"
-                                f"post_id={old_post_id_to_supersede}\n"
-                                f"message_id={mid}\n"
-                                f"Ошибка: {delete_error}"
-                            ),
-                            disable_web_page_preview=True,
-                        )
-                    except Exception as notify_error:
-                        logger.warning(
-                            f"Could not notify admin about undeleted message {mid}: {notify_error}"
-                        )
+        await cleanup_old_repost_messages(callback.bot, Config, repost_cleanup_plan)
 
         publish_result = await publish_premium_post_to_telegram(
             callback.bot,
@@ -158,7 +97,7 @@ async def admin_approve_premium(callback: CallbackQuery):
                 published_message_ids=published_message_ids,
                 publish_chat_id=publish_chat_id,
                 topic_id=topic_id,
-                old_post_id_to_supersede=old_post_id_to_supersede,
+                old_post_id_to_supersede=repost_cleanup_plan.old_post_id_to_supersede,
             )
 
         # Notify user
