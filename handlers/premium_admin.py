@@ -2,13 +2,19 @@
 
 import logging
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery
 from database import db
 from services.directory_links import directory_message_url
-from services.post_identity import format_premium_post_identity_text
 from services.premium_publish_plan import build_premium_publish_plan
 from services.premium_publisher import publish_premium_post_to_telegram
 from services.premium_publication_effects import apply_premium_publication_effects
+from services.premium_admin_notifications import (
+    build_approval_admin_text,
+    build_approval_user_notification,
+    build_pin_disabled_user_notification,
+    build_rejection_admin_text,
+    build_rejection_user_notification,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,12 +84,11 @@ async def admin_approve_premium(callback: CallbackQuery):
 
         if post.get("action_type") == "pin":
             db.reject_premium_post(post_id, callback.from_user.id, "Pin product disabled")
+            notification = build_pin_disabled_user_notification()
             await callback.bot.send_message(
                 chat_id=user['telegram_id'],
-                text="Закрепление больше недоступно. Если вы уже оплатили закрепление, обратитесь к администратору.",
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                    [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-                ]),
+                text=notification.text,
+                reply_markup=notification.reply_markup,
                 disable_web_page_preview=True,
             )
             await callback.message.edit_text(
@@ -166,56 +171,21 @@ async def admin_approve_premium(callback: CallbackQuery):
             except Exception as e:
                 logger.warning(f"Could not build premium post link: {e}")
 
-        identity = format_premium_post_identity_text(post)
-
-        if post.get("action_type") == "repost" and _baraholka_publish:
-            user_text = (
-                f"{identity}\n\n"
-                "Опубликовано в Барахолке.\n\n"
-                "Удалить его можно через администратора @baraholka_pt"
-            )
-            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-            ])
-        elif post.get("action_type") == "repost":
-            user_text = (
-                f"{identity}\n\n"
-                "Теперь это самое новое объявление в разделе.\n\n"
-                "Удалить его можно через раздел \"Мои объявления\"."
-            )
-            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="← Назад", callback_data="back_to_my_postings")]
-            ])
-        elif post.get('mode') == 'reviews':
-            if message_link:
-                user_text = f"Ваш отзыв опубликован!\nСсылка: {message_link}"
-            else:
-                user_text = "Ваш отзыв опубликован!"
-            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-            ])
-        else:
-            user_text = (
-                f"{identity}\n\n"
-                "Объявление с медиа опубликовано.\n\n"
-                "Отредактировать или удалить его можно через раздел \"Мои объявления\"."
-            )
-            main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-            ])
-
+        notification = build_approval_user_notification(
+            post,
+            message_link=message_link,
+            is_baraholka_publish=_baraholka_publish,
+        )
         await callback.bot.send_message(
             chat_id=user['telegram_id'],
-            text=user_text,
-            reply_markup=main_menu_keyboard,
+            text=notification.text,
+            reply_markup=notification.reply_markup,
             disable_web_page_preview=True,
         )
         
         # Update admin message
         await callback.message.edit_text(
-            f"✅ <b>Премиум-пост #{post_id} одобрен и опубликован!</b>\n\n"
-            f"Пользователь уведомлен об одобрении.\n"
-            f"Пост опубликован в канале.",
+            build_approval_admin_text(post_id),
             parse_mode="HTML"
         )
         
@@ -252,28 +222,12 @@ async def admin_reject_premium(callback: CallbackQuery):
     db.reject_premium_post(post_id, callback.from_user.id, "Отклонено администратором")
 
     # Notify user
-    if post.get('mode') == 'reviews':
-        user_text = (
-            "🚫 **Ваш отзыв отклонён.**\n\n"
-            "Возможно содержание не соответствует требованиям Справочника.\n\n"
-            "Обратитесь к [администратору](https://t.me/andreytelegraf)."
-        )
-    else:
-        user_text = (
-            "🚫 **Ваш премиум-пост отклонен :(**\n\n"
-            "Возможно его содержание не соответствует требованиям Справочника или всё ещё не подтверждена оплата.\n\n"
-            "Обратитесь к [администратору](https://t.me/andreytelegraf)."
-        )
-    
-    main_menu_keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="В главное меню", callback_data="go:main")]
-    ])
+    notification = build_rejection_user_notification(post)
     try:
         await callback.bot.send_message(
             chat_id=user['telegram_id'],
-            text=user_text,
-            parse_mode="Markdown",
-            reply_markup=main_menu_keyboard,
+            text=notification.text,
+            reply_markup=notification.reply_markup,
             disable_web_page_preview=True,
         )
     except Exception as e:
@@ -281,9 +235,8 @@ async def admin_reject_premium(callback: CallbackQuery):
     
     # Update admin message
     await callback.message.edit_text(
-        f"🚫 **Премиум-пост #{post_id} отклонен.**\n\n"
-        f"Пользователь уведомлен об отклонении.",
-        parse_mode="Markdown"
+        build_rejection_admin_text(post_id),
+        parse_mode="HTML"
     )
     
     await callback.answer("🚫 Пост отклонен!")
