@@ -14,7 +14,7 @@ from aiogram.fsm.state import State, StatesGroup
 from database import db
 from config import Config
 from services.directory_links import directory_message_url
-from services.post_identity import build_premium_post_identity_view
+from services.post_identity import build_premium_post_identity_view, format_premium_post_identity_text
 from utils import get_first_words, escape_markdown
 
 router = Router()
@@ -166,15 +166,12 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
             return
         return await render_my_posting(callback, state)
 
-    view = build_premium_post_identity_view(post)
     status_label = _premium_post_status_label(post)
-    link_line = f"\nСсылка: {view.canonical_post_url}" if view.canonical_post_url else ""
+    identity = format_premium_post_identity_text(post)
     text = (
         f"📋 Мои объявления {counter}\n\n"
-        f"Раздел: {view.section_name}\n"
-        f"Объявление: {view.display_title}\n"
+        f"{identity}\n"
         f"Статус: {status_label}"
-        f"{link_line}"
     )
 
     action_rows = _premium_post_action_rows(post, post_id)
@@ -342,14 +339,12 @@ async def confirm_delete_premium(callback: CallbackQuery):
         return
 
     view = build_premium_post_identity_view(post)
-    link_line = f"\nСсылка: {view.canonical_post_url}" if view.canonical_post_url else ""
+    identity = format_premium_post_identity_text(post)
 
     await callback.message.edit_text(
         "Удалить объявление? Это действие нельзя отменить.\n\n"
-        f"Раздел: {view.section_name}\n"
-        f"Объявление: {view.display_title}\n"
-        f"Статус: {view.publication_status}"
-        f"{link_line}",
+        f"{identity}\n"
+        f"Статус: {view.publication_status}",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [
                 InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"do_delete_premium_{post_id}"),
@@ -439,7 +434,7 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
         )
         return
 
-    view = build_premium_post_identity_view(post)
+    identity = format_premium_post_identity_text(post)
     db.delete_premium_post(post_id)
 
     _del_data = await state.get_data()
@@ -454,8 +449,7 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
     else:
         await callback.message.edit_text(
             "Объявление удалено.\n\n"
-            f"Раздел: {view.section_name}\n"
-            f"Объявление: {view.display_title}",
+            f"{identity}",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="В главное меню", callback_data="go:main")],
             ]),
