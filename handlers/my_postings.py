@@ -18,6 +18,7 @@ from services.post_identity import build_premium_post_identity_view, format_prem
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice_from_post
 from services.premium_repost_request import create_premium_repost_request
+from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from utils import get_first_words, escape_markdown
 
 router = Router()
@@ -427,9 +428,13 @@ async def hs_baraholka_mypostings(callback: CallbackQuery):
         return
 
     try:
-        from handlers.housing_schema_flow import _notify_admin_baraholka_from_post
-        repost_id = db.create_baraholka_housing_repost_from_post(post_id, user["id"])
-        await _notify_admin_baraholka_from_post(callback.bot, repost_id, post)
+        await create_and_notify_baraholka_repost_request(
+            callback.bot,
+            db=db,
+            source_post_id=post_id,
+            user=user,
+            admin_chat_id=Config.ADMIN_IDS[0],
+        )
     except Exception as e:
         logger.exception("Baraholka my_postings repost failed: %s", e)
         await callback.answer("Не удалось отправить заявку. Вернитесь в «Мои объявления» и попробуйте ещё раз.", show_alert=True)

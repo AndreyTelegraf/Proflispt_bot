@@ -32,7 +32,7 @@ from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
 from services.premium_request_labels import premium_request_label
-from services.admin_moderation_notice import send_admin_moderation_notice
+from services.baraholka_repost_request import notify_baraholka_repost_request
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -1036,41 +1036,9 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
 
 async def _notify_admin_baraholka_from_post(bot, post_id: int, source_post: dict) -> None:
     """Notify admin of Baraholka repost request from an already-persisted source post."""
-    admin_chat_id = 336224597
-
-    cities_raw = source_post.get("cities")
-    if isinstance(cities_raw, list):
-        geo_tags = " ".join(
-            f"#{str(c).strip().lstrip('#').lower()}" for c in cities_raw if str(c).strip()
-        )
-    else:
-        geo_tags = str(cities_raw or "")
-
-    rental_term = ""
-    try:
-        src_notes = json.loads(source_post.get("admin_notes") or "{}")
-        rental_term = src_notes.get("rental_term", "")
-    except Exception:
-        pass
-
-    payload = {
-        "geo_tags": geo_tags,
-        "rental_term": rental_term,
-        "description": source_post.get("description", ""),
-        "social_links": source_post.get("social_media", ""),
-        "telegram": source_post.get("telegram_username", ""),
-        "phone_main": source_post.get("phone_main", ""),
-        "phone_whatsapp": source_post.get("phone_whatsapp", ""),
-        "contact_name": source_post.get("name", ""),
-    }
-    post_text = _hs_render_html(payload)
-    section_name = HOUSING_SLUGS.get(source_post.get("mode", ""), source_post.get("mode", ""))
-
-    await send_admin_moderation_notice(
+    await notify_baraholka_repost_request(
         bot,
-        admin_chat_id=admin_chat_id,
         post_id=post_id,
-        preview_text=post_text,
-        control_text=f"[{section_name} → Барахолка] {premium_request_label(action_type='repost', mode=source_post.get('mode'), payment_amount=10, is_baraholka=True)} #{post_id}",
-        media_list=[],
+        source_post=source_post,
+        admin_chat_id=Config.ADMIN_IDS[0],
     )
