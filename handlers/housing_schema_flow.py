@@ -31,7 +31,6 @@ from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
-from services.premium_request_labels import premium_request_label
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.listing_validation import (

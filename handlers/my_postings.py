@@ -1,9 +1,6 @@
 """Handlers for 'My Postings' section."""
 
-import json
 import logging
-from datetime import datetime
-from typing import Optional
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -13,7 +10,6 @@ from aiogram.fsm.state import State, StatesGroup
 
 from database import db
 from config import Config
-from services.directory_links import directory_message_url
 from services.post_identity import build_premium_post_identity_view, format_premium_post_identity_text
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice_from_post
