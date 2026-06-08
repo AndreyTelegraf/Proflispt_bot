@@ -15,7 +15,6 @@ from services.premium_repost_request import create_premium_repost_request
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.premium_post_delete import delete_premium_post_publication
 from services.my_postings_render import build_my_posting_screen
-from services.my_postings_view import premium_post_action_rows, premium_post_status_label
 
 router = Router()
 logger = logging.getLogger(__name__)
