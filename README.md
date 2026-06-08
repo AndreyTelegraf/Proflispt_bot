@@ -1,88 +1,58 @@
-# Proflistpt
+# Proflistpt Bot
 
-Telegram бот для публикации объявлений о работе в Португалии.
+Telegram bot for the Proflistpt directory.
 
-## Установка
+Current staging service:
 
-1. Клонируйте репозиторий
-2. Установите зависимости: `pip3 install -r requirements.txt`
-3. Настройте `config.py` с вашим токеном бота
-4. Запустите: `python3 main.py`
+- `proflistpt_bot_staging.service`
 
-## Обновление и перезапуск бота
+Current staging path:
 
-### Быстрый перезапуск (рекомендуется)
+- `/opt/bots/proflistpt_bot_staging`
 
-```bash
-# Самый простой способ
-./restart.sh
+## Current architecture
 
-# Или принудительный перезапуск
-python3 force_restart.py
-```
+Managed publications are stored in `premium_posts`.
 
-### Дополнительные опции
+The legacy `job_postings` flow has been removed. Job-related sections now work as normal `premium_posts` modes:
 
-```bash
-# Быстрый перезапуск
-python3 update_and_restart.py --quick
+- `job_seeker`
+- `job_offer`
 
-# Полное обновление с проверкой конфликтов
-python3 update_and_restart.py
-```
+Ordinary catalog sections are handled by the generic schema-driven flow:
 
-### Разрешение конфликтов Telegram
+- `handlers/generic_schema_flow.py`
+- `config/fsm_schemas/*.json`
 
-Если бот выдает ошибку `TelegramConflictError`, выполните:
+Special flows:
 
-```bash
-python3 fix_telegram_conflict.py
-```
+- housing: `handlers/housing_schema_flow.py`
+- reviews: `handlers/reviews_schema_flow.py`
+- user post management: `handlers/my_postings.py`
+- premium moderation: `handlers/premium_admin.py`
 
-Этот скрипт автоматически:
-1. Остановит все процессы бота
-2. Удалит webhook
-3. Очистит обновления с offset
-4. Проверит статус
+Canonical mode and section identity helpers:
 
-## Ручное разрешение конфликтов
+- `services/catalog_modes.py`
+- `services/post_identity.py`
 
-Если автоматический скрипт не помог:
+## Health checks
 
-```bash
-# 1. Остановить бота
-pkill -f "python3 main.py"
+Run from the project root:
 
-# 2. Удалить webhook
-curl -s "https://api.telegram.org/botYOUR_TOKEN/deleteWebhook"
+- `./venv/bin/python -m py_compile database.py main.py handlers/*.py services/*.py`
+- `./venv/bin/python -m services.schema_smoke`
+- `./healthcheck_local.sh`
+- `systemctl is-active proflistpt_bot_staging.service`
 
-# 3. Очистить обновления
-curl -s "https://api.telegram.org/botYOUR_TOKEN/getUpdates?offset=999999999"
+## Restart staging
 
-# 4. Запустить бота
-python3 main.py
-```
+- `sudo systemctl restart proflistpt_bot_staging.service`
+- `sleep 2`
+- `systemctl is-active proflistpt_bot_staging.service`
 
-## Функции
+## Refactor state
 
-- ✅ Публикация объявлений "Ищу работу"
-- ✅ Публикация объявлений "Предлагаю работу"
-- ✅ Поддержка множественных городов
-- ✅ Социальные сети (Instagram, X, LinkedIn, Facebook, Threads и др.)
-- ✅ Автоматическое форматирование
-- ✅ Предварительный просмотр
-- ✅ Управление объявлениями
+Current canonical refactor snapshot:
 
-## Структура проекта
-
-```
-├── main.py                 # Главный файл бота
-├── config.py              # Конфигурация
-├── database.py            # Работа с базой данных
-├── utils.py               # Утилиты
-├── fix_telegram_conflict.py # Скрипт разрешения конфликтов
-├── handlers/              # Обработчики команд
-├── services/              # Сервисы
-├── models/                # Модели данных
-└── requirements.txt       # Зависимости
-```
+- `docs/refactor/current-state.md`
