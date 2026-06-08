@@ -17,6 +17,7 @@ from services.directory_links import directory_message_url
 from services.post_identity import build_premium_post_identity_view, format_premium_post_identity_text
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice_from_post
+from services.premium_repost_request import create_premium_repost_request
 from utils import get_first_words, escape_markdown
 
 router = Router()
@@ -237,30 +238,10 @@ async def request_repost_premium(callback: CallbackQuery):
         await callback.answer("Это объявление нельзя переопубликовать.", show_alert=True)
         return
 
-    repost_notes = {
-        "old_post_id": post['id'],
-        "old_message_id": post.get('message_id'),
-        "old_chat_id": post.get('chat_id'),
-        "old_topic_id": post.get('topic_id'),
-        "old_published_message_ids": post.get('published_message_ids') or [],
-    }
-
-    new_post_id = db.create_premium_post(
+    new_post_id = create_premium_repost_request(
+        db,
+        source_post=post,
         user_id=user['id'],
-        mode=post.get('mode'),
-        cities=json.dumps(post['cities']),
-        description=post['description'],
-        social_media=post.get('social_media'),
-        telegram_username=post.get('telegram_username'),
-        phone_main=post.get('phone_main'),
-        phone_whatsapp=post.get('phone_whatsapp'),
-        name=post.get('name'),
-        media_file_id=post.get('media_file_id'),
-        media_type=post.get('media_type'),
-        media_list=post.get('media_list') or [],
-        payment_amount=10.00,
-        action_type='repost',
-        admin_notes=json.dumps(repost_notes),
     )
 
     try:
