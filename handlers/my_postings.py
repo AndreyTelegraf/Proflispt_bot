@@ -225,9 +225,6 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("hs:baraholka_mypostings:"))
 async def hs_baraholka_mypostings(callback: CallbackQuery):
-    import logging
-    logger = logging.getLogger(__name__)
-
     raw_id = callback.data.split(":", 2)[2]
     try:
         post_id = int(raw_id)
