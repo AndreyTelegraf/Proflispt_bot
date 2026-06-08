@@ -19,7 +19,14 @@ from services.my_postings_render import (
     build_premium_delete_done_screen,
 )
 from services.my_postings_access import load_owned_premium_post
-from services.my_postings_state import build_user_post_keys, clamp_index, remove_post_key
+from services.my_postings_state import build_user_post_keys
+from services.my_postings_session import (
+    get_my_postings_session,
+    move_my_postings_index,
+    remove_my_postings_key,
+    set_my_postings_session,
+    set_my_postings_index,
+)
 
 router = Router()
 
@@ -45,7 +52,7 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
             pass
         return
 
-    await state.update_data(my_postings_ids=ids, my_postings_index=0)
+    await set_my_postings_session(state, ids, 0)
     await render_my_posting(callback, state)
     try:
         await callback.answer()
@@ -54,17 +61,14 @@ async def show_my_postings(callback: CallbackQuery, state: FSMContext):
 
 
 async def render_my_posting(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    ids = data.get("my_postings_ids", [])
-    index = data.get("my_postings_index", 0)
+    ids, index = await get_my_postings_session(state)
 
     if not ids:
         screen_text, reply_markup = build_my_postings_no_items_screen()
         await callback.message.edit_text(screen_text, reply_markup=reply_markup)
         return
 
-    index = clamp_index(index, len(ids))
-    await state.update_data(my_postings_index=index)
+    index = await set_my_postings_index(state, index)
 
     item_key = ids[index]
     post_type, post_id_str = item_key.split(":", 1)
@@ -75,8 +79,7 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
 
     post = db.get_premium_post(post_id)
     if not post:
-        new_ids, new_index = remove_post_key(ids, item_key, index)
-        await state.update_data(my_postings_ids=new_ids, my_postings_index=new_index)
+        new_ids, new_index = await remove_my_postings_key(state, item_key)
         if not new_ids:
             screen_text, reply_markup = build_my_postings_no_items_screen()
             await callback.message.edit_text(screen_text, reply_markup=reply_markup)
@@ -105,19 +108,14 @@ async def back_to_my_postings(callback: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == "myprev")
 async def my_postings_prev(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    index = max(0, data.get("my_postings_index", 0) - 1)
-    await state.update_data(my_postings_index=index)
+    await move_my_postings_index(state, -1)
     await render_my_posting(callback, state)
     await callback.answer()
 
 
 @router.callback_query(F.data == "mynext")
 async def my_postings_next(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    ids = data.get("my_postings_ids", [])
-    index = min(len(ids) - 1, data.get("my_postings_index", 0) + 1)
-    await state.update_data(my_postings_index=index)
+    await move_my_postings_index(state, 1)
     await render_my_posting(callback, state)
     await callback.answer()
 
@@ -193,15 +191,8 @@ async def execute_delete_premium(callback: CallbackQuery, state: FSMContext):
         )
         return
 
-    _del_data = await state.get_data()
-    _del_ids = _del_data.get("my_postings_ids", [])
     _del_key = f"premium:{post_id}"
-    _del_new_ids, _del_new_idx = remove_post_key(
-        _del_ids,
-        _del_key,
-        _del_data.get("my_postings_index", 0),
-    )
-    await state.update_data(my_postings_ids=_del_new_ids, my_postings_index=_del_new_idx)
+    _del_new_ids, _del_new_idx = await remove_my_postings_key(state, _del_key)
 
     if _del_new_ids:
         await render_my_posting(callback, state)
