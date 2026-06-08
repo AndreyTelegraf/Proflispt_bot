@@ -7,6 +7,7 @@ from database import db
 from services.directory_links import directory_message_url
 from services.post_identity import format_premium_post_identity_text
 from services.premium_publish_plan import build_premium_publish_plan
+from services.premium_publisher import publish_premium_post_to_telegram
 
 logger = logging.getLogger(__name__)
 
@@ -130,114 +131,15 @@ async def admin_approve_premium(callback: CallbackQuery):
                             f"Could not notify admin about undeleted message {mid}: {notify_error}"
                         )
 
-        # Publish with media
-        published_message = None
-        published_message_ids = []
-        
-        # Parse media_list from DB. get_premium_post() may already return a list.
-        import json
-        media_list = []
-        raw_media_list = post.get('media_list')
-        if isinstance(raw_media_list, list):
-            media_list = raw_media_list
-        elif raw_media_list:
-            try:
-                media_list = json.loads(raw_media_list)
-            except (json.JSONDecodeError, TypeError):
-                media_list = []
-        
-        if media_list:
-            # Send media group if multiple media
-            if len(media_list) > 1:
-                from aiogram.types import InputMediaPhoto, InputMediaVideo
-                
-                media_group = []
-                for i, media in enumerate(media_list):
-                    if i == 0:  # First media gets the caption
-                        if media['type'] == 'photo':
-                            media_group.append(InputMediaPhoto(
-                                media=media['file_id'],
-                                caption=post_text,
-                                parse_mode="HTML"
-                            ))
-                        else:
-                            media_group.append(InputMediaVideo(
-                                media=media['file_id'],
-                                caption=post_text,
-                                parse_mode="HTML"
-                            ))
-                    else:
-                        if media['type'] == 'photo':
-                            media_group.append(InputMediaPhoto(media=media['file_id']))
-                        else:
-                            media_group.append(InputMediaVideo(media=media['file_id']))
-                
-                published_messages = await callback.bot.send_media_group(
-                    chat_id=publish_chat_id,
-                    media=media_group,
-                    message_thread_id=topic_id
-                )
-                published_message = published_messages[0] if published_messages else None
-                published_message_ids = [m.message_id for m in published_messages]
-            else:
-                # Single media
-                media = media_list[0]
-                if media['type'] == 'photo':
-                    published_message = await callback.bot.send_photo(
-                        chat_id=publish_chat_id,
-                        photo=media['file_id'],
-                        caption=post_text,
-                        message_thread_id=topic_id,
-                        parse_mode="HTML"
-                    )
-                    published_message_ids = [published_message.message_id]
-                else:
-                    published_message = await callback.bot.send_video(
-                        chat_id=publish_chat_id,
-                        video=media['file_id'],
-                        caption=post_text,
-                        message_thread_id=topic_id,
-                        parse_mode="HTML"
-                    )
-                    published_message_ids = [published_message.message_id]
-        else:
-            # Fallback to old format
-            if post['media_type'] == 'photo':
-                published_message = await callback.bot.send_photo(
-                    chat_id=publish_chat_id,
-                    photo=post['media_file_id'],
-                    caption=post_text,
-                    message_thread_id=topic_id,
-                    parse_mode="HTML"
-                )
-                published_message_ids = [published_message.message_id]
-            elif post['media_type'] == 'video':
-                published_message = await callback.bot.send_video(
-                    chat_id=publish_chat_id,
-                    video=post['media_file_id'],
-                    caption=post_text,
-                    message_thread_id=topic_id,
-                    parse_mode="HTML"
-                )
-                published_message_ids = [published_message.message_id]
-            elif post.get("action_type") == "repost":
-                published_message = await callback.bot.send_message(
-                    chat_id=publish_chat_id,
-                    text=post_text,
-                    message_thread_id=topic_id,
-                    parse_mode="HTML",
-                    disable_web_page_preview=True,
-                )
-                published_message_ids = [published_message.message_id]
-            elif post.get('mode') == 'reviews':
-                published_message = await callback.bot.send_message(
-                    chat_id=publish_chat_id,
-                    text=post_text,
-                    message_thread_id=topic_id,
-                    parse_mode="HTML",
-                    disable_web_page_preview=True,
-                )
-                published_message_ids = [published_message.message_id]
+        publish_result = await publish_premium_post_to_telegram(
+            callback.bot,
+            post,
+            post_text=post_text,
+            publish_chat_id=publish_chat_id,
+            topic_id=topic_id,
+        )
+        published_message = publish_result.message
+        published_message_ids = publish_result.message_ids
 
         # Update post with publication info
         if published_message:
