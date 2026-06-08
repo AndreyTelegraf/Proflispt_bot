@@ -19,6 +19,7 @@ from keyboards.main import get_main_menu
 from services.catalog_specialized_renderers import render_review_listing_html as _rv_render_html
 from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MAX_LEN, REVIEW_TEXT_WITH_MEDIA_MAX_LEN
 from services.catalog_modes import REVIEWS_SECTION_NAME
+from services.premium_request_labels import premium_request_label
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -188,7 +189,7 @@ async def _rv_notify_admin(bot, post_id: int, payload: dict, media_list: list) -
     ])
     await bot.send_message(
         chat_id=ADMIN_CHAT_ID,
-        text=f"[{REVIEWS_SECTION_NAME}] Управление заявкой #{post_id}",
+        text=f"[{REVIEWS_SECTION_NAME}] {premium_request_label(action_type='post', mode='reviews', payment_amount=0)} #{post_id}",
         reply_markup=controls,
         disable_web_page_preview=True,
     )

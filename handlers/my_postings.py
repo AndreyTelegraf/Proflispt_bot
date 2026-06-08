@@ -15,6 +15,7 @@ from database import db
 from config import Config
 from services.directory_links import directory_message_url
 from services.post_identity import build_premium_post_identity_view, format_premium_post_identity_text
+from services.premium_request_labels import premium_request_label
 from utils import get_first_words, escape_markdown
 
 router = Router()
@@ -286,7 +287,7 @@ async def request_repost_premium(callback: CallbackQuery):
             user_ref = f'<a href="tg://user?id={callback.from_user.id}">{html.escape(callback.from_user.first_name or str(callback.from_user.id))}</a>'
 
         admin_text = (
-            f"🔁 <b>Repost #{new_post_id}</b> — €10\n\n"
+            f"<b>{premium_request_label(action_type='repost', mode=post.get('mode'), payment_amount=10)} #{new_post_id}</b>\n\n"
             f"<b>{name}</b> ({cities_safe})\n"
             f"{desc}"
             f"{old_link}\n\n"

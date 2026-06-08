@@ -31,6 +31,7 @@ from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
+from services.premium_request_labels import premium_request_label
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -1072,7 +1073,7 @@ async def _notify_admin_baraholka_from_post(bot, post_id: int, source_post: dict
     ])
     await bot.send_message(
         chat_id=admin_chat_id,
-        text=f"[{section_name} → Барахолка] Перепост #{post_id}\n\n{post_text}",
+        text=f"[{section_name} → Барахолка] {premium_request_label(action_type='repost', mode=source_post.get('mode'), payment_amount=10, is_baraholka=True)} #{post_id}\n\n{post_text}",
         reply_markup=controls,
         parse_mode="HTML",
         disable_web_page_preview=True,

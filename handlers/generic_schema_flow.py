@@ -27,6 +27,7 @@ from services.sections_registry import load_sections_registry
 from services.catalog_modes import MODE_TO_SECTION_NAME as SLUG_TO_SECTION
 from services.geo import normalize_geo_tags_json
 from services.catalog_listing_renderer import render_catalog_listing_html
+from services.premium_request_labels import premium_request_label
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     is_valid_pt_mobile,
@@ -379,7 +380,7 @@ async def _notify_admin(bot, post_id: int, payload: dict, media_list: list, sect
     ])
     await bot.send_message(
         chat_id=admin_chat_id,
-        text=f"[{section_name}] Управление заявкой #{post_id}",
+        text=f"[{section_name}] {premium_request_label(action_type='post', mode=None, payment_amount=20)} #{post_id}",
         reply_markup=controls,
         disable_web_page_preview=True,
     )
