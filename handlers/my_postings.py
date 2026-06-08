@@ -1,7 +1,7 @@
 """Handlers for 'My Postings' section."""
 
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from database import db
