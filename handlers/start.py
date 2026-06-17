@@ -4,7 +4,7 @@ import logging
 
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 from aiogram.fsm.context import FSMContext
 
 from database import db
@@ -18,6 +18,7 @@ def _main_menu_text() -> str:
     return (
         "Здравствуйте!\n\n"
         "Этот бот поможет вам опубликовать объявления в разделы Справочника.\n\n"
+        'Перед публикацией обязательно ознакомьтесь <a href="https://t.me/Proflistpt_bot?start=rules">с правилами</a>!\n\n'
         "Выберите действие:"
     )
 
@@ -33,7 +34,7 @@ def _help_keyboard(back_to: str) -> InlineKeyboardMarkup:
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message, state: FSMContext):
+async def cmd_start(message: Message, state: FSMContext, command: CommandObject):
     await state.clear()
 
     db.create_user(
@@ -44,13 +45,33 @@ async def cmd_start(message: Message, state: FSMContext):
     )
 
     logger.info("User %s started bot", message.from_user.id)
-    await message.answer(_main_menu_text(), reply_markup=get_main_menu())
+
+    if (command.args or "").strip() == "rules":
+        await message.answer(
+            _rules_text(),
+            reply_markup=_help_keyboard("go:main"),
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+        return
+
+    await message.answer(
+        _main_menu_text(),
+        reply_markup=get_main_menu(),
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
 
 
 @router.callback_query(F.data == "go:main")
 async def show_main_menu(callback: CallbackQuery, state: FSMContext):
     await state.clear()
-    await callback.message.edit_text(_main_menu_text(), reply_markup=get_main_menu())
+    await callback.message.edit_text(
+        _main_menu_text(),
+        reply_markup=get_main_menu(),
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
     await callback.answer()
 
 
@@ -63,9 +84,8 @@ async def show_help(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.callback_query(F.data == "help:rules")
-async def show_rules(callback: CallbackQuery):
-    rules_text = (
+def _rules_text() -> str:
+    return (
         "📜 <b>Правила:</b>\n"
         "- Выбирайте правильный раздел, это влияет на видимость объявления.\n"
         "- Описание должно чётко объяснять, что вы предлагаете или ищете.\n"
@@ -103,5 +123,14 @@ async def show_rules(callback: CallbackQuery):
         "- Посты с нарушениями удаляются, частые нарушения могут привести к блокировке пользователя или номера телефона.\n"
         "- Отзывы и платные размещения публикуются только после модераторской проверки."
     )
-    await callback.message.edit_text(rules_text, reply_markup=_help_keyboard("help"), parse_mode="HTML")
+
+
+@router.callback_query(F.data == "help:rules")
+async def show_rules(callback: CallbackQuery):
+    await callback.message.edit_text(
+        _rules_text(),
+        reply_markup=_help_keyboard("help"),
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
     await callback.answer()
