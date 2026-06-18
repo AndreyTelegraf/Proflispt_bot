@@ -1089,12 +1089,14 @@ async def hs_media_skip(callback: CallbackQuery, state: FSMContext):
     await state.update_data(hs_media=[])
     _, _, _, payload, _ = await _get_hs(state)
     await state.set_state(HS_CONFIRM)
+    preview_text, preview_kb = await _hs_render_preview_text_and_kb(
+        slug,
+        payload,
+        (db.get_user(callback.from_user.id) or {}).get("id"),
+    )
     await callback.message.edit_text(
-        *(await _hs_render_preview_text_and_kb(
-            slug,
-            payload,
-            (db.get_user(callback.from_user.id) or {}).get("id"),
-        )),
+        preview_text,
+        reply_markup=preview_kb,
         parse_mode="HTML",
         disable_web_page_preview=True,
     )
@@ -1112,12 +1114,14 @@ async def hs_media_done(callback: CallbackQuery, state: FSMContext):
         await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
         return
     await state.set_state(HS_CONFIRM)
+    preview_text, preview_kb = await _hs_render_preview_text_and_kb(
+        slug,
+        payload,
+        (db.get_user(callback.from_user.id) or {}).get("id"),
+    )
     await callback.message.edit_text(
-        *(await _hs_render_preview_text_and_kb(
-            slug,
-            payload,
-            (db.get_user(callback.from_user.id) or {}).get("id"),
-        )),
+        preview_text,
+        reply_markup=preview_kb,
         parse_mode="HTML",
         disable_web_page_preview=True,
     )
