@@ -32,6 +32,8 @@ from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
 from services.catalog_specialized_renderers import render_housing_listing_html as _hs_render_html
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
+from services.admin_moderation_notice import send_admin_moderation_notice
+from services.premium_request_labels import premium_request_label
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -133,12 +135,57 @@ def _hs_step_kb(step, slug: str) -> InlineKeyboardMarkup:
     return _hs_back_kb(slug)
 
 
-def _hs_preview_kb(slug: str) -> InlineKeyboardMarkup:
+def _hs_preview_kb(slug: str, *, can_publish_free: bool = True) -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
-    b.add(InlineKeyboardButton(text="Опубликовать", callback_data=f"hs:publish_free:{slug}"))
+    if can_publish_free:
+        b.add(InlineKeyboardButton(text="Опубликовать", callback_data=f"hs:publish_free:{slug}"))
+    else:
+        b.add(InlineKeyboardButton(text="Опубликовать платно в Справочник — €10", callback_data=f"hs:publish_paid:{slug}"))
     b.add(InlineKeyboardButton(text="← Назад", callback_data=f"hs:back:{slug}"))
     b.adjust(1)
     return b.as_markup()
+
+
+async def _hs_free_publish_available(user_id: int, slug: str, phone_main: str) -> tuple[bool, str | None]:
+    can_post, limit_message = db.check_premium_post_monthly_limit(user_id, slug)
+    if not can_post:
+        return False, limit_message
+    return db.check_free_repost_guard(user_id, slug, phone_main)
+
+
+async def _hs_render_preview_text_and_kb(slug: str, payload: dict, user_id: int | None) -> tuple[str, InlineKeyboardMarkup]:
+    text = _hs_render_html(payload)
+    can_publish_free = True
+    free_limit_message = None
+
+    if user_id:
+        can_publish_free, free_limit_message = await _hs_free_publish_available(
+            user_id,
+            slug,
+            payload.get("phone_main", ""),
+        )
+
+    if not can_publish_free:
+        text = (
+            f"{text}\n\n"
+            f"Бесплатная публикация сейчас недоступна: {free_limit_message}\n\n"
+            "Можно отправить объявление на платную публикацию в Справочник за €10."
+        )
+
+    return text, _hs_preview_kb(slug, can_publish_free=can_publish_free)
+
+
+async def _hs_notify_paid_directory_admin(bot, post_id: int, payload: dict, media: list, section_name: str) -> None:
+    admin_chat_id = Config.ADMIN_IDS[0]
+    post_text = _hs_render_html(payload)
+    await send_admin_moderation_notice(
+        bot,
+        admin_chat_id=admin_chat_id,
+        post_id=post_id,
+        preview_text=post_text,
+        control_text=f"[{section_name}] {premium_request_label(action_type='post', mode=None, payment_amount=10)} #{post_id}",
+        media_list=media,
+    )
 
 
 def _hs_tg_gate_kb(slug: str) -> InlineKeyboardMarkup:
@@ -695,27 +742,19 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
         )
         user = db.get_user(callback.from_user.id)
 
-    can_post, limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
-    if not can_post:
-        b = InlineKeyboardBuilder()
-        b.add(InlineKeyboardButton(text="Мои объявления", callback_data="my_postings"))
-        b.add(InlineKeyboardButton(text="← Назад", callback_data="catalog:group:housing_work"))
-        b.adjust(1)
-        await callback.message.edit_text(limit_message, reply_markup=b.as_markup())
-        await callback.answer()
-        return
-
-    can_post, limit_message = db.check_free_repost_guard(
+    can_post, limit_message = await _hs_free_publish_available(
         user["id"],
         slug,
         payload.get("phone_main", ""),
     )
     if not can_post:
-        b = InlineKeyboardBuilder()
-        b.add(InlineKeyboardButton(text="Мои объявления", callback_data="my_postings"))
-        b.add(InlineKeyboardButton(text="← Назад", callback_data="catalog:group:housing_work"))
-        b.adjust(1)
-        await callback.message.edit_text(limit_message, reply_markup=b.as_markup())
+        text, kb = await _hs_render_preview_text_and_kb(slug, payload, user["id"])
+        await callback.message.edit_text(
+            text,
+            reply_markup=kb,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
         await callback.answer()
         return
 
@@ -725,6 +764,22 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
             payload = dict(payload)
             payload["telegram"] = uname
             await state.update_data(hs_payload=payload)
+
+    can_post, limit_message = await _hs_free_publish_available(
+        user["id"],
+        slug,
+        payload.get("phone_main", ""),
+    )
+    if not can_post:
+        text, kb = await _hs_render_preview_text_and_kb(slug, payload, user["id"])
+        await callback.message.edit_text(
+            text,
+            reply_markup=kb,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+        await callback.answer()
+        return
 
     # Final publish-boundary validation.
     # FSM/input validation is not enough: stale or corrupted state must not publish.
@@ -957,6 +1012,74 @@ async def hs_publish_free(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
+@router.callback_query(F.data.startswith("hs:publish_paid:"))
+async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
+    if await state.get_state() != HS_CONFIRM:
+        await callback.answer()
+        return
+
+    slug = callback.data.split(":", 2)[2]
+    section_name, _, _, payload, media = await _get_hs(state)
+    if not section_name:
+        await callback.answer("Сессия устарела. Начните публикацию заново.", show_alert=True)
+        return
+
+    if not payload.get("telegram"):
+        uname = _username_value(callback.from_user)
+        if uname:
+            payload = dict(payload)
+            payload["telegram"] = uname
+            await state.update_data(hs_payload=payload)
+
+    validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+    if not validation.ok:
+        await callback.answer(validation.message, show_alert=True)
+        return
+
+    try:
+        user_db_id = db.create_user(
+            telegram_id=callback.from_user.id,
+            username=callback.from_user.username,
+            first_name=callback.from_user.first_name,
+            last_name=callback.from_user.last_name,
+        )
+        first = media[0] if media else {}
+        admin_notes = json.dumps({"rental_term": payload.get("rental_term", "")})
+        post_id = db.create_premium_post(
+            user_id=user_db_id,
+            mode=slug,
+            cities=_normalize_geo(payload.get("geo_tags")),
+            description=payload.get("description", ""),
+            social_media=payload.get("social_links", ""),
+            telegram_username=payload.get("telegram", ""),
+            phone_main=payload.get("phone_main", ""),
+            phone_whatsapp=payload.get("phone_whatsapp", ""),
+            name=payload.get("contact_name", ""),
+            media_file_id=first.get("file_id"),
+            media_type=first.get("type"),
+            media_list=media,
+            payment_amount=10.00,
+            action_type="post",
+            admin_notes=admin_notes,
+        )
+        await _hs_notify_paid_directory_admin(callback.bot, post_id, payload, media, section_name)
+        await state.clear()
+
+        b = InlineKeyboardBuilder()
+        b.add(InlineKeyboardButton(text="В главное меню", callback_data="go:main"))
+        await callback.message.edit_text(
+            "Заявка на платную публикацию в Справочник отправлена на модерацию. Администратор проверит публикацию и свяжется с вами.",
+            reply_markup=b.as_markup(),
+            disable_web_page_preview=True,
+        )
+    except Exception as e:
+        logger.exception("Housing paid directory submit failed: %s", e)
+        await callback.answer("Не удалось отправить заявку. Вернитесь к объявлению и попробуйте ещё раз.", show_alert=True)
+        return
+
+    await callback.answer()
+
+
 @router.callback_query(F.data.startswith("hs:media_skip:"))
 async def hs_media_skip(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != HS_MEDIA:
@@ -967,8 +1090,11 @@ async def hs_media_skip(callback: CallbackQuery, state: FSMContext):
     _, _, _, payload, _ = await _get_hs(state)
     await state.set_state(HS_CONFIRM)
     await callback.message.edit_text(
-        _hs_render_html(payload),
-        reply_markup=_hs_preview_kb(slug),
+        *(await _hs_render_preview_text_and_kb(
+            slug,
+            payload,
+            (db.get_user(callback.from_user.id) or {}).get("id"),
+        )),
         parse_mode="HTML",
         disable_web_page_preview=True,
     )
@@ -987,8 +1113,11 @@ async def hs_media_done(callback: CallbackQuery, state: FSMContext):
         return
     await state.set_state(HS_CONFIRM)
     await callback.message.edit_text(
-        _hs_render_html(payload),
-        reply_markup=_hs_preview_kb(slug),
+        *(await _hs_render_preview_text_and_kb(
+            slug,
+            payload,
+            (db.get_user(callback.from_user.id) or {}).get("id"),
+        )),
         parse_mode="HTML",
         disable_web_page_preview=True,
     )
