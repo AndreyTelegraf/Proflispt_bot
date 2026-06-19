@@ -425,12 +425,37 @@ class Database:
             conn.commit()
 
     def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        """Get user by username."""
+        """Get user by username.
+
+        Primary source is users.username. Fallback source is premium_posts.telegram_username
+        for users who published through admin/moderation flows but never started the bot
+        with a Telegram username stored in users.
+        """
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            # Убираем @ если есть
-            username_clean = username.lstrip('@')
-            cursor.execute("SELECT * FROM users WHERE username = ?", (username_clean,))
+            username_clean = str(username or "").strip().lstrip("@")
+            if not username_clean:
+                return None
+
+            cursor.execute(
+                "SELECT * FROM users WHERE lower(username) = lower(?)",
+                (username_clean,),
+            )
+            result = cursor.fetchone()
+            if result:
+                return dict(result)
+
+            cursor.execute(
+                """
+                SELECT u.*
+                FROM premium_posts pp
+                JOIN users u ON u.id = pp.user_id
+                WHERE lower(ltrim(pp.telegram_username, '@')) = lower(?)
+                ORDER BY datetime(pp.updated_at) DESC, pp.id DESC
+                LIMIT 1
+                """,
+                (username_clean,),
+            )
             result = cursor.fetchone()
             return dict(result) if result else None
 
