@@ -99,6 +99,10 @@
         {
           "value": "long_term",
           "label": "Долгосрок > 1 года"
+        },
+        {
+          "value": "sale",
+          "label": "Продажа"
         }
       ]
     },

@@ -10,6 +10,7 @@ from services.geo import render_geo_tags
 RENTAL_TAGS: dict[str, str] = {
     "short_term": "#короткосрок",
     "long_term": "#долгосрок",
+    "sale": "#продажа",
 }
 
 
