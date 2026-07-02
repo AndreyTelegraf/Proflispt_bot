@@ -3,13 +3,19 @@
 import asyncio
 import logging
 from datetime import datetime, time, timedelta
+from pathlib import Path
 from typing import Optional
 from aiogram import Bot
 
 from database import db
 from services.post_identity import format_premium_post_identity_text
+from services.directory_username_http_audit import send_directory_username_audit_report
 
 logger = logging.getLogger(__name__)
+
+WEEKLY_CONTACTS_AUDIT_WEEKDAY = 0  # Monday
+WEEKLY_CONTACTS_AUDIT_HOUR_UTC = 12
+WEEKLY_CONTACTS_AUDIT_STATE_FILE = Path("data/directory_username_audit_last_run.txt")
 
 
 class CleanupScheduler:
@@ -110,6 +116,9 @@ class CleanupScheduler:
             # Warn and expire premium posts by TTL
             await self._expire_premium_posts()
 
+            # Weekly contacts audit report
+            await self._maybe_run_weekly_contacts_audit()
+
         except Exception as e:
             logger.error(f"Error during cleanup: {e}")
     
@@ -199,6 +208,46 @@ class CleanupScheduler:
                     )
             except Exception:
                 pass
+
+    def _weekly_contacts_audit_already_ran(self, today_key: str) -> bool:
+        try:
+            value = WEEKLY_CONTACTS_AUDIT_STATE_FILE.read_text().strip()
+        except FileNotFoundError:
+            return False
+        except Exception as exc:
+            logger.warning("Could not read weekly contacts audit state: %s", exc)
+            return False
+        return value == today_key
+
+    def _mark_weekly_contacts_audit_ran(self, today_key: str) -> None:
+        try:
+            WEEKLY_CONTACTS_AUDIT_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+            WEEKLY_CONTACTS_AUDIT_STATE_FILE.write_text(today_key)
+        except Exception as exc:
+            logger.warning("Could not write weekly contacts audit state: %s", exc)
+
+    async def _maybe_run_weekly_contacts_audit(self):
+        now = datetime.utcnow()
+        if now.weekday() != WEEKLY_CONTACTS_AUDIT_WEEKDAY:
+            return
+        if now.hour < WEEKLY_CONTACTS_AUDIT_HOUR_UTC:
+            return
+
+        today_key = now.strftime("%Y-%m-%d")
+        if self._weekly_contacts_audit_already_ran(today_key):
+            return
+
+        logger.info("Starting weekly directory contacts audit")
+        try:
+            checked, issues = await send_directory_username_audit_report(self.bot, self.db)
+            self._mark_weekly_contacts_audit_ran(today_key)
+            logger.info(
+                "Weekly directory contacts audit finished: checked=%s issues=%s",
+                checked,
+                issues,
+            )
+        except Exception as exc:
+            logger.exception("Weekly directory contacts audit failed: %s", exc)
 
     async def run_cleanup_now(self):
         """Run cleanup immediately (for testing)."""
