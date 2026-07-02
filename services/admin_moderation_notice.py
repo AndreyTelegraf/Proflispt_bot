@@ -6,21 +6,8 @@ import html
 
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from config import Config
 from services.directory_links import directory_message_url
 
-
-
-def resolve_admin_moderation_chat_id(fallback_admin_chat_id: int) -> int:
-    """Resolve the single recipient for admin moderation notices.
-
-    ADMIN_MODERATION_CHAT_ID is the explicit route override.
-    If it is not set, preserve the caller-provided recipient.
-    """
-    configured = int(getattr(Config, "ADMIN_MODERATION_CHAT_ID", 0) or 0)
-    if configured:
-        return configured
-    return int(fallback_admin_chat_id)
 
 
 def _requester_link(user) -> str:
@@ -71,7 +58,7 @@ async def send_admin_moderation_notice(
 ) -> None:
     from aiogram.types import InputMediaPhoto, InputMediaVideo
 
-    recipient_chat_id = resolve_admin_moderation_chat_id(admin_chat_id)
+    recipient_chat_id = int(admin_chat_id)
 
     group = []
     for idx, item in enumerate(media_list[:10]):
@@ -140,7 +127,7 @@ async def send_admin_moderation_notice_from_post(
         f"Пользователь: {_requester_link(requester)}"
     )
 
-    recipient_chat_id = resolve_admin_moderation_chat_id(admin_chat_id)
+    recipient_chat_id = int(admin_chat_id)
 
     await bot.send_message(
         recipient_chat_id,

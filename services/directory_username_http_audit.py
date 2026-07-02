@@ -10,7 +10,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from config import Config
-from services.admin_moderation_notice import resolve_admin_moderation_chat_id
 from services.catalog_modes import get_section_name_for_mode
 from services.directory_links import directory_message_url
 
@@ -213,8 +212,10 @@ def build_directory_username_audit_report(*, checked_count: int, issues: list[Di
 async def send_directory_username_audit_report(bot, db, *, fallback_admin_chat_id: int | None = None, limit: int | None = None) -> tuple[int, int]:
     checked_count, issues = audit_directory_usernames(db, limit=limit)
     report = build_directory_username_audit_report(checked_count=checked_count, issues=issues)
-    recipient = resolve_admin_moderation_chat_id(
-        fallback_admin_chat_id if fallback_admin_chat_id is not None else Config.ADMIN_IDS[0]
+    recipient = int(
+        getattr(Config, "ADMIN_MODERATION_CHAT_ID", 0)
+        or fallback_admin_chat_id
+        or Config.ADMIN_IDS[0]
     )
 
     chunks: list[str] = []
