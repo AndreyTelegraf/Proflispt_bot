@@ -18,6 +18,7 @@ class Config:
     BARAHOLKA_CHANNEL_ID: int = int(os.getenv("BARAHOLKA_CHANNEL_ID", "0"))
     BARAHOLKA_HOUSING_TOPIC_ID: int = int(os.getenv("BARAHOLKA_HOUSING_TOPIC_ID", "0"))
     DIRECTORY_CHANNEL_USERNAME: str = os.getenv("DIRECTORY_CHANNEL_USERNAME", "")
+    ADMIN_MODERATION_CHAT_ID: int = int(os.getenv("ADMIN_MODERATION_CHAT_ID", "0") or "0")
     
     # Features
     POSTING_COOLDOWN_DAYS: int = 30
