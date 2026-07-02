@@ -18,6 +18,7 @@ from aiogram.dispatcher.event.bases import UNHANDLED
 
 from config import Config
 from services.directory_links import directory_message_url
+from services.directory_username_http_audit import send_directory_username_audit_report
 from database import db
 from handlers.start import router as start_router
 from handlers.my_postings import router as my_postings_router
@@ -508,6 +509,26 @@ async def _send_long_text(message: Message, lines):
 
     for chunk in chunks:
         await message.answer(chunk, disable_web_page_preview=True)
+
+
+@router.message(Command("audit_contacts"))
+async def cmd_audit_contacts(message: Message):
+    if not _billing_is_allowed(message):
+        await message.answer("Нет доступа.")
+        return
+
+    await message.answer("Запускаю проверку Telegram-контактов Справочника. Отчёт будет отправлен администратору.")
+
+    try:
+        checked, issues = await send_directory_username_audit_report(message.bot, db)
+    except Exception as exc:
+        logger.exception("Manual directory username audit failed: %s", exc)
+        await message.answer(f"Проверка не выполнена: {exc}")
+        return
+
+    await message.answer(
+        f"Проверка завершена. Проверено объявлений: {checked}. Проблемных контактов: {issues}."
+    )
 
 
 @router.message(Command("pays"))
