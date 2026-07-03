@@ -1043,6 +1043,19 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
             first_name=callback.from_user.first_name,
             last_name=callback.from_user.last_name,
         )
+
+        can_post, limit_message = await _hs_free_publish_available(
+            user_db_id,
+            slug,
+            payload.get("phone_main", ""),
+        )
+        if not can_post:
+            await callback.answer(
+                "Такое объявление уже опубликовано. Удалите старое через «Мои объявления» перед повторной публикацией.",
+                show_alert=True,
+            )
+            return
+
         first = media[0] if media else {}
         admin_notes = json.dumps({"rental_term": payload.get("rental_term", "")})
         post_id = db.create_premium_post(
