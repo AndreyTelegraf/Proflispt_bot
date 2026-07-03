@@ -35,6 +35,7 @@ from services.baraholka_repost_request import create_and_notify_baraholka_repost
 from services.admin_moderation_notice import send_admin_moderation_notice
 from services.premium_request_labels import premium_request_label
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
+from services.directory_post_guard import check_duplicate_directory_post
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     validate_publish_payload,
@@ -146,11 +147,13 @@ def _hs_preview_kb(slug: str, *, can_publish_free: bool = True) -> InlineKeyboar
     return b.as_markup()
 
 
-async def _hs_free_publish_available(user_id: int, slug: str, phone_main: str) -> tuple[bool, str | None]:
-    can_post, limit_message = db.check_premium_post_monthly_limit(user_id, slug)
-    if not can_post:
-        return False, limit_message
-    return db.check_free_repost_guard(user_id, slug, phone_main)
+async def _hs_directory_post_available(user_id: int, slug: str, phone_main: str) -> tuple[bool, str | None]:
+    return await check_duplicate_directory_post(
+        db,
+        user_id=user_id,
+        mode=slug,
+        phone_main=phone_main,
+    )
 
 
 async def _hs_render_preview_text_and_kb(slug: str, payload: dict, user_id: int | None) -> tuple[str, InlineKeyboardMarkup]:
@@ -159,7 +162,7 @@ async def _hs_render_preview_text_and_kb(slug: str, payload: dict, user_id: int 
     free_limit_message = None
 
     if user_id:
-        can_publish_free, free_limit_message = await _hs_free_publish_available(
+        can_publish_free, free_limit_message = await _hs_directory_post_available(
             user_id,
             slug,
             payload.get("phone_main", ""),
@@ -742,7 +745,7 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
         )
         user = db.get_user(callback.from_user.id)
 
-    can_post, limit_message = await _hs_free_publish_available(
+    can_post, limit_message = await _hs_directory_post_available(
         user["id"],
         slug,
         payload.get("phone_main", ""),
@@ -765,7 +768,7 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
             payload["telegram"] = uname
             await state.update_data(hs_payload=payload)
 
-    can_post, limit_message = await _hs_free_publish_available(
+    can_post, limit_message = await _hs_directory_post_available(
         user["id"],
         slug,
         payload.get("phone_main", ""),
@@ -1044,7 +1047,7 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
             last_name=callback.from_user.last_name,
         )
 
-        can_post, limit_message = await _hs_free_publish_available(
+        can_post, limit_message = await _hs_directory_post_available(
             user_db_id,
             slug,
             payload.get("phone_main", ""),
