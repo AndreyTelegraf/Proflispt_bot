@@ -1033,28 +1033,13 @@ class Database:
                   AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
                   AND payment_status = 'approved'
                   AND datetime(created_at) > datetime(?)
-                  AND status IN ('published', 'pending', 'deleted')
+                  AND status IN ('published', 'pending')
                   AND (phone_main = ? OR phone_whatsapp = ?)
                 ORDER BY datetime(created_at) ASC, id ASC
             """, (user_id, mode, since, phone, phone))
             rows = cursor.fetchall()
 
         if not rows:
-            return True, None
-
-        if mode == "job_offer":
-            return True, None
-
-        if any(row["status"] in ("published", "pending") for row in rows):
-            return False, (
-                "Похожее бесплатное объявление в этом разделе уже опубликовано. "
-                "Сначала удалите старое объявление через раздел «Мои объявления»."
-            )
-
-        first_created = datetime.fromisoformat(rows[0]["created_at"])
-        now = datetime.now()
-
-        if (now - first_created) <= timedelta(hours=6):
             return True, None
 
         return False, (
