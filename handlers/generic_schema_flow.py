@@ -121,9 +121,11 @@ def _normalize_social_links(value) -> str:
         if not item:
             continue
 
-        if item.startswith("@"):
+        if re.match(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$", item):
+            item = "mailto:" + item
+        elif item.startswith("@"):
             item = "https://t.me/" + item[1:]
-        elif re.match(r"^(?:https?://|tg://)", item, re.I):
+        elif re.match(r"^(?:https?://|tg://|mailto:)", item, re.I):
             pass
         elif re.match(r"^www\.", item, re.I):
             item = "https://" + item
@@ -143,6 +145,21 @@ def _normalize_social_links(value) -> str:
             out.append(item)
 
     return "\n".join(out)
+
+
+def _validate_contact_name(value: str) -> tuple[bool, str | None]:
+    text = str(value or "").strip()
+
+    if re.search(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", text):
+        return False, "В поле имени укажите только имя человека или название компании. Почту добавьте на шаге ссылок."
+
+    if re.search(r"(https?://|www\.|t\.me/|telegram\.me/|mailto:|tg://)", text, re.I):
+        return False, "В поле имени укажите только имя человека или название компании. Ссылки добавьте на шаге ссылок."
+
+    if re.search(r"@[A-Za-z0-9_]{5,32}\b", text):
+        return False, "В поле имени укажите только имя человека или название компании. Telegram бот подтянет отдельно."
+
+    return True, None
 
 
 def _validate_description_text(text: str) -> tuple[bool, str | None]:
@@ -668,13 +685,19 @@ async def gs_text_input(message: Message, state: FSMContext):
         if raw.lower() in {"нет", "no", "none", "-", "—"}:
             payload["social_links"] = ""
         elif not normalized:
-            await message.answer("Не нашёл ссылок. Вставьте сайт или соцсети, например: https://example.com или example.com", reply_markup=_step_kb(step, slug))
+            await message.answer("Не нашёл ссылок. Вставьте сайт, соцсети или email, например: https://example.com, example.com или name@example.com", reply_markup=_step_kb(step, slug))
             return
         else:
             payload["social_links"] = normalized
         await _advance(message, message.from_user, state, schema, payload,
                        step_idx + 1, slug, is_message=True)
         return
+
+    if field == "contact_name":
+        ok, error = _validate_contact_name(raw)
+        if not ok:
+            await message.answer(error, reply_markup=_step_kb(step, slug))
+            return
 
     # phone_main: strict mobile validation before schema engine
     if field == "phone_main":
