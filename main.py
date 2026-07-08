@@ -143,7 +143,7 @@ async def show_help(callback: CallbackQuery):
 
     builder = InlineKeyboardBuilder()
     builder.add(
-        InlineKeyboardButton(text="👤 Позвать человека", url="https://t.me/andreytelegraf")
+        InlineKeyboardButton(text="👤 Позвать человека", url="https://t.me/kak_odin")
     )
     builder.add(InlineKeyboardButton(text="← Назад", callback_data="go:main"))
     builder.adjust(1)

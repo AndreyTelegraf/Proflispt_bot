@@ -27,7 +27,7 @@ def _help_keyboard(back_to: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="Правила", callback_data="help:rules")],
-            [InlineKeyboardButton(text="Поговорить с человеком", url="https://t.me/andreytelegraf")],
+            [InlineKeyboardButton(text="Поговорить с человеком", url="https://t.me/kak_odin")],
             [InlineKeyboardButton(text="← Назад", callback_data=back_to)],
         ]
     )

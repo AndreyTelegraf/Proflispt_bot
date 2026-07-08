@@ -84,13 +84,13 @@ def build_rejection_user_notification(post: dict) -> PremiumAdminNotification:
         text = (
             "Ваш отзыв отклонён.\n\n"
             "Возможно содержание не соответствует требованиям Справочника.\n\n"
-            "Обратитесь к администратору: https://t.me/andreytelegraf"
+            "Обратитесь к администратору: https://t.me/kak_odin"
         )
     else:
         text = (
             "Ваш премиум-пост отклонен.\n\n"
             "Возможно его содержание не соответствует требованиям Справочника или всё ещё не подтверждена оплата.\n\n"
-            "Обратитесь к администратору: https://t.me/andreytelegraf"
+            "Обратитесь к администратору: https://t.me/kak_odin"
         )
 
     return PremiumAdminNotification(
