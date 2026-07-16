@@ -921,27 +921,27 @@ class Database:
             return phone or f"post:{row['id']}"
 
         def _count_rows(rows):
-            first_by_group = {}
+            groups = {}
             for row in rows:
                 key = (row["mode"], _phone_key(row))
-                created = _parse_dt(row["created_at"])
-                first_by_group[key] = min(first_by_group.get(key, created), created)
+                groups.setdefault(key, []).append(row)
 
             count = 0
-            for row in rows:
-                status = row["status"]
-                payment_amount = float(row["payment_amount"] or 0)
-                key = (row["mode"], _phone_key(row))
-                first_created = first_by_group[key]
+            for group_rows in groups.values():
+                created_times = sorted(
+                    _parse_dt(row["created_at"])
+                    for row in group_rows
+                )
+                first_created = created_times[0]
+                correction_deadline = first_created + timedelta(hours=6)
 
-                if (
-                    status == "deleted"
-                    and payment_amount == 0
-                    and (now - first_created) <= timedelta(hours=6)
-                ):
-                    continue
-
+                # The original post and every correction created during its
+                # six-hour window permanently count as one publication.
                 count += 1
+                count += sum(
+                    created > correction_deadline
+                    for created in created_times[1:]
+                )
 
             return count
 
@@ -1010,11 +1010,7 @@ class Database:
         *,
         days: int = 30,
     ) -> tuple[bool, str | None]:
-        """Allow unlimited delete/repost corrections during first 6 hours, then block 30 days.
-
-        For job_offer, an already deleted vacancy with the same employer phone
-        must not block a new vacancy. The active/pending duplicate guard remains.
-        """
+        """Apply duplicate rules and the six-hour correction window."""
         since = (datetime.now() - timedelta(days=days)).isoformat()
         phone = str(phone_main or "").strip()
 
@@ -1033,14 +1029,28 @@ class Database:
                   AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
                   AND payment_status = 'approved'
                   AND datetime(created_at) > datetime(?)
-                  AND status IN ('published', 'pending')
                   AND (phone_main = ? OR phone_whatsapp = ?)
                 ORDER BY datetime(created_at) ASC, id ASC
             """, (user_id, mode, since, phone, phone))
             rows = cursor.fetchall()
 
-        if not rows:
-            return True, None
+        if mode == "job_offer":
+            active_rows = [
+                row
+                for row in rows
+                if row["status"] in ("published", "pending")
+            ]
+            if not active_rows:
+                return True, None
+        else:
+            if not rows:
+                return True, None
+
+            first_created = datetime.fromisoformat(
+                str(rows[0]["created_at"])
+            )
+            if datetime.now() <= first_created + timedelta(hours=6):
+                return True, None
 
         return False, (
             "Похожее бесплатное объявление в этом разделе уже публиковалось за последние 30 дней. "
