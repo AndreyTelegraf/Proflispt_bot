@@ -29,6 +29,7 @@ from services.geo import normalize_geo_tags_json
 from services.catalog_listing_renderer import render_catalog_listing_html
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice
+from services.free_post_supersede import supersede_previous_free_publications
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     is_valid_pt_mobile,
@@ -831,7 +832,7 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
 
         try:
             if user:
-                db.publish_free_generic_post(
+                source_post_id = db.publish_free_generic_post(
                     user_id=user["id"],
                     mode=slug,
                     payload=payload,
@@ -839,6 +840,14 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
                     message_id=published.message_id,
                     chat_id=channel_id,
                     topic_id=topic_id,
+                )
+                await supersede_previous_free_publications(
+                    callback.bot,
+                    db,
+                    user_id=user["id"],
+                    mode=slug,
+                    phone_main=payload.get("phone_main", ""),
+                    new_post_id=source_post_id,
                 )
                 try:
                     from services.auto_repost import maybe_auto_repost_cargo

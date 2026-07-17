@@ -36,6 +36,7 @@ from services.admin_moderation_notice import send_admin_moderation_notice
 from services.premium_request_labels import premium_request_label
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.directory_post_guard import check_duplicate_directory_post
+from services.free_post_supersede import supersede_previous_free_publications
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     validate_publish_payload,
@@ -859,6 +860,14 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
                 topic_id=topic_id,
                 media_list=media,
                 published_message_ids=published_message_ids,
+            )
+            await supersede_previous_free_publications(
+                callback.bot,
+                db,
+                user_id=user["id"],
+                mode=slug,
+                phone_main=payload.get("phone_main", ""),
+                new_post_id=source_post_id,
             )
     except Exception as e:
         logger.warning("Could not persist free housing post: %s", e)
