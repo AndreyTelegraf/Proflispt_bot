@@ -9,6 +9,7 @@ from aiogram import Bot
 
 from database import db
 from services.post_identity import format_premium_post_identity_text
+from services.free_republication_status import free_republication_status_text
 from services.directory_username_http_audit import send_directory_username_audit_report
 
 logger = logging.getLogger(__name__)
@@ -162,12 +163,21 @@ class CleanupScheduler:
             try:
                 if post.get('telegram_id'):
                     identity = format_premium_post_identity_text(post)
+                    free_status = free_republication_status_text(db, post)
+                    free_status_block = (
+                        f"\n\n{free_status}\n"
+                        "Старое объявление заранее удалять не нужно."
+                        if free_status
+                        else ""
+                    )
                     await bot.send_message(
                         chat_id=post['telegram_id'],
                         text=(
                             f"{identity}\n\n"
                             "Через 1 день будет автоматически удалено ваше объявление.\n\n"
-                            "Если объявление ещё актуально, поднимите его или опубликуйте новую версию.\n"
+                            "Поднять объявление — €10. Бот заменит старую "
+                            "публикацию новой и поднимет её наверх раздела."
+                            f"{free_status_block}\n\n"
                             "Если ничего не делать, объявление будет удалено автоматически."
                         ),
                         disable_web_page_preview=True,

@@ -895,29 +895,31 @@ class Database:
 
 
 
-    def check_premium_post_monthly_limit(
+    def get_premium_post_monthly_limit_availability(
         self,
         user_id: int,
         mode: str,
         *,
         per_mode_limit: int = 3,
         total_limit: int = 10,
-    ) -> tuple[bool, str | None]:
-        """Check free directory posting limits in premium_posts for rolling 30 days.
-
-        Deleted correction reposts inside the 6-hour edit window are not counted.
-        """
+        days: int = 30,
+    ) -> tuple[bool, Optional[datetime], str | None]:
+        """Return monthly-limit status and the earliest known release time."""
         if mode == "reviews":
-            return True, None
+            return True, None, None
 
-        since = (datetime.now() - timedelta(days=30)).isoformat()
         now = datetime.now()
+        since = (now - timedelta(days=days)).isoformat()
 
         def _parse_dt(value):
             return datetime.fromisoformat(str(value))
 
         def _phone_key(row):
-            phone = str(row["phone_main"] or row["phone_whatsapp"] or "").strip()
+            phone = str(
+                row["phone_main"]
+                or row["phone_whatsapp"]
+                or ""
+            ).strip()
             return phone or f"post:{row['id']}"
 
         def _count_rows(rows):
@@ -933,10 +935,10 @@ class Database:
                     for row in group_rows
                 )
                 first_created = created_times[0]
-                correction_deadline = first_created + timedelta(hours=6)
+                correction_deadline = (
+                    first_created + timedelta(hours=6)
+                )
 
-                # The original post and every correction created during its
-                # six-hour window permanently count as one publication.
                 count += 1
                 count += sum(
                     created > correction_deadline
@@ -945,73 +947,126 @@ class Database:
 
             return count
 
+        def _next_allowed_at(rows, limit):
+            if _count_rows(rows) < limit:
+                return None
+
+            candidates = sorted({
+                _parse_dt(row["created_at"]) + timedelta(days=days)
+                for row in rows
+            })
+
+            for candidate in candidates:
+                remaining = [
+                    row
+                    for row in rows
+                    if (
+                        _parse_dt(row["created_at"])
+                        + timedelta(days=days)
+                    ) > candidate
+                ]
+                if _count_rows(remaining) < limit:
+                    return candidate
+
+            return None
+
+        query = """
+            SELECT
+                id,
+                mode,
+                phone_main,
+                phone_whatsapp,
+                status,
+                payment_amount,
+                created_at
+            FROM premium_posts
+            WHERE user_id = ?
+              AND mode != 'reviews'
+              AND action_type = 'post'
+              AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
+              AND datetime(created_at) > datetime(?)
+              AND (
+                  status IN ('published', 'pending')
+                  OR status = 'deleted'
+              )
+              AND payment_status IN ('approved', 'pending', 'rejected')
+            ORDER BY datetime(created_at), id
+        """
+
         with self.get_connection() as conn:
-            cursor = conn.cursor()
+            rows = conn.execute(query, (user_id, since)).fetchall()
 
-            cursor.execute("""
-                SELECT id, mode, phone_main, phone_whatsapp, status, payment_amount, created_at
-                FROM premium_posts
-                WHERE user_id = ?
-                  AND mode = ?
-                  AND mode != 'reviews'
-                  AND action_type = 'post'
-                  AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
-                  AND datetime(created_at) > datetime(?)
-                  AND (
-                      status IN ('published', 'pending')
-                      OR (
-                          status = 'deleted'
-                          AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
-                      )
-                  )
-                  AND payment_status IN ('approved', 'pending', 'rejected')
-            """, (user_id, mode, since))
-            per_mode_count = _count_rows(cursor.fetchall())
+        per_mode_rows = [
+            row for row in rows if str(row["mode"]) == mode
+        ]
 
-            if per_mode_count >= per_mode_limit:
-                return False, (
-                    f"Лимит публикаций в этом разделе превышен. "
-                    f"Можно опубликовать не больше {per_mode_limit} объявлений в одном разделе за 30 дней."
-                )
+        per_mode_count = _count_rows(per_mode_rows)
+        total_count = _count_rows(rows)
 
-            cursor.execute("""
-                SELECT id, mode, phone_main, phone_whatsapp, status, payment_amount, created_at
-                FROM premium_posts
-                WHERE user_id = ?
-                  AND mode != 'reviews'
-                  AND action_type = 'post'
-                  AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
-                  AND datetime(created_at) > datetime(?)
-                  AND (
-                      status IN ('published', 'pending')
-                      OR (
-                          status = 'deleted'
-                          AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
-                      )
-                  )
-                  AND payment_status IN ('approved', 'pending', 'rejected')
-            """, (user_id, since))
-            total_count = _count_rows(cursor.fetchall())
+        blockers = []
+        messages = []
 
-            if total_count >= total_limit:
-                return False, (
-                    f"Общий лимит публикаций превышен. "
-                    f"Можно опубликовать не больше {total_limit} объявлений во всём справочнике за 30 дней."
-                )
+        if per_mode_count >= per_mode_limit:
+            release_at = _next_allowed_at(
+                per_mode_rows,
+                per_mode_limit,
+            )
+            if release_at is not None:
+                blockers.append(release_at)
+            messages.append(
+                "Лимит публикаций в этом разделе превышен. "
+                f"Можно опубликовать не больше {per_mode_limit} "
+                "объявлений в одном разделе за 30 дней."
+            )
 
-            return True, None
+        if total_count >= total_limit:
+            release_at = _next_allowed_at(rows, total_limit)
+            if release_at is not None:
+                blockers.append(release_at)
+            messages.append(
+                "Общий лимит публикаций превышен. "
+                f"Можно опубликовать не больше {total_limit} "
+                "объявлений во всём справочнике за 30 дней."
+            )
+
+        if not messages:
+            return True, None, None
+
+        available_at = max(blockers) if blockers else None
+        return False, available_at, " ".join(messages)
 
 
-    def check_free_repost_guard(
+    def check_premium_post_monthly_limit(
+        self,
+        user_id: int,
+        mode: str,
+        *,
+        per_mode_limit: int = 3,
+        total_limit: int = 10,
+    ) -> tuple[bool, str | None]:
+        """Check free directory posting limits in a rolling 30-day window."""
+        allowed, _available_at, message = (
+            self.get_premium_post_monthly_limit_availability(
+                user_id,
+                mode,
+                per_mode_limit=per_mode_limit,
+                total_limit=total_limit,
+            )
+        )
+        return allowed, message
+
+
+    def get_free_republication_availability(
         self,
         user_id: int,
         mode: str,
         phone_main: str,
         *,
         days: int = 30,
-    ) -> tuple[bool, str | None]:
-        """Apply duplicate rules and the six-hour correction window."""
-        since = (datetime.now() - timedelta(days=days)).isoformat()
+    ) -> tuple[bool, Optional[datetime]]:
+        """Return whether the same free listing may be published again."""
+        now = datetime.now()
+        since = (now - timedelta(days=days)).isoformat()
         phone = str(phone_main or "").strip()
 
         if not phone:
@@ -1035,26 +1090,63 @@ class Database:
             rows = cursor.fetchall()
 
         if mode == "job_offer":
-            active_rows = [
+            rows = [
                 row
                 for row in rows
                 if row["status"] in ("published", "pending")
             ]
-            if not active_rows:
-                return True, None
-        else:
-            if not rows:
-                return True, None
 
-            first_created = datetime.fromisoformat(
-                str(rows[0]["created_at"])
-            )
-            if datetime.now() <= first_created + timedelta(hours=6):
-                return True, None
+        if not rows:
+            return True, None
+
+        first_created = datetime.fromisoformat(
+            str(rows[0]["created_at"])
+        )
+
+        if (
+            mode != "job_offer"
+            and now <= first_created + timedelta(hours=6)
+        ):
+            return True, None
+
+        available_at = first_created + timedelta(days=days)
+        if now >= available_at:
+            return True, None
+
+        return False, available_at
+
+
+    def check_free_repost_guard(
+        self,
+        user_id: int,
+        mode: str,
+        phone_main: str,
+        *,
+        days: int = 30,
+    ) -> tuple[bool, str | None]:
+        """Apply duplicate rules and show the next free publication date."""
+        allowed, available_at = self.get_free_republication_availability(
+            user_id,
+            mode,
+            phone_main,
+            days=days,
+        )
+
+        if allowed:
+            return True, None
+
+        date_text = (
+            available_at.strftime("%d.%m.%Y")
+            if available_at is not None
+            else "позже"
+        )
 
         return False, (
-            "Похожее бесплатное объявление в этом разделе уже публиковалось за последние 30 дней. "
-            "Редактирование через удаление и повторную публикацию доступно только в первые 6 часов после первой публикации."
+            "Похожее бесплатное объявление в этом разделе уже публиковалось "
+            f"за последние {days} дней. "
+            "Редактирование через удаление и повторную публикацию доступно "
+            "только в первые 6 часов после первой публикации. "
+            f"Бесплатная повторная публикация будет доступна {date_text}."
         )
 
 

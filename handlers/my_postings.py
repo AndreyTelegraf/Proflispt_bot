@@ -9,6 +9,7 @@ from config import Config
 from services.my_postings_repost import handle_my_postings_repost_request
 from services.my_postings_baraholka import handle_my_postings_baraholka_request
 from services.my_postings_delete import handle_my_postings_delete_request
+from services.free_republication_status import free_republication_status_text
 from services.my_postings_render import (
     build_my_posting_screen,
     build_my_postings_empty_screen,
@@ -96,6 +97,7 @@ async def render_my_posting(callback: CallbackQuery, state: FSMContext):
         post_id=post_id,
         counter=counter,
         nav_row=nav_row,
+        free_republication_status=free_republication_status_text(db, post),
     )
 
     await callback.message.edit_text(screen_text, reply_markup=reply_markup)

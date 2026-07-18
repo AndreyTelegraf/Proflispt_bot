@@ -14,6 +14,7 @@ def build_my_posting_screen(
     post_id: int,
     counter: str,
     nav_row: list[InlineKeyboardButton],
+    free_republication_status: str | None = None,
 ) -> tuple[str, InlineKeyboardMarkup]:
     status_label = premium_post_status_label(post)
     identity = format_premium_post_identity_text(post)
@@ -22,6 +23,8 @@ def build_my_posting_screen(
         f"{identity}\n"
         f"Статус: {status_label}"
     )
+    if free_republication_status:
+        text = f"{text}\n\n{free_republication_status}"
 
     inline_keyboard = []
     if nav_row:
