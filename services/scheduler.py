@@ -193,14 +193,87 @@ class CleanupScheduler:
             if not message_ids and post.get('message_id'):
                 message_ids = [post['message_id']]
 
-            for mid in message_ids:
+            cleanup_succeeded = not bool(post.get('chat_id') and message_ids)
+            undeletable_message_ids = []
+            cleanup_failed = False
+
+            if post.get('chat_id'):
+                for mid in message_ids:
+                    try:
+                        await bot.delete_message(
+                            chat_id=int(post['chat_id']),
+                            message_id=int(mid),
+                        )
+                        cleanup_succeeded = True
+                    except Exception as exc:
+                        error = str(exc).lower()
+
+                        if (
+                            "message to delete not found" in error
+                            or "message_id_invalid" in error
+                            or "chat not found" in error
+                            or "message not found" in error
+                        ):
+                            cleanup_succeeded = True
+                            continue
+
+                        if "message can't be deleted" in error:
+                            undeletable_message_ids.append(int(mid))
+                            logger.warning(
+                                "Expired premium post message %s cannot be deleted; "
+                                "will try to mark it expired: %s",
+                                mid,
+                                exc,
+                            )
+                            continue
+
+                        cleanup_failed = True
+                        logger.warning(
+                            "Could not delete expired premium post message %s "
+                            "for post #%s; expiry will be retried: %s",
+                            mid,
+                            post['id'],
+                            exc,
+                        )
+
+            if undeletable_message_ids and not cleanup_failed:
+                marker_message_id = undeletable_message_ids[0]
+                marker_text = "Срок публикации объявления истёк."
+                marker_applied = False
+
                 try:
-                    await bot.delete_message(
+                    await bot.edit_message_text(
                         chat_id=int(post['chat_id']),
-                        message_id=int(mid)
+                        message_id=marker_message_id,
+                        text=marker_text,
                     )
-                except Exception:
-                    pass
+                    marker_applied = True
+                except Exception as text_exc:
+                    try:
+                        await bot.edit_message_caption(
+                            chat_id=int(post['chat_id']),
+                            message_id=marker_message_id,
+                            caption=marker_text,
+                        )
+                        marker_applied = True
+                    except Exception as caption_exc:
+                        logger.warning(
+                            "Could not mark expired premium post #%s after "
+                            "Telegram refused deletion: text_error=%s caption_error=%s",
+                            post['id'],
+                            text_exc,
+                            caption_exc,
+                        )
+
+                cleanup_succeeded = marker_applied
+
+            if cleanup_failed or not cleanup_succeeded:
+                logger.warning(
+                    "Expired premium post #%s remains published; "
+                    "database status was not changed and cleanup will be retried",
+                    post['id'],
+                )
+                continue
 
             db.mark_premium_post_expired(post['id'])
 
