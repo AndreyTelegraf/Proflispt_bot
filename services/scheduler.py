@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Optional
 from aiogram import Bot
 
+from config import Config
 from database import db
+from services.directory_links import directory_message_url
 from services.post_identity import format_premium_post_identity_text
 from services.free_republication_status import free_republication_status_text
 from services.directory_username_http_audit import send_directory_username_audit_report
@@ -153,6 +155,39 @@ class CleanupScheduler:
                 else:
                     logger.warning(f"Failed to unpin premium post #{post['id']}: {e}")
 
+    async def _notify_admin_expired_post_delete_failure(
+        self,
+        *,
+        post: dict,
+        message_id: int,
+        error: Exception,
+    ) -> None:
+        post_url = directory_message_url(
+            int(message_id),
+            int(post.get('topic_id')) if post.get('topic_id') else None,
+        )
+
+        try:
+            await self.bot.send_message(
+                chat_id=Config.ADMIN_IDS[0],
+                text=(
+                    "⚠️ Не удалось автоматически удалить просроченное объявление.\n\n"
+                    f"Пост: {post_url}\n"
+                    f"ID в базе: #{post['id']}\n\n"
+                    "Удалите публикацию вручную."
+                ),
+                disable_web_page_preview=True,
+            )
+        except Exception as notify_error:
+            logger.warning(
+                "Could not notify admin about expired premium post delete "
+                "failure post_id=%s message_id=%s error=%s notify_error=%s",
+                post['id'],
+                message_id,
+                error,
+                notify_error,
+            )
+
     async def _expire_premium_posts(self):
         db = self.db
         bot = self.bot
@@ -216,6 +251,12 @@ class CleanupScheduler:
                         ):
                             cleanup_succeeded = True
                             continue
+
+                        await self._notify_admin_expired_post_delete_failure(
+                            post=post,
+                            message_id=int(mid),
+                            error=exc,
+                        )
 
                         if "message can't be deleted" in error:
                             undeletable_message_ids.append(int(mid))
