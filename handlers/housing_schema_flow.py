@@ -35,7 +35,10 @@ from services.baraholka_repost_request import create_and_notify_baraholka_repost
 from services.admin_moderation_notice import send_admin_moderation_notice
 from services.premium_request_labels import premium_request_label
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
-from services.directory_post_guard import check_duplicate_directory_post
+from services.directory_post_guard import (
+    check_active_directory_post,
+    check_duplicate_directory_post,
+)
 from services.free_post_supersede import supersede_previous_free_publications
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -1063,14 +1066,16 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
             last_name=callback.from_user.last_name,
         )
 
-        can_post, limit_message = await _hs_directory_post_available(
-            user_db_id,
-            slug,
-            payload.get("phone_main", ""),
+        can_post, limit_message = await check_active_directory_post(
+            db,
+            user_id=user_db_id,
+            mode=slug,
+            phone_main=payload.get("phone_main", ""),
         )
         if not can_post:
             await callback.answer(
-                "Такое объявление уже опубликовано. Удалите старое через «Мои объявления» перед повторной публикацией.",
+                limit_message
+                or "Такое объявление уже опубликовано или ожидает публикации.",
                 show_alert=True,
             )
             return
