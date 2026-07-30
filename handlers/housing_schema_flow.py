@@ -34,6 +34,7 @@ from services.catalog_specialized_renderers import render_housing_listing_html a
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.admin_moderation_notice import send_admin_moderation_notice
 from services.premium_request_labels import premium_request_label
+from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.directory_post_guard import (
     check_active_directory_post,
@@ -158,6 +159,22 @@ async def _hs_directory_post_available(user_id: int, slug: str, phone_main: str)
         user_id=user_id,
         mode=slug,
         phone_main=phone_main,
+    )
+
+
+def _hs_media_caption_error(payload: dict, media: list) -> str | None:
+    """Return an error when rendered housing text cannot fit a media caption."""
+    if not media:
+        return None
+
+    post_text = _hs_render_html(payload)
+    if len(post_text) <= TELEGRAM_MEDIA_CAPTION_LIMIT:
+        return None
+
+    return (
+        "Текст объявления слишком длинный для публикации с фото/видео. "
+        f"Telegram ограничивает подпись к медиа {TELEGRAM_MEDIA_CAPTION_LIMIT} символами.\n\n"
+        "Вернитесь назад и сократите описание либо опубликуйте объявление без медиа."
     )
 
 
@@ -746,6 +763,11 @@ async def hs_media_preview_back(callback: CallbackQuery, state: FSMContext):
 async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str, media: list) -> None:
     section_name, _, _, payload, _ = await _get_hs(state)
 
+    caption_error = _hs_media_caption_error(payload, media)
+    if caption_error:
+        await callback.answer(caption_error, show_alert=True)
+        return
+
     user = db.get_user(callback.from_user.id)
     if not user:
         db.create_user(
@@ -1058,6 +1080,11 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
         await callback.answer(validation.message, show_alert=True)
         return
 
+    caption_error = _hs_media_caption_error(payload, media)
+    if caption_error:
+        await callback.answer(caption_error, show_alert=True)
+        return
+
     try:
         user_db_id = db.create_user(
             telegram_id=callback.from_user.id,
@@ -1150,6 +1177,17 @@ async def hs_media_done(callback: CallbackQuery, state: FSMContext):
     if not media:
         await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
         return
+
+    caption_error = _hs_media_caption_error(payload, media)
+    if caption_error:
+        await callback.message.edit_text(
+            caption_error,
+            reply_markup=_hs_back_kb(slug),
+            disable_web_page_preview=True,
+        )
+        await callback.answer()
+        return
+
     await state.set_state(HS_CONFIRM)
     preview_text, preview_kb = await _hs_render_preview_text_and_kb(
         slug,
