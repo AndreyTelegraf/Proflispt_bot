@@ -8,7 +8,7 @@ def run_smoke() -> None:
     registry = build_schema_registry()
     sections = registry.list_sections()
     assert "Спорт" in sections, sections
-    assert "Поговори" in sections, sections
+    assert "Поговори со мной" in sections, sections
 
     sport = SchemaFlowAdapter("Спорт")
     assert sport.current_prompt()
@@ -21,7 +21,7 @@ def run_smoke() -> None:
     assert sport.accept_answer("Andrey Telegraf, Sport Telegraf").accepted
     assert sport.state.is_finished
 
-    talk = SchemaFlowAdapter("Поговори")
+    talk = SchemaFlowAdapter("Поговори со мной")
     assert talk.current_prompt()
     assert talk.accept_answer("да").accepted
     assert talk.accept_answer("мужчина, 40+, высшее").accepted

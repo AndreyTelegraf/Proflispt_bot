@@ -883,6 +883,7 @@ class Database:
             "art": 90,
 
             "reviews": None,
+            "talk_to_me": None,
         }
         return ttl_by_mode.get(mode, 90)
 
@@ -905,7 +906,7 @@ class Database:
         days: int = 30,
     ) -> tuple[bool, Optional[datetime], str | None]:
         """Return monthly-limit status and the earliest known release time."""
-        if mode == "reviews":
+        if mode in {"reviews", "talk_to_me"}:
             return True, None, None
 
         now = datetime.now()
@@ -981,7 +982,7 @@ class Database:
                 created_at
             FROM premium_posts
             WHERE user_id = ?
-              AND mode != 'reviews'
+              AND mode NOT IN ('reviews', 'talk_to_me')
               AND action_type = 'post'
               AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
               AND datetime(created_at) > datetime(?)
@@ -1065,6 +1066,9 @@ class Database:
         days: int = 30,
     ) -> tuple[bool, Optional[datetime]]:
         """Return whether the same free listing may be published again."""
+        if mode in {"reviews", "talk_to_me"}:
+            return True, None
+
         now = datetime.now()
         since = (now - timedelta(days=days)).isoformat()
         phone = str(phone_main or "").strip()
@@ -1079,7 +1083,7 @@ class Database:
                 FROM premium_posts
                 WHERE user_id = ?
                   AND mode = ?
-                  AND mode != 'reviews'
+                  AND mode NOT IN ('reviews', 'talk_to_me')
                   AND action_type = 'post'
                   AND CAST(COALESCE(payment_amount, 0) AS REAL) = 0
                   AND payment_status = 'approved'

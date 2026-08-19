@@ -24,9 +24,15 @@ from models.posting_context import PostingContext
 from services.schema_bootstrap import build_schema_registry
 from services.schema_engine import SchemaEngine
 from services.sections_registry import load_sections_registry
-from services.catalog_modes import MODE_TO_SECTION_NAME as SLUG_TO_SECTION
+from services.catalog_modes import (
+    MODE_TO_SECTION_NAME as SLUG_TO_SECTION,
+    TALK_TO_ME_MODE,
+)
 from services.geo import normalize_geo_tags_json
-from services.catalog_listing_renderer import render_catalog_listing_html
+from services.catalog_listing_renderer import (
+    render_catalog_listing_html,
+    render_talk_to_me_listing_html,
+)
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice
 from services.free_post_supersede import supersede_previous_free_publications
@@ -34,6 +40,10 @@ from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     is_valid_pt_mobile,
     validate_publish_payload,
+)
+from services.moderated_free_sections import (
+    build_talk_to_me_listing_payload,
+    validate_talk_to_me_payload,
 )
 
 logger = logging.getLogger(__name__)
@@ -173,6 +183,25 @@ def _normalize_geo(value) -> str:
     return normalize_geo_tags_json(value)
 
 
+def _canonical_payload(slug: str, payload: dict) -> dict:
+    if slug == TALK_TO_ME_MODE:
+        return build_talk_to_me_listing_payload(payload)
+    return payload
+
+
+def _render_listing(slug: str, payload: dict) -> str:
+    canonical = _canonical_payload(slug, payload)
+    if slug == TALK_TO_ME_MODE:
+        return render_talk_to_me_listing_html(canonical)
+    return render_catalog_listing_html(canonical)
+
+
+def _validate_submission(slug: str, payload: dict):
+    if slug == TALK_TO_ME_MODE:
+        return validate_talk_to_me_payload(payload)
+    return validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+
+
 # ── keyboards ─────────────────────────────────────────────────────────────────
 
 def _back_kb(slug: str) -> InlineKeyboardMarkup:
@@ -222,11 +251,29 @@ def _step_kb(step, slug: str) -> InlineKeyboardMarkup:
         return b.as_markup()
     if getattr(step, "kind", None) == "choice":
         return _choice_kb(step, slug)
+    if not bool(getattr(step, "required", False)):
+        b = InlineKeyboardBuilder()
+        b.add(InlineKeyboardButton(text="Пропустить", callback_data=f"gs:skip:{slug}"))
+        b.add(InlineKeyboardButton(text="← Назад", callback_data=f"gs:back:{slug}"))
+        b.adjust(1)
+        return b.as_markup()
     return _back_kb(slug)
 
 
-def _preview_kb(slug: str, *, can_publish_free: bool = True) -> InlineKeyboardMarkup:
+def _preview_kb(
+    slug: str,
+    *,
+    can_publish_free: bool = True,
+    can_add_media: bool = True,
+) -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
+    if slug == TALK_TO_ME_MODE:
+        b.add(InlineKeyboardButton(text="Отправить без медиа", callback_data=f"gs:confirm:{slug}"))
+        if can_add_media:
+            b.add(InlineKeyboardButton(text="Добавить фото/видео", callback_data=f"gs:premium:{slug}"))
+        b.add(InlineKeyboardButton(text="← Назад", callback_data=f"gs:back:{slug}"))
+        b.adjust(1)
+        return b.as_markup()
     if can_publish_free:
         b.add(InlineKeyboardButton(text="Опубликовать", callback_data=f"gs:confirm:{slug}"))
     b.add(InlineKeyboardButton(text="Опубликовать с фото/видео — €20", callback_data=f"gs:premium:{slug}"))
@@ -327,12 +374,12 @@ async def _advance(
 
     if next_index >= len(schema.steps):
         await state.set_state(GS_CONFIRM)
-        text = render_catalog_listing_html(payload)
+        text = _render_listing(slug, payload)
 
         can_publish_free = True
         free_limit_message = None
         user = db.get_user(from_user.id)
-        if user:
+        if user and slug != TALK_TO_ME_MODE:
             can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
             if can_publish_free:
                 can_publish_free, free_limit_message = db.check_free_repost_guard(
@@ -348,7 +395,17 @@ async def _advance(
                 "Можно отправить объявление на платную публикацию с фото/видео."
             )
 
-        kb = _preview_kb(slug, can_publish_free=can_publish_free)
+        can_add_media = len(text) <= TELEGRAM_MEDIA_CAPTION_LIMIT
+        if slug == TALK_TO_ME_MODE and not can_add_media:
+            text += (
+                "\n\nТекст не помещается в подпись к фото или видео, "
+                "поэтому публикацию можно отправить только без медиа."
+            )
+        kb = _preview_kb(
+            slug,
+            can_publish_free=can_publish_free,
+            can_add_media=can_add_media,
+        )
         if is_message:
             await target.answer(text, reply_markup=kb, parse_mode="HTML", disable_web_page_preview=True)
         else:
@@ -364,17 +421,98 @@ async def _advance(
 
 # ── admin notify ──────────────────────────────────────────────────────────────
 
-async def _notify_admin(bot, post_id: int, payload: dict, media_list: list, section_name: str) -> None:
+async def _notify_admin(
+    bot,
+    post_id: int,
+    payload: dict,
+    media_list: list,
+    section_name: str,
+    *,
+    mode: str,
+    payment_amount: float,
+) -> None:
     admin_chat_id = 336224597
-    post_text = render_catalog_listing_html(payload)
+    post_text = _render_listing(mode, payload)
     await send_admin_moderation_notice(
         bot,
         admin_chat_id=admin_chat_id,
         post_id=post_id,
         preview_text=post_text,
-        control_text=f"[{section_name}] {premium_request_label(action_type='post', mode=None, payment_amount=20)} #{post_id}",
+        control_text=(
+            f"[{section_name}] "
+            f"{premium_request_label(action_type='post', mode=mode, payment_amount=payment_amount)} "
+            f"#{post_id}"
+        ),
         media_list=media_list,
     )
+
+
+async def _submit_talk_to_me_for_moderation(
+    callback: CallbackQuery,
+    state: FSMContext,
+    *,
+    section_name: str,
+    payload: dict,
+    media_list: list,
+) -> int:
+    validation = validate_talk_to_me_payload(payload)
+    if not validation.ok:
+        raise ValueError(validation.message)
+
+    canonical = build_talk_to_me_listing_payload(payload)
+    post_text = render_talk_to_me_listing_html(canonical)
+    if len(post_text) > TELEGRAM_TEXT_MESSAGE_SAFE_LIMIT:
+        raise ValueError("Текст слишком длинный для публикации в Telegram.")
+    if media_list and len(post_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+        raise ValueError(
+            "Текст слишком длинный для публикации с фото или видео. "
+            "Вернитесь к превью и отправьте публикацию без медиа."
+        )
+
+    first = media_list[0] if media_list else None
+    user_db_id = db.create_user(
+        telegram_id=callback.from_user.id,
+        username=callback.from_user.username,
+        first_name=callback.from_user.first_name,
+        last_name=callback.from_user.last_name,
+    )
+    post_id = db.create_premium_post(
+        user_id=user_db_id,
+        mode=TALK_TO_ME_MODE,
+        cities=_normalize_geo(canonical.get("geo_tags")),
+        description=canonical.get("description", ""),
+        social_media=canonical.get("social_links", ""),
+        telegram_username=canonical.get("telegram", ""),
+        phone_main=canonical.get("phone_main", ""),
+        phone_whatsapp=canonical.get("phone_whatsapp", ""),
+        name=canonical.get("contact_name", ""),
+        media_file_id=first.get("file_id") if first else None,
+        media_type=first.get("type") if first else None,
+        media_list=media_list,
+        action_type="post",
+        payment_amount=0.00,
+        admin_notes="talk_to_me_moderation",
+    )
+    await _notify_admin(
+        callback.bot,
+        post_id,
+        payload,
+        media_list,
+        section_name,
+        mode=TALK_TO_ME_MODE,
+        payment_amount=0.00,
+    )
+    await state.clear()
+
+    b = InlineKeyboardBuilder()
+    b.add(InlineKeyboardButton(text="← Главное меню", callback_data="go:main"))
+    await callback.message.edit_text(
+        "Ваша публикация отправлена на модерацию. "
+        f"Администратор проверит её и опубликует в разделе «{section_name}».",
+        reply_markup=b.as_markup(),
+        disable_web_page_preview=True,
+    )
+    return post_id
 
 # ── entry ─────────────────────────────────────────────────────────────────────
 
@@ -562,6 +700,41 @@ async def gs_wa_skip(callback: CallbackQuery, state: FSMContext):
                    step_idx + 1, slug, is_message=False)
     await callback.answer()
 
+
+@router.callback_query(F.data.startswith("gs:skip:"))
+async def gs_optional_skip(callback: CallbackQuery, state: FSMContext):
+    if await state.get_state() != GS_INPUT:
+        await callback.answer()
+        return
+
+    callback_slug = callback.data.split(":", 2)[2]
+    section_name, state_slug, step_idx, payload, _ = await _get_gs(state)
+    if not section_name or callback_slug != state_slug:
+        await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+        return
+
+    schema = build_schema_registry().get_by_section(section_name)
+    step = schema.steps[step_idx]
+    if bool(getattr(step, "required", False)) or getattr(step, "kind", None) == "choice":
+        await callback.answer("Это поле нельзя пропустить.", show_alert=True)
+        return
+
+    field = getattr(step, "field_name", None)
+    if field:
+        payload[field] = ""
+
+    await _advance(
+        callback.message,
+        callback.from_user,
+        state,
+        schema,
+        payload,
+        step_idx + 1,
+        state_slug,
+        is_message=False,
+    )
+    await callback.answer()
+
 # ── telegram gate ─────────────────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("gs:tg_created:"))
@@ -672,7 +845,9 @@ async def gs_text_input(message: Message, state: FSMContext):
     field = getattr(step, "field_name", "")
     raw = str(message.text or "").strip()
 
-    if field == "description":
+    if field == "description" or (
+        slug == TALK_TO_ME_MODE and field in {"profile_description", "availability"}
+    ):
         ok, err = _validate_description_text(raw)
         if not ok:
             await message.answer(
@@ -694,11 +869,22 @@ async def gs_text_input(message: Message, state: FSMContext):
                        step_idx + 1, slug, is_message=True)
         return
 
-    if field == "contact_name":
+    if field in {"contact_name", "name"}:
         ok, error = _validate_contact_name(raw)
         if not ok:
             await message.answer(error, reply_markup=_step_kb(step, slug))
             return
+
+    if field == "telegram":
+        normalized_username = "@" + raw.lstrip("@").strip()
+        if not re.fullmatch(r"@[A-Za-z0-9_]{5,32}", normalized_username):
+            await message.answer(
+                "Укажите Telegram username в формате @username. "
+                "Минимум 5 символов после @, только латиница, цифры и подчёркивание.",
+                reply_markup=_step_kb(step, slug),
+            )
+            return
+        raw = normalized_username
 
     # phone_main: strict mobile validation before schema engine
     if field == "phone_main":
@@ -753,7 +939,33 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
         return
 
     slug = callback.data.split(":", 2)[2]
-    section_name, _, _, payload, _ = await _get_gs(state)
+    section_name, state_slug, _, payload, _ = await _get_gs(state)
+    if slug != state_slug:
+        await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+        return
+
+    if slug == TALK_TO_ME_MODE:
+        try:
+            await _submit_talk_to_me_for_moderation(
+                callback,
+                state,
+                section_name=section_name,
+                payload=payload,
+                media_list=[],
+            )
+        except ValueError as exc:
+            await callback.answer(str(exc), show_alert=True)
+            return
+        except Exception as exc:
+            logger.exception("Talk-to-me submit failed: %s", exc)
+            await callback.answer(
+                "Не удалось отправить публикацию на модерацию. "
+                "Вернитесь к превью и попробуйте ещё раз.",
+                show_alert=True,
+            )
+            return
+        await callback.answer()
+        return
 
     try:
         user = db.get_user(callback.from_user.id)
@@ -799,7 +1011,7 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
 
         # Final publish-boundary validation.
         # FSM/input validation is not enough: stale or corrupted state must not publish.
-        validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+        validation = _validate_submission(slug, payload)
         if not validation.ok:
             await callback.answer(validation.message, show_alert=True)
             return
@@ -808,7 +1020,7 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
         channel_id = int(registry.channel_id)
         topic_id = int(registry.get_topic_id(section_name))
 
-        post_text = render_catalog_listing_html(payload)
+        post_text = _render_listing(slug, payload)
         if len(post_text) > TELEGRAM_TEXT_MESSAGE_SAFE_LIMIT:
             await callback.message.edit_text(
                 "Текст объявления слишком длинный для публикации без медиа. "
@@ -896,6 +1108,16 @@ async def gs_premium_start(callback: CallbackQuery, state: FSMContext):
         return
 
     slug = callback.data.split(":", 2)[2]
+    _, state_slug, _, payload, _ = await _get_gs(state)
+    if slug != state_slug:
+        await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+        return
+    if len(_render_listing(slug, payload)) > TELEGRAM_MEDIA_CAPTION_LIMIT:
+        await callback.answer(
+            "Текст не помещается в подпись к фото или видео. Отправьте публикацию без медиа.",
+            show_alert=True,
+        )
+        return
     await state.set_state(GS_MEDIA)
 
     await callback.message.edit_text(
@@ -951,13 +1173,16 @@ async def gs_media_input(message: Message, state: FSMContext):
 @router.callback_query(F.data.startswith("gs:media_submit:"))
 async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
     slug = callback.data.split(":", 2)[2]
-    section_name, _, _, payload, media = await _get_gs(state)
+    section_name, state_slug, _, payload, media = await _get_gs(state)
+    if slug != state_slug or await state.get_state() != GS_MEDIA:
+        await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+        return
 
     if not media:
         await callback.answer("Сначала добавьте хотя бы одно фото или видео.", show_alert=True)
         return
 
-    post_text = render_catalog_listing_html(payload)
+    post_text = _render_listing(slug, payload)
     if len(post_text) > TELEGRAM_MEDIA_CAPTION_LIMIT:
         await callback.message.edit_text(
             "Текст объявления слишком длинный для публикации с фото/видео. "
@@ -966,6 +1191,29 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
             reply_markup=_back_kb(slug),
             disable_web_page_preview=True,
         )
+        await callback.answer()
+        return
+
+    if slug == TALK_TO_ME_MODE:
+        try:
+            await _submit_talk_to_me_for_moderation(
+                callback,
+                state,
+                section_name=section_name,
+                payload=payload,
+                media_list=media,
+            )
+        except ValueError as exc:
+            await callback.answer(str(exc), show_alert=True)
+            return
+        except Exception as exc:
+            logger.exception("Talk-to-me media submit failed: %s", exc)
+            await callback.answer(
+                "Не удалось отправить публикацию на модерацию. "
+                "Вернитесь к превью и попробуйте ещё раз.",
+                show_alert=True,
+            )
+            return
         await callback.answer()
         return
 
@@ -980,7 +1228,7 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
 
     # Final premium-submit boundary validation.
     # FSM/input validation is not enough: stale or corrupted state must not create premium posts.
-    validation = validate_publish_payload(payload, STANDARD_LISTING_REQUIRED_FIELDS)
+    validation = _validate_submission(slug, payload)
     if not validation.ok:
         await callback.answer(validation.message, show_alert=True)
         return
@@ -1009,7 +1257,15 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
             payment_amount=20.00,
             admin_notes=None,
         )
-        await _notify_admin(callback.bot, post_id, payload, media, section_name)
+        await _notify_admin(
+            callback.bot,
+            post_id,
+            payload,
+            media,
+            section_name,
+            mode=slug,
+            payment_amount=20.00,
+        )
         await state.clear()
 
         b = InlineKeyboardBuilder()
@@ -1030,13 +1286,16 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("gs:media_cancel:"))
 async def gs_media_cancel(callback: CallbackQuery, state: FSMContext):
     slug = callback.data.split(":", 2)[2]
-    _, _, _, payload, _ = await _get_gs(state)
+    _, state_slug, _, payload, _ = await _get_gs(state)
+    if slug != state_slug:
+        await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+        return
     await state.update_data(gs_media=[], gs_media_status_id=None)
     await state.set_state(GS_CONFIRM)
     can_publish_free = True
     free_limit_message = None
     user = db.get_user(callback.from_user.id)
-    if user:
+    if user and slug != TALK_TO_ME_MODE:
         can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
         if can_publish_free:
             can_publish_free, free_limit_message = db.check_free_repost_guard(
@@ -1045,7 +1304,7 @@ async def gs_media_cancel(callback: CallbackQuery, state: FSMContext):
                 payload.get("phone_main", ""),
             )
 
-    text = render_catalog_listing_html(payload)
+    text = _render_listing(slug, payload)
     if not can_publish_free:
         text = (
             f"{text}\n\n"
@@ -1055,7 +1314,11 @@ async def gs_media_cancel(callback: CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text(
         text,
-        reply_markup=_preview_kb(slug, can_publish_free=can_publish_free),
+        reply_markup=_preview_kb(
+            slug,
+            can_publish_free=can_publish_free,
+            can_add_media=len(text) <= TELEGRAM_MEDIA_CAPTION_LIMIT,
+        ),
         parse_mode="HTML",
         disable_web_page_preview=True,
     )

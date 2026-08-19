@@ -69,6 +69,16 @@ def build_approval_user_notification(
             reply_markup=_main_menu_kb(),
         )
 
+    if post.get("mode") == "talk_to_me":
+        return PremiumAdminNotification(
+            text=(
+                f"Ваша публикация в разделе «Поговори со мной» опубликована!\nСсылка: {message_link}"
+                if message_link
+                else "Ваша публикация в разделе «Поговори со мной» опубликована!"
+            ),
+            reply_markup=_main_menu_kb(),
+        )
+
     return PremiumAdminNotification(
         text=(
             f"{identity}\n\n"
@@ -84,6 +94,12 @@ def build_rejection_user_notification(post: dict) -> PremiumAdminNotification:
         text = (
             "Ваш отзыв отклонён.\n\n"
             "Возможно содержание не соответствует требованиям Справочника.\n\n"
+            "Обратитесь к администратору: https://t.me/kak_odin"
+        )
+    elif post.get("mode") == "talk_to_me":
+        text = (
+            "Ваша публикация в разделе «Поговори со мной» отклонена.\n\n"
+            "Возможно, содержание не соответствует требованиям Справочника.\n\n"
             "Обратитесь к администратору: https://t.me/kak_odin"
         )
     else:

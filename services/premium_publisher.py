@@ -12,6 +12,8 @@ from dataclasses import dataclass
 
 from aiogram.types import InputMediaPhoto, InputMediaVideo
 
+from services.moderated_free_sections import is_moderated_free_mode
+
 
 @dataclass(frozen=True)
 class PremiumPublishResult:
@@ -115,7 +117,7 @@ async def publish_premium_post_to_telegram(
         )
         return PremiumPublishResult(message=message, message_ids=[message.message_id])
 
-    if post.get("action_type") == "repost" or post.get("mode") == "reviews":
+    if post.get("action_type") == "repost" or is_moderated_free_mode(post.get("mode")):
         message = await bot.send_message(
             chat_id=publish_chat_id,
             text=post_text,

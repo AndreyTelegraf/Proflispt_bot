@@ -35,7 +35,7 @@ def free_republication_status_text(db, post: dict) -> str | None:
         return None
 
     mode = str(post.get("mode") or "")
-    if not mode or mode == "reviews":
+    if not mode or mode in {"reviews", "talk_to_me"}:
         return None
 
     phone = str(

@@ -17,9 +17,11 @@ from dataclasses import dataclass
 from services.catalog_listing_renderer import (
     build_catalog_listing_payload_from_premium_post,
     render_catalog_listing_html,
+    render_talk_to_me_listing_html,
 )
 from services.catalog_modes import (
     REVIEWS_SECTION_NAME,
+    TALK_TO_ME_MODE,
     get_catalog_mode_slugs,
     get_catalog_section_name,
     get_catalog_topic_id,
@@ -49,6 +51,10 @@ def build_premium_post_text(post: dict) -> str:
 
     if mode == "reviews":
         return build_review_listing_html_from_premium_post(post)
+
+    if mode == TALK_TO_ME_MODE:
+        payload = build_catalog_listing_payload_from_premium_post(post)
+        return render_talk_to_me_listing_html(payload)
 
     if mode in get_catalog_mode_slugs():
         payload = build_catalog_listing_payload_from_premium_post(post)

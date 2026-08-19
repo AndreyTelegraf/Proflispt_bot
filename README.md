@@ -28,6 +28,7 @@ Special flows:
 
 - housing: `handlers/housing_schema_flow.py`
 - reviews: `handlers/reviews_schema_flow.py`
+- Talk to Me: schema-driven questionnaire with free moderation in `handlers/generic_schema_flow.py`
 - user post management: `handlers/my_postings.py`
 - premium moderation: `handlers/premium_admin.py`
 

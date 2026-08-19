@@ -396,19 +396,19 @@ def _fetch_billing_report(period):
 
         accounting_posts = fetch_rows("""
             pp.action_type = 'post'
-            AND pp.mode != 'reviews'
+            AND pp.mode NOT IN ('reviews', 'talk_to_me')
             AND pp.message_id IS NOT NULL
             AND pp.status IN ('published', 'deleted', 'superseded')
         """)
         accounting_reposts = fetch_rows("""
             pp.action_type = 'repost'
-            AND pp.mode != 'reviews'
+            AND pp.mode NOT IN ('reviews', 'talk_to_me')
             AND pp.message_id IS NOT NULL
             AND pp.status IN ('published', 'deleted', 'superseded')
         """)
         accounting_pins = fetch_rows("""
             pp.action_type = 'pin'
-            AND pp.mode != 'reviews'
+            AND pp.mode NOT IN ('reviews', 'talk_to_me')
             AND pp.message_id IS NOT NULL
             AND pp.status IN ('published', 'deleted', 'superseded')
         """)

@@ -12,6 +12,9 @@ def premium_request_label(*, action_type: str | None, mode: str | None, payment_
     if mode == "reviews":
         return "Бесплатный отзыв — €0"
 
+    if mode == "talk_to_me":
+        return "Бесплатная публикация «Поговори со мной» — €0"
+
     if is_baraholka:
         return "Платный перепост в Барахолку — €10"
 

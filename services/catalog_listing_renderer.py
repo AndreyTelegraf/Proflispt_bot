@@ -70,7 +70,7 @@ def _split_lines(value: object) -> list[str]:
     return [part.strip() for part in clean.splitlines() if part.strip()]
 
 
-def render_catalog_listing_html(payload: dict) -> str:
+def render_catalog_listing_html(payload: dict, *, include_reviews: bool = True) -> str:
     lines: list[str] = []
 
     geo_tags = render_geo_tags(payload.get("geo_tags"))
@@ -125,7 +125,7 @@ def render_catalog_listing_html(payload: dict) -> str:
         lines.append("- " + html.escape(contact_name))
 
     performer = _norm(payload.get("telegram"))
-    if performer:
+    if performer and include_reviews:
         try:
             idx = db.get_review_index_for_performer(performer)
             total = idx.get("total", 0)
@@ -145,3 +145,8 @@ def render_catalog_listing_html(payload: dict) -> str:
                 lines.append(f'- <a href="{html.escape(link, quote=True)}">Отзыв #{num}</a>')
 
     return "\n".join(lines).strip()
+
+
+def render_talk_to_me_listing_html(payload: dict) -> str:
+    """Render a personal conversation profile without professional review links."""
+    return render_catalog_listing_html(payload, include_reviews=False)

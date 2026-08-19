@@ -26,6 +26,8 @@ HOUSING_MODE_TO_SECTION_NAME = {
 
 
 REVIEWS_SECTION_NAME = "Отзывы"
+TALK_TO_ME_MODE = "talk_to_me"
+TALK_TO_ME_SECTION_NAME = "Поговори со мной"
 
 
 def get_housing_section_name(mode: str) -> str | None:
@@ -71,4 +73,5 @@ MODE_TO_SECTION_NAME = {
     "tourism":              "Туризм",
     "photo_video":          "Фото/видео",
     "art":                  "Искусство",
+    TALK_TO_ME_MODE:        TALK_TO_ME_SECTION_NAME,
 }
