@@ -444,6 +444,34 @@ def _rows_sum(rows):
     return sum(float(row.get("payment_amount") or 0) for row in rows)
 
 
+def _billing_tariff_summary_lines(rows):
+    groups: dict[int, dict[str, int]] = {}
+    for row in rows:
+        cents = int(round(float(row.get("payment_amount") or 0) * 100))
+        group = groups.setdefault(cents, {"count": 0, "total_cents": 0})
+        group["count"] += 1
+        group["total_cents"] += cents
+
+    if not groups:
+        return ["- оплаченные: 0", "- сумма: 0.00 €"]
+
+    lines = []
+    for cents in sorted(groups, reverse=True):
+        group = groups[cents]
+        tariff = f"{cents / 100:.2f}".rstrip("0").rstrip(".")
+        subtotal = group["total_cents"] / 100
+        lines.append(
+            f"- тариф {tariff} €: {group['count']} оплат; сумма: {subtotal:.2f} €"
+        )
+
+    if len(groups) > 1:
+        lines.append(
+            f"- всего: {len(rows)} оплат; сумма: {_rows_sum(rows):.2f} €"
+        )
+
+    return lines
+
+
 def _exclude_known_non_billable_rows(rows):
     """Exclude known historical technical/test duplicates from /pays accounting.
 
@@ -572,25 +600,21 @@ async def cmd_pays(message: Message):
         "Платные услуги",
         f"Период: {period['label']}",
         "",
-        "Посты с медиа за 20 €:",
-        f"- оплаченные: {len(accounting_posts)}",
-        f"- сумма: {accounting_posts_total:.2f} €",
+        "Платные посты:",
+        *_billing_tariff_summary_lines(accounting_posts),
         "",
-        "Апы за 10 €:",
-        f"- оплаченные: {len(directory_reposts)}",
-        f"- сумма: {directory_reposts_total:.2f} €",
+        "Апы:",
+        *_billing_tariff_summary_lines(directory_reposts),
         "",
         "Закрепы:",
-        f"- оплаченные: {len(accounting_pins)}",
-        f"- сумма: {accounting_pins_total:.2f} €",
+        *_billing_tariff_summary_lines(accounting_pins),
         "",
         "Итого по справочнику:",
         f"- всего оплат: {directory_count}",
         f"- сумма: {directory_total:.2f} €",
         "",
         "Перепосты в Барахолку:",
-        f"- оплаченные: {len(baraholka_reposts)}",
-        f"- сумма: {baraholka_reposts_total:.2f} €",
+        *_billing_tariff_summary_lines(baraholka_reposts),
     ]
 
     await _send_long_text(message, lines)
