@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import html
 import json
+import re
+import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 
 from config import Config
@@ -119,7 +124,7 @@ def _issue_from_row(row: dict[str, Any], *, reason: str) -> DirectoryUsernameAud
     )
 
 
-def check_public_tme_username(username: str, *, timeout: float = 8.0) -> tuple[bool, str | None]:
+def _check_public_tme_username_once(username: str, *, timeout: float) -> tuple[bool | None, str | None]:
     slug = username_slug(username)
     if not slug:
         return False, "empty_username"
@@ -140,78 +145,199 @@ def check_public_tme_username(username: str, *, timeout: float = 8.0) -> tuple[b
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
             return False, "t.me returned 404"
-        return False, f"t.me HTTP {exc.code}"
+        return None, f"t.me HTTP {exc.code}"
     except urllib.error.URLError as exc:
-        return False, f"t.me URL error: {exc.reason}"
+        return None, f"t.me URL error: {exc.reason}"
     except TimeoutError:
-        return False, "t.me timeout"
+        return None, "t.me timeout"
+    except OSError as exc:
+        return None, f"t.me connection error: {exc}"
+    except Exception as exc:
+        return None, f"t.me check error: {type(exc).__name__}: {exc}"
 
     if status >= 400:
-        return False, f"t.me HTTP {status}"
+        return None, f"t.me HTTP {status}"
 
     lower = body.lower()
-    not_found_markers = [
-        "tgme_page_extra\">if you have <strong>telegram</strong>, you can contact",
-        "tgme_page_description\">if you have <strong>telegram</strong>, you can contact",
-        "username not found",
-        "this channel is unavailable",
-    ]
-    if "tgme_page_title" not in lower and "tgme_page_wrap" not in lower:
-        return False, "unexpected t.me page"
+    plain_text = " ".join(
+        re.sub(r"<[^>]+>", " ", html.unescape(lower)).split()
+    )
+    description_blocks = re.findall(
+        r'<div\s+class="[^"]*\btgme_page_description\b[^"]*"[^>]*>(.*?)</div>',
+        lower,
+        flags=re.DOTALL,
+    )
+    description_text = " ".join(
+        re.sub(r"<[^>]+>", " ", html.unescape(block)).strip()
+        for block in description_blocks
+    )
+    description_text = " ".join(description_text.split())
 
-    if any(marker in lower for marker in not_found_markers):
+    if re.search(r"if you have telegram\s*,\s*you can contact", description_text):
         return False, "t.me page has not-found marker"
+
+    if "username not found" in plain_text or "this channel is unavailable" in plain_text:
+        return False, "t.me page has not-found marker"
+
+    if "tgme_page_title" not in lower:
+        return None, "unexpected t.me page"
 
     return True, None
 
 
-def audit_directory_usernames(db, *, limit: int | None = None) -> tuple[int, list[DirectoryUsernameAuditIssue]]:
+def check_public_tme_username(
+    username: str,
+    *,
+    timeout: float = 8.0,
+    attempts: int = 3,
+    retry_delay: float = 2.0,
+) -> tuple[bool | None, str | None]:
+    """Return True for valid, False for confirmed invalid, None for unavailable.
+
+    Transport errors and unexpected responses are retried and never presented as
+    proof that a Telegram username is invalid.
+    """
+    if not username_slug(username):
+        return False, "empty_username"
+
+    attempts = max(1, int(attempts))
+    invalid_count = 0
+    last_reason: str | None = None
+
+    for attempt in range(attempts):
+        ok, reason = _check_public_tme_username_once(username, timeout=timeout)
+        if ok is True:
+            return True, None
+        if ok is False:
+            invalid_count += 1
+        last_reason = reason
+        if attempt + 1 < attempts and retry_delay > 0:
+            time.sleep(retry_delay * (2**attempt))
+
+    if invalid_count == attempts:
+        return False, f"{last_reason or 't.me username not found'} confirmed by {attempts} attempts"
+
+    return None, (
+        f"{last_reason or 'temporary t.me error'}; inconclusive after {attempts} attempts "
+        f"({invalid_count} not-found responses)"
+    )
+
+
+def audit_directory_usernames(
+    db,
+    *,
+    limit: int | None = None,
+    max_workers: int = 4,
+    confirmation_workers: int = 2,
+    confirmation_cooldown: float = 5.0,
+) -> tuple[int, list[DirectoryUsernameAuditIssue], list[DirectoryUsernameAuditIssue]]:
     rows = load_published_directory_contact_rows(db, limit=limit)
     issues: list[DirectoryUsernameAuditIssue] = []
+    unavailable: list[DirectoryUsernameAuditIssue] = []
 
-    checked_cache: dict[str, tuple[bool, str | None]] = {}
+    usernames_by_key: dict[str, str] = {}
     for row in rows:
         username = normalize_telegram_username(row.get("telegram_username"))
-        if username not in checked_cache:
-            checked_cache[username] = check_public_tme_username(username)
+        usernames_by_key.setdefault(username.casefold(), username)
 
-        ok, reason = checked_cache[username]
-        if not ok:
+    checked_cache: dict[str, tuple[bool | None, str | None]] = {}
+    if usernames_by_key:
+        worker_count = max(1, min(int(max_workers), len(usernames_by_key)))
+        keys = list(usernames_by_key)
+        with ThreadPoolExecutor(max_workers=worker_count, thread_name_prefix="tme-audit") as executor:
+            initial_check = partial(check_public_tme_username, attempts=1, retry_delay=0)
+            results = executor.map(initial_check, (usernames_by_key[key] for key in keys))
+            checked_cache = dict(zip(keys, results))
+
+        confirmation_keys = [key for key in keys if checked_cache[key][0] is not True]
+        if confirmation_keys:
+            if confirmation_cooldown > 0:
+                time.sleep(confirmation_cooldown)
+            worker_count = max(1, min(int(confirmation_workers), len(confirmation_keys)))
+            with ThreadPoolExecutor(
+                max_workers=worker_count,
+                thread_name_prefix="tme-audit-confirm",
+            ) as executor:
+                confirmation_results = executor.map(
+                    check_public_tme_username,
+                    (usernames_by_key[key] for key in confirmation_keys),
+                )
+                checked_cache.update(zip(confirmation_keys, confirmation_results))
+
+    for row in rows:
+        username = normalize_telegram_username(row.get("telegram_username"))
+        ok, reason = checked_cache[username.casefold()]
+        if ok is False:
             issues.append(_issue_from_row(row, reason=reason or "unknown"))
+        elif ok is None:
+            unavailable.append(_issue_from_row(row, reason=reason or "temporary t.me error"))
 
-    return len(rows), issues
+    return len(rows), issues, unavailable
 
 
-def build_directory_username_audit_report(*, checked_count: int, issues: list[DirectoryUsernameAuditIssue]) -> str:
+def build_directory_username_audit_report(
+    *,
+    checked_count: int,
+    issues: list[DirectoryUsernameAuditIssue],
+    unavailable: list[DirectoryUsernameAuditIssue] | None = None,
+) -> str:
+    unavailable = unavailable or []
     lines = [
         "<b>Проверка Telegram-контактов Справочника</b>",
         "",
         f"Проверено объявлений: {checked_count}",
-        f"Проблемных контактов: {len(issues)}",
+        f"Подтверждённо неработающих контактов: {len(issues)}",
+        f"Временно не удалось проверить: {len(unavailable)}",
     ]
 
-    if not issues:
-        lines.extend(["", "Проблемных Telegram username не найдено."])
+    if not issues and not unavailable:
+        lines.extend(["", "Все Telegram username работают."])
         return "\n".join(lines)
 
-    lines.append("")
-    for issue in issues[:80]:
-        lines.append(f"❌ {html.escape(issue.username)} — {html.escape(issue.section_name)} #{issue.post_id}")
-        lines.append(html.escape(issue.display_title))
-        if issue.post_url:
-            lines.append(html.escape(issue.post_url))
-        lines.append(f"Причина: {html.escape(issue.reason)}")
-        lines.append("")
+    if issues:
+        lines.extend(["", "<b>Подтверждённо неработающие:</b>"])
+        for issue in issues[:80]:
+            lines.append(f"❌ {html.escape(issue.username)} — {html.escape(issue.section_name)} #{issue.post_id}")
+            lines.append(html.escape(issue.display_title))
+            if issue.post_url:
+                lines.append(html.escape(issue.post_url))
+            lines.append(f"Причина: {html.escape(issue.reason)}")
+            lines.append("")
 
-    if len(issues) > 80:
-        lines.append(f"Показаны первые 80 из {len(issues)} проблемных контактов.")
+        if len(issues) > 80:
+            lines.append(f"Показаны первые 80 из {len(issues)} неработающих контактов.")
+
+    if unavailable:
+        lines.extend([
+            "",
+            "<b>Временные ошибки проверки:</b>",
+            "Эти контакты не помечены как неработающие.",
+        ])
+        for issue in unavailable[:80]:
+            lines.append(f"⚠️ {html.escape(issue.username)} — {html.escape(issue.section_name)} #{issue.post_id}")
+            lines.append(html.escape(issue.display_title))
+            if issue.post_url:
+                lines.append(html.escape(issue.post_url))
+            lines.append(f"Причина: {html.escape(issue.reason)}")
+            lines.append("")
+
+        if len(unavailable) > 80:
+            lines.append(f"Показаны первые 80 из {len(unavailable)} временно непроверенных контактов.")
 
     return "\n".join(lines).strip()
 
 
-async def send_directory_username_audit_report(bot, db, *, fallback_admin_chat_id: int | None = None, limit: int | None = None) -> tuple[int, int]:
-    checked_count, issues = audit_directory_usernames(db, limit=limit)
-    report = build_directory_username_audit_report(checked_count=checked_count, issues=issues)
+async def send_directory_username_audit_report(bot, db, *, fallback_admin_chat_id: int | None = None, limit: int | None = None) -> tuple[int, int, int]:
+    checked_count, issues, unavailable = await asyncio.to_thread(
+        audit_directory_usernames,
+        db,
+        limit=limit,
+    )
+    report = build_directory_username_audit_report(
+        checked_count=checked_count,
+        issues=issues,
+        unavailable=unavailable,
+    )
     recipient = int(
         getattr(Config, "ADMIN_MODERATION_CHAT_ID", 0)
         or fallback_admin_chat_id
@@ -236,4 +362,4 @@ async def send_directory_username_audit_report(bot, db, *, fallback_admin_chat_i
             disable_web_page_preview=True,
         )
 
-    return checked_count, len(issues)
+    return checked_count, len(issues), len(unavailable)
