@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 
 
-def build_repost_admin_notes(source_post: dict) -> str:
+def build_repost_admin_notes(source_post: dict, *, repost_kind: str) -> str:
     return json.dumps({
+        "repost_kind": repost_kind,
         "old_post_id": source_post["id"],
         "old_message_id": source_post.get("message_id"),
         "old_chat_id": source_post.get("chat_id"),
@@ -15,7 +16,13 @@ def build_repost_admin_notes(source_post: dict) -> str:
     })
 
 
-def create_premium_repost_request(db, *, source_post: dict, user_id: int) -> int:
+def create_premium_repost_request(
+    db,
+    *,
+    source_post: dict,
+    user_id: int,
+    repost_kind: str,
+) -> int:
     return db.create_premium_post(
         user_id=user_id,
         mode=source_post.get("mode"),
@@ -31,5 +38,5 @@ def create_premium_repost_request(db, *, source_post: dict, user_id: int) -> int
         media_list=source_post.get("media_list") or [],
         payment_amount=10.00,
         action_type="repost",
-        admin_notes=build_repost_admin_notes(source_post),
+        admin_notes=build_repost_admin_notes(source_post, repost_kind=repost_kind),
     )

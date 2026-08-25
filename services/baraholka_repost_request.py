@@ -8,6 +8,7 @@ from services.admin_moderation_notice import send_admin_moderation_notice
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.catalog_specialized_renderers import render_housing_listing_html
 from services.premium_request_labels import premium_request_label
+from services.premium_repost_policy import premium_repost_denied_text, premium_repost_policy
 
 
 def _baraholka_repost_payload(source_post: dict) -> dict:
@@ -81,6 +82,10 @@ async def create_and_notify_baraholka_repost_request(
 
     if source_post["user_id"] != user["id"]:
         raise ValueError(f"Source premium post #{source_post_id} does not belong to user #{user['id']}")
+
+    repost_policy = premium_repost_policy(source_post)
+    if not repost_policy.allowed:
+        raise ValueError(premium_repost_denied_text(repost_policy))
 
     repost_id = db.create_baraholka_housing_repost_from_post(source_post_id, user["id"])
     await notify_baraholka_repost_request(

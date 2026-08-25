@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 
-def premium_request_label(*, action_type: str | None, mode: str | None, payment_amount: object, is_baraholka: bool = False) -> str:
+def premium_request_label(
+    *,
+    action_type: str | None,
+    mode: str | None,
+    payment_amount: object,
+    is_baraholka: bool = False,
+    repost_kind: str | None = None,
+) -> str:
     try:
         amount = float(payment_amount or 0)
     except (TypeError, ValueError):
@@ -19,6 +26,8 @@ def premium_request_label(*, action_type: str | None, mode: str | None, payment_
         return "Платный перепост в Барахолку — €10"
 
     if action_type == "repost":
+        if repost_kind == "republish":
+            return "Повторная публикация — €10"
         return "Ап объявления — €10"
 
     if action_type == "post" and amount >= 20:

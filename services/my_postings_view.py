@@ -5,6 +5,7 @@ from __future__ import annotations
 from aiogram.types import InlineKeyboardButton
 
 from services.catalog_modes import TALK_TO_ME_MODE
+from services.premium_repost_policy import REPUBLISH_KIND, premium_repost_policy
 
 
 def premium_post_status_label(post: dict) -> str:
@@ -43,10 +44,14 @@ def premium_post_action_rows(post: dict, post_id: int) -> list[list[InlineKeyboa
             ]
         return []
 
+    repost_policy = premium_repost_policy(post)
+
     if status == "deleted":
-        return [
-            [InlineKeyboardButton(text="Опубликовать снова — €10", callback_data=f"repost_premium_{post_id}")],
-        ]
+        if repost_policy.allowed and repost_policy.kind == REPUBLISH_KIND:
+            return [
+                [InlineKeyboardButton(text="Опубликовать снова — €10", callback_data=f"repost_premium_{post_id}")],
+            ]
+        return []
 
     if status != "published":
         return []
@@ -60,12 +65,16 @@ def premium_post_action_rows(post: dict, post_id: int) -> list[list[InlineKeyboa
         ]
 
     if is_housing:
-        return [
-            [InlineKeyboardButton(text="Платный перепост в Барахолку — €10", callback_data=f"hs:baraholka_mypostings:{post_id}")],
-            [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
-        ]
+        rows = []
+        if repost_policy.allowed:
+            rows.append(
+                [InlineKeyboardButton(text="Платный перепост в Барахолку — €10", callback_data=f"hs:baraholka_mypostings:{post_id}")]
+            )
+        rows.append([InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")])
+        return rows
 
-    return [
-        [InlineKeyboardButton(text="Поднять — €10", callback_data=f"repost_premium_{post_id}")],
-        [InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")],
-    ]
+    rows = []
+    if repost_policy.allowed:
+        rows.append([InlineKeyboardButton(text="Поднять — €10", callback_data=f"repost_premium_{post_id}")])
+    rows.append([InlineKeyboardButton(text="Удалить", callback_data=f"delete_premium_{post_id}")])
+    return rows

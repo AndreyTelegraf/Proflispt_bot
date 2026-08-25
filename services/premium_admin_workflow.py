@@ -14,6 +14,7 @@ from services.premium_admin_dispatcher import (
     edit_admin_approval,
     edit_admin_pin_disabled,
     edit_admin_rejection,
+    edit_admin_repost_source_blocked,
     notify_user_approval,
     notify_user_pin_disabled,
     notify_user_rejection,
@@ -22,6 +23,7 @@ from services.premium_publication_effects import apply_premium_publication_effec
 from services.premium_publish_plan import build_premium_publish_plan
 from services.premium_publisher import publish_premium_post_to_telegram
 from services.premium_repost_cleanup import build_repost_cleanup_plan, cleanup_old_repost_messages
+from services.premium_repost_policy import validate_premium_repost_request
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +53,13 @@ async def approve_premium_request(
     post_id: int,
     admin_id: int,
 ) -> str:
+    if post.get("action_type") == "repost":
+        try:
+            validate_premium_repost_request(db, post)
+        except ValueError as exc:
+            logger.error("Repost request #%s is no longer eligible: %s", post_id, exc)
+            raise PremiumAdminWorkflowError(str(exc)) from exc
+
     db.approve_premium_post(post_id, admin_id)
 
     repost_cleanup_plan = build_repost_cleanup_plan(post)
@@ -126,3 +135,39 @@ async def reject_premium_request(
         logger.error("Failed to notify user about rejection: %s", e)
 
     await edit_admin_rejection(admin_message, post_id=post_id)
+
+
+async def block_repost_source_request(
+    *,
+    bot,
+    admin_message,
+    post: dict,
+    user: dict,
+    post_id: int,
+    admin_id: int,
+) -> int:
+    if post.get("action_type") != "repost":
+        raise PremiumAdminWorkflowError(f"Post #{post_id} is not a repost request")
+
+    reason = f"Заблокировано администратором из заявки #{post_id}"
+    try:
+        source_post_id = db.block_repost_source_from_request(
+            post_id,
+            admin_id,
+            reason,
+        )
+    except Exception as exc:
+        logger.error("Failed to block repost source for request #%s: %s", post_id, exc)
+        raise PremiumAdminWorkflowError(str(exc)) from exc
+
+    try:
+        await notify_user_rejection(bot, user=user, post=post)
+    except Exception as exc:
+        logger.error("Failed to notify user about blocked repost source: %s", exc)
+
+    await edit_admin_repost_source_blocked(
+        admin_message,
+        post_id=post_id,
+        source_post_id=source_post_id,
+    )
+    return source_post_id

@@ -95,3 +95,18 @@ async def edit_admin_rejection(message, *, post_id: int) -> None:
         build_rejection_admin_text(post_id),
         parse_mode="HTML",
     )
+
+
+async def edit_admin_repost_source_blocked(
+    message,
+    *,
+    post_id: int,
+    source_post_id: int,
+) -> None:
+    await message.edit_text(
+        (
+            f"<b>Заявка #{post_id} отклонена.</b>\n\n"
+            f"Для исходного объявления #{source_post_id} запрещены ап и повторная публикация."
+        ),
+        parse_mode="HTML",
+    )

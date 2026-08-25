@@ -156,6 +156,9 @@ class Database:
                     payment_amount DECIMAL(10,2) DEFAULT 20.00,
                     action_type TEXT DEFAULT 'post' CHECK (action_type IN ('post', 'repost', 'pin')),
                     admin_notes TEXT,
+                    repost_blocked_at TIMESTAMP,
+                    repost_blocked_reason TEXT,
+                    repost_blocked_by INTEGER,
                     message_id INTEGER,
                     chat_id INTEGER,
                     topic_id INTEGER,
@@ -207,6 +210,9 @@ class Database:
                 ("expires_at", "TIMESTAMP"),
                 ("expiry_warned_1d_at", "TIMESTAMP"),
                 ("expired_notified_at", "TIMESTAMP"),
+                ("repost_blocked_at", "TIMESTAMP"),
+                ("repost_blocked_reason", "TEXT"),
+                ("repost_blocked_by", "INTEGER"),
             ]:
                 try:
                     cursor.execute(f"ALTER TABLE premium_posts ADD COLUMN {col} {col_type}")
@@ -1423,6 +1429,95 @@ class Database:
             
             conn.commit()
             return cursor.rowcount > 0
+
+    def block_premium_post_repost(self, post_id: int, admin_id: int, reason: str) -> bool:
+        """Block future bumps/republication for one source post."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE premium_posts
+                SET repost_blocked_at = ?, repost_blocked_reason = ?,
+                    repost_blocked_by = ?, updated_at = ?
+                WHERE id = ?
+            """, (datetime.now(), reason, admin_id, datetime.now(), post_id))
+            conn.commit()
+            return cursor.rowcount == 1
+
+    def block_repost_source_from_request(
+        self,
+        request_post_id: int,
+        admin_id: int,
+        reason: str,
+    ) -> int:
+        """Atomically reject a repost request and block its source post."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, user_id, action_type, payment_status, admin_notes
+                FROM premium_posts
+                WHERE id = ?
+            """, (request_post_id,))
+            request_row = cursor.fetchone()
+            if not request_row:
+                raise ValueError(f"Repost request #{request_post_id} not found")
+            if request_row["action_type"] != "repost":
+                raise ValueError(f"Post #{request_post_id} is not a repost request")
+            if request_row["payment_status"] != "pending":
+                raise ValueError(
+                    f"Repost request #{request_post_id} is already {request_row['payment_status']}"
+                )
+
+            try:
+                request_notes = json.loads(request_row["admin_notes"] or "{}")
+            except Exception as exc:
+                raise ValueError(
+                    f"Repost request #{request_post_id} has invalid admin notes"
+                ) from exc
+
+            source_post_id = int(request_notes.get("old_post_id") or 0)
+            if not source_post_id:
+                raise ValueError(f"Repost request #{request_post_id} has no source post")
+
+            cursor.execute("""
+                SELECT id, user_id
+                FROM premium_posts
+                WHERE id = ?
+            """, (source_post_id,))
+            source_row = cursor.fetchone()
+            if not source_row:
+                raise ValueError(f"Source post #{source_post_id} not found")
+            if source_row["user_id"] != request_row["user_id"]:
+                raise ValueError("Repost request and source post belong to different users")
+
+            now = datetime.now()
+            request_notes.update({
+                "moderation_result": "rejected_source_blocked",
+                "repost_blocked_source_id": source_post_id,
+                "repost_blocked_by": admin_id,
+                "repost_blocked_reason": reason,
+            })
+
+            cursor.execute("""
+                UPDATE premium_posts
+                SET repost_blocked_at = ?, repost_blocked_reason = ?,
+                    repost_blocked_by = ?, updated_at = ?
+                WHERE id = ?
+            """, (now, reason, admin_id, now, source_post_id))
+            if cursor.rowcount != 1:
+                conn.rollback()
+                raise RuntimeError(f"Could not block source post #{source_post_id}")
+
+            cursor.execute("""
+                UPDATE premium_posts
+                SET payment_status = 'rejected', admin_notes = ?, updated_at = ?
+                WHERE id = ? AND payment_status = 'pending'
+            """, (json.dumps(request_notes), now, request_post_id))
+            if cursor.rowcount != 1:
+                conn.rollback()
+                raise RuntimeError(f"Could not reject repost request #{request_post_id}")
+
+            conn.commit()
+            return source_post_id
 
     def update_premium_post_publication(
         self,

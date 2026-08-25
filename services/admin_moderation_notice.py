@@ -33,8 +33,8 @@ def _compact_description(value: object, *, limit: int = 120) -> str:
     return desc
 
 
-def _approval_keyboard(post_id: int) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
+def _approval_keyboard(post_id: int, *, allow_source_block: bool = False) -> InlineKeyboardMarkup:
+    rows = [
         [
             InlineKeyboardButton(
                 text="✅ Одобрить",
@@ -45,7 +45,15 @@ def _approval_keyboard(post_id: int) -> InlineKeyboardMarkup:
                 callback_data=f"admin:reject_premium:{post_id}",
             ),
         ],
-    ])
+    ]
+    if allow_source_block:
+        rows.append([
+            InlineKeyboardButton(
+                text="Запретить ап источника",
+                callback_data=f"admin:block_repost_source:{post_id}",
+            )
+        ])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 async def send_admin_moderation_notice(
     bot,
@@ -134,5 +142,5 @@ async def send_admin_moderation_notice_from_post(
         admin_text,
         parse_mode="HTML",
         disable_web_page_preview=True,
-        reply_markup=_approval_keyboard(post_id),
+        reply_markup=_approval_keyboard(post_id, allow_source_block=True),
     )
