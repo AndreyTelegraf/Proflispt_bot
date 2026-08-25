@@ -1,4 +1,7 @@
-"""Eligibility policy for paid bumps and republication from My Postings."""
+"""Eligibility policy for reusing one source post from My Postings.
+
+This policy must never gate creation of a separate new paid post.
+"""
 
 from __future__ import annotations
 

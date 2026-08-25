@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from database import Database
+from keyboards.main import get_main_menu
 from services.admin_moderation_notice import _approval_keyboard
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.my_postings_repost import handle_my_postings_repost_request
@@ -51,6 +52,13 @@ assert premium_post_action_rows(self_deleted, 3) == []
 blocked_rows = premium_post_action_rows(admin_blocked, 4)
 assert blocked_rows == []
 assert premium_post_status_label(admin_blocked) == "Заблокировано администратором"
+
+main_callbacks = {
+    button.callback_data
+    for row in get_main_menu().inline_keyboard
+    for button in row
+}
+assert "catalog:groups" in main_callbacks
 
 assert premium_request_label(
     action_type="repost",
@@ -184,5 +192,22 @@ with tempfile.TemporaryDirectory() as tmp:
             raise AssertionError("Admin-blocked source must not create a Baraholka request")
 
     asyncio.run(assert_blocked_baraholka_callback_is_denied())
+
+    new_paid_post_id = temp_db.create_premium_post(
+        user_id=user_id,
+        mode="teaching",
+        cities="[]",
+        description="Entirely new paid post",
+        telegram_username="@policy_user",
+        phone_main="+351000000000",
+        name="Policy User",
+        media_list=[{"type": "photo", "file_id": "paid-media"}],
+        payment_amount=20,
+        action_type="post",
+    )
+    new_paid_post = temp_db.get_premium_post(new_paid_post_id)
+    assert new_paid_post["action_type"] == "post"
+    assert float(new_paid_post["payment_amount"]) == 20.0
+    assert new_paid_post["repost_blocked_at"] is None
 
 print("my_postings_repost_policy_smoke OK")
