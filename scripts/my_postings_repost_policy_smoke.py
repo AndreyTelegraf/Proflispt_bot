@@ -12,7 +12,7 @@ from database import Database
 from services.admin_moderation_notice import _approval_keyboard
 from services.baraholka_repost_request import create_and_notify_baraholka_repost_request
 from services.my_postings_repost import handle_my_postings_repost_request
-from services.my_postings_view import premium_post_action_rows
+from services.my_postings_view import premium_post_action_rows, premium_post_status_label
 from services.premium_repost_policy import (
     BUMP_KIND,
     REPUBLISH_KIND,
@@ -49,7 +49,8 @@ assert premium_post_action_rows(published, 1)[0][0].text == "Поднять — 
 assert premium_post_action_rows(expired, 2)[0][0].text == "Опубликовать снова — €10"
 assert premium_post_action_rows(self_deleted, 3) == []
 blocked_rows = premium_post_action_rows(admin_blocked, 4)
-assert [button.text for row in blocked_rows for button in row] == ["Удалить"]
+assert blocked_rows == []
+assert premium_post_status_label(admin_blocked) == "Заблокировано администратором"
 
 assert premium_request_label(
     action_type="repost",

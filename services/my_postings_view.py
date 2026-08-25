@@ -9,6 +9,9 @@ from services.premium_repost_policy import REPUBLISH_KIND, premium_repost_policy
 
 
 def premium_post_status_label(post: dict) -> str:
+    if post.get("repost_blocked_at"):
+        return "Заблокировано администратором"
+
     status = post.get("status")
     if status == "published":
         return "Опубликовано"
@@ -36,6 +39,9 @@ def premium_post_action_rows(post: dict, post_id: int) -> list[list[InlineKeyboa
     status = post.get("status")
     mode = post.get("mode")
     action_type = post.get("action_type")
+
+    if post.get("repost_blocked_at"):
+        return []
 
     if mode == TALK_TO_ME_MODE:
         if status == "published":
