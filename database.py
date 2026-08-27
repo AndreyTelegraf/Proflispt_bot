@@ -1423,7 +1423,8 @@ class Database:
             
             cursor.execute("""
                 UPDATE premium_posts 
-                SET payment_status = 'rejected', admin_notes = ?, updated_at = ?
+                SET payment_status = 'rejected', status = 'rejected',
+                    admin_notes = ?, updated_at = ?
                 WHERE id = ?
             """, (admin_notes, datetime.now(), post_id))
             
@@ -1509,7 +1510,8 @@ class Database:
 
             cursor.execute("""
                 UPDATE premium_posts
-                SET payment_status = 'rejected', admin_notes = ?, updated_at = ?
+                SET payment_status = 'rejected', status = 'rejected',
+                    admin_notes = ?, updated_at = ?
                 WHERE id = ? AND payment_status = 'pending'
             """, (json.dumps(request_notes), now, request_post_id))
             if cursor.rowcount != 1:

@@ -40,7 +40,13 @@ async def check_active_directory_post(
             WHERE user_id = ?
               AND mode = ?
               AND action_type = 'post'
-              AND status IN ('published', 'pending')
+              AND (
+                    status = 'published'
+                    OR (
+                        status = 'pending'
+                        AND payment_status IN ('pending', 'approved')
+                    )
+                  )
               AND (phone_main = ? OR phone_whatsapp = ?)
             ORDER BY id DESC
             LIMIT 1
