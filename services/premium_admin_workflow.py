@@ -107,6 +107,7 @@ async def approve_premium_request(
             user=user,
             post=post,
             publish_chat_id=publish_chat_id,
+            topic_id=topic_id,
             published_message=published_message,
             is_baraholka_publish=is_baraholka_publish,
         )

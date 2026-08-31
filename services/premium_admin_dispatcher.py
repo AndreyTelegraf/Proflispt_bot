@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+from services.directory_links import telegram_message_url
 from services.premium_admin_notifications import (
     build_approval_admin_text,
     build_approval_user_notification,
@@ -15,14 +16,24 @@ from services.premium_admin_notifications import (
 logger = logging.getLogger(__name__)
 
 
-async def build_message_link(bot, *, chat_id: int, message_id: int | None) -> str | None:
+async def build_message_link(
+    bot,
+    *,
+    chat_id: int,
+    message_id: int | None,
+    topic_id: int | None = None,
+) -> str | None:
     if not message_id:
         return None
 
     try:
         chat_info = await bot.get_chat(chat_id)
         if chat_info.username:
-            return f"https://t.me/{chat_info.username}/{message_id}"
+            return telegram_message_url(
+                chat_info.username,
+                message_id,
+                topic_id,
+            )
     except Exception as e:
         logger.warning("Could not build premium post link: %s", e)
 
@@ -52,6 +63,7 @@ async def notify_user_approval(
     user: dict,
     post: dict,
     publish_chat_id: int,
+    topic_id: int | None,
     published_message,
     is_baraholka_publish: bool,
 ) -> None:
@@ -59,6 +71,7 @@ async def notify_user_approval(
         bot,
         chat_id=publish_chat_id,
         message_id=published_message.message_id if published_message else None,
+        topic_id=topic_id,
     )
     notification = build_approval_user_notification(
         post,

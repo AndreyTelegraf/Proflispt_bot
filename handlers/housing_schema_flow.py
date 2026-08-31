@@ -40,6 +40,7 @@ from services.directory_post_guard import (
     check_active_directory_post,
     check_duplicate_directory_post,
 )
+from services.directory_links import telegram_message_url
 from services.free_post_supersede import supersede_previous_free_publications
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -901,7 +902,11 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
     try:
         chat_info = await callback.bot.get_chat(channel_id)
         if chat_info.username:
-            link = f"https://t.me/{chat_info.username}/{published_message.message_id}"
+            link = telegram_message_url(
+                chat_info.username,
+                published_message.message_id,
+                topic_id,
+            )
     except Exception:
         pass
 
@@ -998,7 +1003,11 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
                 try:
                     baraholka_chat = await callback.bot.get_chat(Config.BARAHOLKA_CHANNEL_ID)
                     if baraholka_chat.username:
-                        baraholka_link = f"https://t.me/{baraholka_chat.username}/{baraholka_message.message_id}"
+                        baraholka_link = telegram_message_url(
+                            baraholka_chat.username,
+                            baraholka_message.message_id,
+                            Config.BARAHOLKA_HOUSING_TOPIC_ID,
+                        )
                 except Exception:
                     pass
         except Exception as e:
@@ -1244,5 +1253,4 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
         reply_markup=b.as_markup(),
     )
     await callback.answer()
-
 

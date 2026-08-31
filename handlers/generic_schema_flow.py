@@ -35,6 +35,7 @@ from services.catalog_listing_renderer import (
 )
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice
+from services.directory_links import telegram_message_url
 from services.free_post_supersede import supersede_previous_free_publications
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
@@ -1078,8 +1079,15 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
 
         try:
             chat_info = await callback.bot.get_chat(channel_id)
-            link = (f"https://t.me/{chat_info.username}/{published.message_id}"
-                    if chat_info.username else None)
+            link = (
+                telegram_message_url(
+                    chat_info.username,
+                    published.message_id,
+                    topic_id,
+                )
+                if chat_info.username
+                else None
+            )
         except Exception:
             link = None
 
