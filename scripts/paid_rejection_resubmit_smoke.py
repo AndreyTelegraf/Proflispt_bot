@@ -15,10 +15,42 @@ with tempfile.TemporaryDirectory() as runtime_dir:
     os.chdir(runtime_dir)
     try:
         from database import Database
-        from services.directory_post_guard import check_active_directory_post
+        from services.directory_post_guard import check_pending_directory_post
 
         test_db = Database(str(Path(runtime_dir) / "resubmit.db"))
         user_id = test_db.create_user(telegram_id=1001, username="resubmit_user")
+
+        published_free_id = test_db.create_premium_post(
+            user_id=user_id,
+            mode="owner_real_estate",
+            cities="[]",
+            description="Published free listing",
+            telegram_username="@resubmit_user",
+            phone_main="+351000000000",
+            name="Resubmit User",
+            media_list=[],
+            payment_amount=0,
+            action_type="post",
+        )
+        assert test_db.approve_premium_post(published_free_id, admin_id=777)
+        assert test_db.update_premium_post_publication(
+            published_free_id,
+            message_id=5001,
+            chat_id=-1001000000000,
+            topic_id=8490,
+            published_message_ids=[5001],
+        )
+
+        allowed, message = asyncio.run(
+            check_pending_directory_post(
+                test_db,
+                user_id=user_id,
+                mode="owner_real_estate",
+                phone_main="+351000000000",
+            )
+        )
+        assert allowed
+        assert message is None
 
         request_id = test_db.create_premium_post(
             user_id=user_id,
@@ -34,7 +66,7 @@ with tempfile.TemporaryDirectory() as runtime_dir:
         )
 
         allowed, _ = asyncio.run(
-            check_active_directory_post(
+            check_pending_directory_post(
                 test_db,
                 user_id=user_id,
                 mode="owner_real_estate",
@@ -53,7 +85,7 @@ with tempfile.TemporaryDirectory() as runtime_dir:
         assert rejected["status"] == "rejected"
 
         allowed, message = asyncio.run(
-            check_active_directory_post(
+            check_pending_directory_post(
                 test_db,
                 user_id=user_id,
                 mode="owner_real_estate",
@@ -87,7 +119,7 @@ with tempfile.TemporaryDirectory() as runtime_dir:
             conn.commit()
 
         allowed, message = asyncio.run(
-            check_active_directory_post(
+            check_pending_directory_post(
                 test_db,
                 user_id=user_id,
                 mode="owner_real_estate",

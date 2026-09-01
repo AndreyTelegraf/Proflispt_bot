@@ -37,8 +37,8 @@ from services.premium_request_labels import premium_request_label
 from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT
 from services.catalog_modes import HOUSING_MODE_TO_SECTION_NAME
 from services.directory_post_guard import (
-    check_active_directory_post,
     check_duplicate_directory_post,
+    check_pending_directory_post,
 )
 from services.directory_links import telegram_message_url
 from services.free_post_supersede import supersede_previous_free_publications
@@ -1102,7 +1102,7 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
             last_name=callback.from_user.last_name,
         )
 
-        can_post, limit_message = await check_active_directory_post(
+        can_post, limit_message = await check_pending_directory_post(
             db,
             user_id=user_db_id,
             mode=slug,
@@ -1111,7 +1111,7 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
         if not can_post:
             await callback.answer(
                 limit_message
-                or "Такое объявление уже опубликовано или ожидает публикации.",
+                or "Такое объявление уже ожидает публикации.",
                 show_alert=True,
             )
             return
@@ -1253,4 +1253,3 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
         reply_markup=b.as_markup(),
     )
     await callback.answer()
-

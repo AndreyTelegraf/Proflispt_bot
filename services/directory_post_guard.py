@@ -20,14 +20,14 @@ async def check_duplicate_directory_post(
     return db.check_free_repost_guard(user_id, mode, phone_main)
 
 
-async def check_active_directory_post(
+async def check_pending_directory_post(
     db,
     *,
     user_id: int,
     mode: str,
     phone_main: str,
 ) -> tuple[bool, str | None]:
-    """Return whether there is no active matching directory post."""
+    """Return whether there is no matching paid request awaiting publication."""
     phone = str(phone_main or "").strip()
     if not phone:
         return True, None
@@ -40,13 +40,8 @@ async def check_active_directory_post(
             WHERE user_id = ?
               AND mode = ?
               AND action_type = 'post'
-              AND (
-                    status = 'published'
-                    OR (
-                        status = 'pending'
-                        AND payment_status IN ('pending', 'approved')
-                    )
-                  )
+              AND status = 'pending'
+              AND payment_status IN ('pending', 'approved')
               AND (phone_main = ? OR phone_whatsapp = ?)
             ORDER BY id DESC
             LIMIT 1
@@ -57,4 +52,4 @@ async def check_active_directory_post(
     if row is None:
         return True, None
 
-    return False, "Такое объявление уже опубликовано или ожидает публикации."
+    return False, "Такое объявление уже ожидает публикации."
