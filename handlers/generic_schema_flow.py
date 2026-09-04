@@ -46,6 +46,7 @@ from services.moderated_free_sections import (
     build_talk_to_me_listing_payload,
     validate_talk_to_me_payload,
 )
+from services.publication_access import PAID_ONLY_NOTICE, free_publication_availability
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -298,6 +299,18 @@ def _media_kb(slug: str) -> InlineKeyboardMarkup:
     b.adjust(1)
     return b.as_markup()
 
+
+def _paid_only_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="← Главное меню", callback_data="go:main")],
+    ])
+
+
+async def _show_paid_only(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    await callback.message.edit_text(PAID_ONLY_NOTICE, reply_markup=_paid_only_kb())
+    await callback.answer()
+
 # ── state data helpers ────────────────────────────────────────────────────────
 
 async def _get_gs(state: FSMContext) -> tuple[str, str, int, dict, list]:
@@ -381,7 +394,9 @@ async def _advance(
         free_limit_message = None
         user = db.get_user(from_user.id)
         if user and slug != TALK_TO_ME_MODE:
-            can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
+            can_publish_free, free_limit_message = free_publication_availability(db, user["id"])
+            if can_publish_free:
+                can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
             if can_publish_free:
                 can_publish_free, free_limit_message = db.check_free_repost_guard(
                     user["id"],
@@ -523,6 +538,10 @@ async def gs_entry(callback: CallbackQuery, state: FSMContext):
     section_name = SLUG_TO_SECTION.get(slug)
     if not section_name:
         await callback.answer("Раздел не найден.", show_alert=True)
+        return
+
+    if slug == TALK_TO_ME_MODE and db.is_paid_only_telegram_user(callback.from_user.id):
+        await _show_paid_only(callback, state)
         return
 
     try:
@@ -946,6 +965,9 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
         return
 
     if slug == TALK_TO_ME_MODE:
+        if db.is_paid_only_telegram_user(callback.from_user.id):
+            await _show_paid_only(callback, state)
+            return
         try:
             await _submit_talk_to_me_for_moderation(
                 callback,
@@ -978,6 +1000,22 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
                 last_name=callback.from_user.last_name,
             )
             user = db.get_user(callback.from_user.id)
+
+        can_post, limit_message = free_publication_availability(db, user["id"])
+        if not can_post:
+            text = (
+                f"{_render_listing(slug, payload)}\n\n"
+                f"Бесплатная публикация сейчас недоступна: {limit_message}\n\n"
+                "Можно отправить объявление на платную публикацию с фото/видео."
+            )
+            await callback.message.edit_text(
+                text,
+                reply_markup=_preview_kb(slug, can_publish_free=False),
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+            await callback.answer()
+            return
 
         can_post, limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
         if not can_post:
@@ -1203,6 +1241,9 @@ async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
         return
 
     if slug == TALK_TO_ME_MODE:
+        if db.is_paid_only_telegram_user(callback.from_user.id):
+            await _show_paid_only(callback, state)
+            return
         try:
             await _submit_talk_to_me_for_moderation(
                 callback,
@@ -1304,7 +1345,9 @@ async def gs_media_cancel(callback: CallbackQuery, state: FSMContext):
     free_limit_message = None
     user = db.get_user(callback.from_user.id)
     if user and slug != TALK_TO_ME_MODE:
-        can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
+        can_publish_free, free_limit_message = free_publication_availability(db, user["id"])
+        if can_publish_free:
+            can_publish_free, free_limit_message = db.check_premium_post_monthly_limit(user["id"], slug)
         if can_publish_free:
             can_publish_free, free_limit_message = db.check_free_repost_guard(
                 user["id"],

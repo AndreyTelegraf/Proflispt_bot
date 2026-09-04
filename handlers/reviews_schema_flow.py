@@ -21,6 +21,7 @@ from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, REVIEW_TEXT_MA
 from services.catalog_modes import REVIEWS_SECTION_NAME
 from services.premium_request_labels import premium_request_label
 from services.admin_moderation_notice import send_admin_moderation_notice
+from services.publication_access import PAID_ONLY_NOTICE
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -172,6 +173,17 @@ async def _rv_notify_admin(bot, post_id: int, payload: dict, media_list: list) -
 # ── submit helper ──────────────────────────────────────────────────────────────
 
 async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dict, media_list: list) -> None:
+    if db.is_paid_only_telegram_user(callback.from_user.id):
+        await state.clear()
+        await callback.message.edit_text(
+            PAID_ONLY_NOTICE,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="← Главное меню", callback_data="go:main")],
+            ]),
+        )
+        await callback.answer()
+        return
+
     author_username = callback.from_user.username or ""
     if not author_username:
         await callback.answer("Нужен Telegram username автора отзыва.", show_alert=True)
@@ -232,6 +244,16 @@ async def _rv_do_submit(callback: CallbackQuery, state: FSMContext, payload: dic
 @router.callback_query(F.data == "section:reviews")
 async def rv_entry(callback: CallbackQuery, state: FSMContext):
     await state.clear()
+
+    if db.is_paid_only_telegram_user(callback.from_user.id):
+        await callback.message.edit_text(
+            PAID_ONLY_NOTICE,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="← Главное меню", callback_data="go:main")],
+            ]),
+        )
+        await callback.answer()
+        return
 
     if db.is_residency_confirmed(callback.from_user.id):
         payload = {"resides_in_portugal": "yes"}

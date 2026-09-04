@@ -42,6 +42,7 @@ from services.directory_post_guard import (
 )
 from services.directory_links import telegram_message_url
 from services.free_post_supersede import supersede_previous_free_publications
+from services.publication_access import free_publication_availability
 from services.listing_validation import (
     STANDARD_LISTING_REQUIRED_FIELDS,
     validate_publish_payload,
@@ -185,11 +186,13 @@ async def _hs_render_preview_text_and_kb(slug: str, payload: dict, user_id: int 
     free_limit_message = None
 
     if user_id:
-        can_publish_free, free_limit_message = await _hs_directory_post_available(
-            user_id,
-            slug,
-            payload.get("phone_main", ""),
-        )
+        can_publish_free, free_limit_message = free_publication_availability(db, user_id)
+        if can_publish_free:
+            can_publish_free, free_limit_message = await _hs_directory_post_available(
+                user_id,
+                slug,
+                payload.get("phone_main", ""),
+            )
 
     if not can_publish_free:
         text = (
@@ -778,6 +781,18 @@ async def _hs_free_publish(callback: CallbackQuery, state: FSMContext, slug: str
             last_name=callback.from_user.last_name,
         )
         user = db.get_user(callback.from_user.id)
+
+    can_post, _ = free_publication_availability(db, user["id"])
+    if not can_post:
+        text, kb = await _hs_render_preview_text_and_kb(slug, payload, user["id"])
+        await callback.message.edit_text(
+            text,
+            reply_markup=kb,
+            parse_mode="HTML",
+            disable_web_page_preview=True,
+        )
+        await callback.answer()
+        return
 
     can_post, limit_message = await _hs_directory_post_available(
         user["id"],

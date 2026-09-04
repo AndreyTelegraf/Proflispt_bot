@@ -84,6 +84,18 @@ class Database:
                 if "duplicate column name" not in str(e):
                     logger.warning(f"Could not add residency_confirmed_at column: {e}")
 
+            # Per-account policy: paid requests remain available while new
+            # free publications are disabled.
+            try:
+                cursor.execute(
+                    "ALTER TABLE users ADD COLUMN paid_only_posts INTEGER NOT NULL "
+                    "DEFAULT 0 CHECK (paid_only_posts IN (0, 1))"
+                )
+                logger.info("Added paid_only_posts column to users table")
+            except sqlite3.OperationalError as e:
+                if "duplicate column name" not in str(e):
+                    logger.warning(f"Could not add paid_only_posts column: {e}")
+
             # Drafts table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS drafts (
@@ -821,6 +833,10 @@ class Database:
         Returns:
             int: ID созданного поста
         """
+        payment_amount = data.get('payment_amount', 20.00)
+        if float(payment_amount or 0) <= 0:
+            self.assert_free_publication_allowed(user_id)
+
         with self.get_connection() as conn:
             cursor = conn.cursor()
             
@@ -836,13 +852,36 @@ class Database:
                 data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
                 data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
                 data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
-                data.get('payment_amount', 20.00), data.get('action_type', 'post'),
+                payment_amount, data.get('action_type', 'post'),
                 data.get('admin_notes')
             ))
             
             post_id = cursor.lastrowid
             conn.commit()
             return post_id
+
+    def is_paid_only_user(self, user_id: int) -> bool:
+        """Return whether an internal user id may create paid posts only."""
+        with self.get_connection() as conn:
+            row = conn.execute(
+                "SELECT paid_only_posts FROM users WHERE id = ?",
+                (user_id,),
+            ).fetchone()
+        return bool(row and row["paid_only_posts"])
+
+    def is_paid_only_telegram_user(self, telegram_id: int) -> bool:
+        """Return whether a Telegram account may create paid posts only."""
+        with self.get_connection() as conn:
+            row = conn.execute(
+                "SELECT paid_only_posts FROM users WHERE telegram_id = ?",
+                (telegram_id,),
+            ).fetchone()
+        return bool(row and row["paid_only_posts"])
+
+    def assert_free_publication_allowed(self, user_id: int) -> None:
+        """Reject a free write at the database boundary for paid-only users."""
+        if self.is_paid_only_user(user_id):
+            raise PermissionError("free publications are disabled for this user")
 
     def _premium_post_ttl_days(self, mode: str):
         ttl_by_mode = {
@@ -1171,6 +1210,7 @@ class Database:
         topic_id: int,
     ) -> int:
         """Insert a free (text-only) post in any section directly as published."""
+        self.assert_free_publication_allowed(user_id)
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -1221,6 +1261,7 @@ class Database:
         published_message_ids: list,
     ) -> int:
         """Insert a free housing post (with or without media) directly as published."""
+        self.assert_free_publication_allowed(user_id)
         first_media = media_list[0] if media_list else None
         admin_notes_val = json.dumps({"rental_term": payload.get("rental_term", "")})
         with self.get_connection() as conn:
