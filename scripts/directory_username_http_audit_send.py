@@ -21,10 +21,10 @@ async def main() -> None:
 
     bot = Bot(token=Config.BOT_TOKEN)
     try:
-        checked, issues, unavailable = await send_directory_username_audit_report(bot, db, limit=limit)
+        checked, issues, unavailable, stale = await send_directory_username_audit_report(bot, db, limit=limit)
         print(
             "directory_username_http_audit_send OK "
-            f"checked={checked} issues={issues} unavailable={unavailable}"
+            f"checked={checked} issues={issues} unavailable={unavailable} stale={stale}"
         )
     finally:
         await bot.session.close()

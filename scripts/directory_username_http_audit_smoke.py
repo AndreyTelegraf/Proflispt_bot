@@ -6,6 +6,7 @@ import sys
 import time
 import urllib.error
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -14,10 +15,12 @@ from services.directory_username_http_audit import (
     DirectoryUsernameAuditIssue,
     audit_directory_usernames,
     build_directory_username_audit_report,
+    check_public_tme_post,
     check_public_tme_username,
     normalize_telegram_username,
     send_directory_username_audit_report,
     username_slug,
+    verify_directory_username_audit_candidates,
 )
 
 assert normalize_telegram_username("@Kak_odin") == "@Kak_odin"
@@ -89,8 +92,8 @@ with patch(
     return_value=missing_page,
 ) as mocked_urlopen:
     ok, reason = check_public_tme_username("@missing", retry_delay=0)
-    assert ok is False
-    assert reason and "not-found marker" in reason and "confirmed by 3 attempts" in reason
+    assert ok is None
+    assert reason and "ambiguous generic contact page" in reason
     assert mocked_urlopen.call_count == 3
 
 with patch(
@@ -99,6 +102,39 @@ with patch(
 ) as mocked_urlopen:
     assert check_public_tme_username("@recovers_from_false_not_found", retry_delay=0) == (True, None)
     assert mocked_urlopen.call_count == 2
+
+live_post_page = FakeResponse(
+    '<meta property="og:title" content="Proflistpt_bot in Directory">'
+    '<meta property="og:description" content="Listing text @working">'
+)
+with patch(
+    "services.directory_username_http_audit.urllib.request.urlopen",
+    return_value=live_post_page,
+) as mocked_urlopen:
+    assert check_public_tme_post(
+        "https://t.me/proflistpt/1/101",
+        expected_username="@working",
+        retry_delay=0,
+    ) == (True, None)
+    assert mocked_urlopen.call_count == 1
+
+missing_post_page = FakeResponse(
+    '<meta property="og:title" content="Directory">'
+    '<meta property="og:description" content="Directory landing page">'
+    '<div class="tgme_page_title">Directory</div>'
+)
+with patch(
+    "services.directory_username_http_audit.urllib.request.urlopen",
+    return_value=missing_post_page,
+) as mocked_urlopen:
+    ok, reason = check_public_tme_post(
+        "https://t.me/proflistpt/1/102",
+        expected_username="@missing",
+        retry_delay=0,
+    )
+    assert ok is False
+    assert reason and "channel landing page" in reason and "confirmed by 3 attempts" in reason
+    assert mocked_urlopen.call_count == 3
 
 rows = [
     {
@@ -174,14 +210,87 @@ report = build_directory_username_audit_report(
             post_url="https://t.me/proflistpt/1/3",
         )
     ],
+    stale_publications=[
+        DirectoryUsernameAuditIssue(
+            post_id=125,
+            username="@stale_user",
+            reason="Telegram publication is absent",
+            section_name="Риелторы",
+            display_title="Удалённая публикация",
+            post_url="https://t.me/proflistpt/1/4",
+        )
+    ],
 )
 
-assert "Проверено объявлений: 2" in report
-assert "Подтверждённо неработающих контактов: 1" in report
+assert "Записей со статусом «опубликовано» в базе: 2" in report
+assert "Подтверждённо неработающих контактов в доступных объявлениях: 1" in report
 assert "Временно не удалось проверить: 1" in report
+assert "Пропущено отсутствующих публикаций: 1" in report
+assert "База автоматически не изменялась" in report
 assert "@missing_user" in report
 assert "@temporary_user" in report
 assert "Грузовые перевозки #123" in report
+
+
+class VerificationBot:
+    async def get_chat(self, target):
+        usernames = {
+            -1001: "proflistpt",
+            10: "working",
+            20: "old_missing_post",
+            30: "new_username",
+        }
+        if target in usernames:
+            return SimpleNamespace(username=usernames[target])
+        raise RuntimeError("not resolvable by Bot API")
+
+
+def candidate(post_id, username, owner_id, owner_username):
+    return DirectoryUsernameAuditIssue(
+        post_id=post_id,
+        username=username,
+        reason="ambiguous t.me page",
+        section_name="Риелторы",
+        display_title=f"Post {post_id}",
+        post_url=None,
+        chat_id=-1001,
+        message_id=post_id,
+        topic_id=1,
+        owner_telegram_id=owner_id,
+        owner_username=owner_username,
+    )
+
+
+async def assert_verified_candidates() -> None:
+    candidates = [
+        candidate(101, "@working", 10, "@working"),
+        candidate(102, "@old_missing_post", 20, "@old_missing_post"),
+        candidate(103, "@old_username", 30, "@old_username"),
+    ]
+
+    def fake_post_check(url, **kwargs):
+        if url.endswith("/102"):
+            return False, "publication missing confirmed"
+        return True, None
+
+    with patch(
+        "services.directory_username_http_audit.check_public_tme_post",
+        side_effect=fake_post_check,
+    ):
+        confirmed, unavailable, stale = await verify_directory_username_audit_candidates(
+            VerificationBot(),
+            [],
+            candidates,
+        )
+
+    assert [item.post_id for item in confirmed] == [103]
+    assert "changed from @old_username to @new_username" in confirmed[0].reason
+    assert unavailable == []
+    assert [item.post_id for item in stale] == [102]
+    assert stale[0].post_url == "https://t.me/proflistpt/1/102"
+
+
+asyncio.run(assert_verified_candidates())
 
 
 class FakeBot:
@@ -204,7 +313,7 @@ async def assert_send_does_not_block_event_loop() -> None:
         )
         await asyncio.sleep(0.02)
         assert not task.done(), "audit blocked the event loop"
-        assert await task == (2, 0, 0)
+        assert await task == (2, 0, 0, 0)
     assert bot.messages
 
 

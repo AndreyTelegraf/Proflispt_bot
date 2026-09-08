@@ -548,16 +548,17 @@ async def cmd_audit_contacts(message: Message):
     await message.answer("Запускаю проверку Telegram-контактов Справочника. Отчёт будет отправлен администратору.")
 
     try:
-        checked, issues, unavailable = await send_directory_username_audit_report(message.bot, db)
+        checked, issues, unavailable, stale = await send_directory_username_audit_report(message.bot, db)
     except Exception as exc:
         logger.exception("Manual directory username audit failed: %s", exc)
         await message.answer(f"Проверка не выполнена: {exc}")
         return
 
     await message.answer(
-        f"Проверка завершена. Проверено объявлений: {checked}. "
+        f"Проверка завершена. Проверено записей со статусом «опубликовано»: {checked}. "
         f"Неработающих контактов: {issues}. "
-        f"Временно не удалось проверить: {unavailable}."
+        f"Временно не удалось проверить: {unavailable}. "
+        f"Отсутствующих публикаций пропущено: {stale}."
     )
 
 

@@ -363,13 +363,14 @@ class CleanupScheduler:
 
         logger.info("Starting weekly directory contacts audit")
         try:
-            checked, issues, unavailable = await send_directory_username_audit_report(self.bot, self.db)
+            checked, issues, unavailable, stale = await send_directory_username_audit_report(self.bot, self.db)
             self._mark_weekly_contacts_audit_ran(today_key)
             logger.info(
-                "Weekly directory contacts audit finished: checked=%s issues=%s unavailable=%s",
+                "Weekly directory contacts audit finished: checked=%s issues=%s unavailable=%s stale=%s",
                 checked,
                 issues,
                 unavailable,
+                stale,
             )
         except Exception as exc:
             logger.exception("Weekly directory contacts audit failed: %s", exc)
