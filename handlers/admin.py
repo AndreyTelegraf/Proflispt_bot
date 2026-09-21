@@ -27,6 +27,96 @@ def is_admin(user_id: int) -> bool:
     """Проверяет, является ли пользователь администратором."""
     return user_id in ADMIN_IDS
 
+
+@router.message(Command("paid_only"))
+async def paid_only_user_command(message: Message):
+    """Restrict one existing user to paid publication paths."""
+    if not is_admin(message.from_user.id):
+        await message.answer("🚫 У вас нет прав для выполнения этой команды.")
+        return
+
+    args = (message.text or "").split()[1:]
+    if len(args) != 1:
+        await message.answer(
+            "Использование: /paid_only <@username или Telegram ID>\n\n"
+            "Примеры:\n"
+            "/paid_only @username\n"
+            "/paid_only 123456789"
+        )
+        return
+
+    target_identifier = args[0].strip()
+    target_user = None
+
+    if target_identifier.startswith("@"):
+        username = target_identifier.lstrip("@").strip()
+        if not username:
+            await message.answer("Укажите username после @.")
+            return
+        target_user = db.get_user_by_username(username)
+        if target_user:
+            current_username = str(target_user.get("username") or "").lstrip("@")
+            if current_username.lower() != username.lower():
+                await message.answer(
+                    f"Текущий аккаунт @{username} не найден. Username встречается только "
+                    "в старой публикации; используйте точный Telegram ID."
+                )
+                return
+    else:
+        try:
+            telegram_id = int(target_identifier)
+        except ValueError:
+            await message.answer("Неверный формат. Используйте @username или числовой Telegram ID.")
+            return
+        target_user = db.get_user(telegram_id)
+
+    if not target_user:
+        await message.answer(
+            f"Пользователь {target_identifier} не найден в базе. "
+            "Он должен хотя бы один раз открыть бот."
+        )
+        return
+
+    target_db_id = int(target_user["id"])
+    target_telegram_id = int(target_user["telegram_id"])
+    username = str(target_user.get("username") or "").lstrip("@")
+    display_name = f"@{username}" if username else str(target_telegram_id)
+
+    if db.is_paid_only_user(target_db_id):
+        await message.answer(
+            f"ℹ️ Для {display_name} уже доступны только платные публикации."
+        )
+        return
+
+    changed = db.enable_paid_only_posts(target_db_id)
+    if not changed:
+        if db.is_paid_only_user(target_db_id):
+            await message.answer(
+                f"ℹ️ Для {display_name} уже доступны только платные публикации."
+            )
+            return
+        logger.error(
+            "[ADMIN] Could not enable paid-only posts: admin=%s target_db_id=%s target_telegram_id=%s",
+            message.from_user.id,
+            target_db_id,
+            target_telegram_id,
+        )
+        await message.answer("Не удалось включить ограничение. Попробуйте ещё раз.")
+        return
+
+    logger.info(
+        "[ADMIN] Paid-only posts enabled: admin=%s target_db_id=%s target_telegram_id=%s username=%s",
+        message.from_user.id,
+        target_db_id,
+        target_telegram_id,
+        username or None,
+    )
+    await message.answer(
+        f"✅ Для {display_name} (Telegram ID {target_telegram_id}) теперь доступны "
+        "только платные публикации.\n\n"
+        "Существующие объявления не изменены."
+    )
+
 @router.message(Command("ban"))
 async def ban_user_command(message: Message, state: FSMContext):
     """Команда для бана пользователя."""

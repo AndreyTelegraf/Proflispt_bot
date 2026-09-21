@@ -878,6 +878,17 @@ class Database:
             ).fetchone()
         return bool(row and row["paid_only_posts"])
 
+    def enable_paid_only_posts(self, user_id: int) -> bool:
+        """Enable paid-only publication access for one existing internal user id."""
+        with self.get_connection() as conn:
+            cursor = conn.execute(
+                "UPDATE users SET paid_only_posts = 1 "
+                "WHERE id = ? AND paid_only_posts = 0",
+                (user_id,),
+            )
+            conn.commit()
+            return cursor.rowcount == 1
+
     def assert_free_publication_allowed(self, user_id: int) -> None:
         """Reject a free write at the database boundary for paid-only users."""
         if self.is_paid_only_user(user_id):
