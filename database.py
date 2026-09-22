@@ -822,6 +822,25 @@ class Database:
             conn.commit()
             return deactivated_count
 
+    @staticmethod
+    def _insert_premium_post(cursor, user_id: int, data: dict) -> int:
+        cursor.execute("""
+            INSERT INTO premium_posts (
+                user_id, mode, cities, description, social_media,
+                telegram_username, phone_main, phone_whatsapp, name,
+                media_file_id, media_type, media_list, payment_status, payment_amount,
+                action_type, admin_notes
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            user_id, data.get('mode'), data.get('cities'), sanitize_description(data.get('description')),
+            data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
+            data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
+            data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
+            data.get('payment_amount', 20.00), data.get('action_type', 'post'),
+            data.get('admin_notes')
+        ))
+        return cursor.lastrowid
+
     def create_premium_post(self, user_id: int, **data) -> int:
         """
         Создает премиум-пост.
@@ -839,26 +858,53 @@ class Database:
 
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
-            cursor.execute("""
-                INSERT INTO premium_posts (
-                    user_id, mode, cities, description, social_media,
-                    telegram_username, phone_main, phone_whatsapp, name,
-                    media_file_id, media_type, media_list, payment_status, payment_amount,
-                    action_type, admin_notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                user_id, data.get('mode'), data.get('cities'), sanitize_description(data.get('description')),
-                data.get('social_media'), data.get('telegram_username'), data.get('phone_main'),
-                data.get('phone_whatsapp'), data.get('name'), data.get('media_file_id'),
-                data.get('media_type'), json.dumps(data.get('media_list', [])), 'pending',
-                payment_amount, data.get('action_type', 'post'),
-                data.get('admin_notes')
-            ))
-            
-            post_id = cursor.lastrowid
+            post_id = self._insert_premium_post(cursor, user_id, data)
             conn.commit()
             return post_id
+
+    def create_or_get_pending_premium_repost(
+        self,
+        user_id: int,
+        source_post_id: int,
+        repost_kind: str,
+        **data,
+    ) -> tuple[int, bool]:
+        """Atomically create one pending repost request per source and kind."""
+        if data.get("action_type") != "repost":
+            raise ValueError("Idempotent repost creation requires action_type='repost'")
+
+        payment_amount = data.get("payment_amount", 20.00)
+        if float(payment_amount or 0) <= 0:
+            self.assert_free_publication_allowed(user_id)
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("BEGIN IMMEDIATE")
+            cursor.execute("""
+                SELECT id, admin_notes
+                FROM premium_posts
+                WHERE user_id = ?
+                  AND action_type = 'repost'
+                  AND status = 'pending'
+                  AND payment_status = 'pending'
+                ORDER BY id ASC
+            """, (user_id,))
+
+            for row in cursor.fetchall():
+                try:
+                    notes = json.loads(row["admin_notes"] or "{}")
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                if (
+                    int(notes.get("old_post_id") or 0) == int(source_post_id)
+                    and notes.get("repost_kind") == repost_kind
+                ):
+                    conn.commit()
+                    return int(row["id"]), False
+
+            post_id = self._insert_premium_post(cursor, user_id, data)
+            conn.commit()
+            return post_id, True
 
     def is_paid_only_user(self, user_id: int) -> bool:
         """Return whether an internal user id may create paid posts only."""

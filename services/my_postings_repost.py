@@ -21,29 +21,30 @@ async def create_and_notify_my_postings_repost(
     requester,
     admin_chat_id: int,
     repost_kind: str,
-) -> int:
-    new_post_id = create_premium_repost_request(
+) -> tuple[int, bool]:
+    new_post_id, created = create_premium_repost_request(
         db,
         source_post=source_post,
         user_id=user["id"],
         repost_kind=repost_kind,
     )
 
-    await send_admin_moderation_notice_from_post(
-        bot,
-        post_id=new_post_id,
-        source_post=source_post,
-        requester=requester,
-        label=premium_request_label(
-            action_type="repost",
-            mode=source_post.get("mode"),
-            payment_amount=10,
-            repost_kind=repost_kind,
-        ),
-        admin_chat_id=admin_chat_id,
-        include_old_post_link=True,
-    )
-    return new_post_id
+    if created:
+        await send_admin_moderation_notice_from_post(
+            bot,
+            post_id=new_post_id,
+            source_post=source_post,
+            requester=requester,
+            label=premium_request_label(
+                action_type="repost",
+                mode=source_post.get("mode"),
+                payment_amount=10,
+                repost_kind=repost_kind,
+            ),
+            admin_chat_id=admin_chat_id,
+            include_old_post_link=True,
+        )
+    return new_post_id, created
 
 async def handle_my_postings_repost_request(
     callback,
@@ -58,7 +59,7 @@ async def handle_my_postings_repost_request(
         await callback.answer(premium_repost_denied_text(policy), show_alert=True)
         return
 
-    await create_and_notify_my_postings_repost(
+    post_id, created = await create_and_notify_my_postings_repost(
         callback.bot,
         db=db,
         source_post=post,
@@ -67,6 +68,13 @@ async def handle_my_postings_repost_request(
         admin_chat_id=admin_chat_id,
         repost_kind=policy.kind,
     )
+
+    if not created:
+        await callback.answer(
+            f"Заявка #{post_id} уже отправлена и ожидает решения",
+            show_alert=True,
+        )
+        return
 
     if policy.kind == REPUBLISH_KIND:
         text = "Заявка на повторную публикацию отправлена"

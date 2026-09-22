@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import json
 import sys
 import tempfile
@@ -20,7 +21,10 @@ from services.premium_repost_policy import (
     premium_repost_policy,
     validate_premium_repost_request,
 )
-from services.premium_repost_request import build_repost_admin_notes
+from services.premium_repost_request import (
+    build_repost_admin_notes,
+    create_premium_repost_request,
+)
 from services.premium_request_labels import premium_request_label
 
 
@@ -132,6 +136,22 @@ with tempfile.TemporaryDirectory() as tmp:
         conn.commit()
 
     source = temp_db.get_premium_post(source_id)
+    def create_same_repost_request() -> tuple[int, bool]:
+        return create_premium_repost_request(
+            temp_db,
+            source_post=source,
+            user_id=user_id,
+            repost_kind=BUMP_KIND,
+        )
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        concurrent_results = list(
+            executor.map(lambda _index: create_same_repost_request(), range(6))
+        )
+
+    assert len({post_id for post_id, _created in concurrent_results}) == 1
+    assert sum(1 for _post_id, created in concurrent_results if created) == 1
+
     request_id = temp_db.create_premium_post(
         user_id=user_id,
         mode="teaching",
@@ -155,6 +175,12 @@ with tempfile.TemporaryDirectory() as tmp:
     request = temp_db.get_premium_post(request_id)
     assert request["payment_status"] == "rejected"
     assert json.loads(request["admin_notes"])["moderation_result"] == "rejected_source_blocked"
+    try:
+        validate_premium_repost_request(temp_db, request)
+    except ValueError as exc:
+        assert "no longer pending" in str(exc)
+    else:
+        raise AssertionError("Rejected repost request must not be approved later")
 
     stale_request_id = temp_db.create_premium_post(
         user_id=user_id,

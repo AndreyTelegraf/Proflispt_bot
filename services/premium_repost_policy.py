@@ -49,6 +49,11 @@ def validate_premium_repost_request(db, request_post: dict) -> tuple[dict, Premi
     """Resolve the live source and reject stale/ineligible repost requests."""
     if request_post.get("action_type") != "repost":
         raise ValueError("Request is not a repost")
+    if (
+        request_post.get("status") != "pending"
+        or request_post.get("payment_status") != "pending"
+    ):
+        raise ValueError("Repost request is no longer pending")
 
     try:
         notes = json.loads(request_post.get("admin_notes") or "{}")

@@ -22,9 +22,11 @@ def create_premium_repost_request(
     source_post: dict,
     user_id: int,
     repost_kind: str,
-) -> int:
-    return db.create_premium_post(
+) -> tuple[int, bool]:
+    return db.create_or_get_pending_premium_repost(
         user_id=user_id,
+        source_post_id=source_post["id"],
+        repost_kind=repost_kind,
         mode=source_post.get("mode"),
         cities=json.dumps(source_post["cities"]),
         description=source_post["description"],
