@@ -906,6 +906,45 @@ class Database:
             conn.commit()
             return post_id, True
 
+    def create_or_get_pending_baraholka_repost(
+        self,
+        user_id: int,
+        source_post_id: int,
+        **data,
+    ) -> tuple[int, bool]:
+        """Atomically create one active Baraholka request per source post."""
+        if data.get("action_type") != "repost":
+            raise ValueError("Baraholka repost creation requires action_type='repost'")
+
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("BEGIN IMMEDIATE")
+            cursor.execute("""
+                SELECT id, admin_notes
+                FROM premium_posts
+                WHERE user_id = ?
+                  AND action_type = 'repost'
+                  AND status IN ('pending', 'publishing')
+                  AND payment_status IN ('pending', 'approved')
+                ORDER BY id ASC
+            """, (user_id,))
+
+            for row in cursor.fetchall():
+                try:
+                    notes = json.loads(row["admin_notes"] or "{}")
+                except (json.JSONDecodeError, TypeError):
+                    continue
+                if (
+                    notes.get("baraholka_repost_target") is True
+                    and int(notes.get("source_post_id") or 0) == int(source_post_id)
+                ):
+                    conn.commit()
+                    return int(row["id"]), False
+
+            post_id = self._insert_premium_post(cursor, user_id, data)
+            conn.commit()
+            return post_id, True
+
     def is_paid_only_user(self, user_id: int) -> bool:
         """Return whether an internal user id may create paid posts only."""
         with self.get_connection() as conn:
@@ -1362,7 +1401,11 @@ class Database:
             conn.commit()
             return cursor.lastrowid
 
-    def create_baraholka_housing_repost_from_post(self, source_post_id: int, user_id: int) -> int:
+    def create_baraholka_housing_repost_from_post(
+        self,
+        source_post_id: int,
+        user_id: int,
+    ) -> tuple[int, bool]:
         """Create a pending Baraholka repost from an already-published free housing post."""
         source = self.get_premium_post(source_post_id)
         if not source:
@@ -1390,8 +1433,9 @@ class Database:
             "source_published_message_ids": pub_ids,
         })
 
-        return self.create_premium_post(
+        return self.create_or_get_pending_baraholka_repost(
             user_id=user_id,
+            source_post_id=source_post_id,
             mode=source["mode"],
             cities=cities_val,
             description=source.get("description", ""),
@@ -1504,6 +1548,27 @@ class Database:
             conn.commit()
             return cursor.rowcount > 0
 
+    def claim_premium_post_for_publication(self, post_id: int, admin_id: int) -> bool:
+        """Atomically claim a pending request before any Telegram publication.
+
+        The transient ``publishing`` status is deliberately sticky on an uncertain
+        Telegram failure: silently retrying an uncertain send can create an orphan
+        duplicate in the destination chat.
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("BEGIN IMMEDIATE")
+            cursor.execute("""
+                UPDATE premium_posts
+                SET payment_status = 'approved', status = 'publishing', updated_at = ?
+                WHERE id = ?
+                  AND status = 'pending'
+                  AND payment_status IN ('pending', 'approved')
+            """, (datetime.now(), post_id))
+            claimed = cursor.rowcount == 1
+            conn.commit()
+            return claimed
+
     def reject_premium_post(self, post_id: int, admin_id: int, admin_notes: str) -> bool:
         """
         Отклоняет оплату премиум-поста.
@@ -1528,6 +1593,28 @@ class Database:
             
             conn.commit()
             return cursor.rowcount > 0
+
+    def reject_pending_premium_post(
+        self,
+        post_id: int,
+        admin_id: int,
+        admin_notes: str,
+    ) -> bool:
+        """Atomically reject a request only while it is not being published."""
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("BEGIN IMMEDIATE")
+            cursor.execute("""
+                UPDATE premium_posts
+                SET payment_status = 'rejected', status = 'rejected',
+                    admin_notes = ?, updated_at = ?
+                WHERE id = ?
+                  AND status = 'pending'
+                  AND payment_status IN ('pending', 'approved')
+            """, (admin_notes, datetime.now(), post_id))
+            rejected = cursor.rowcount == 1
+            conn.commit()
+            return rejected
 
     def block_premium_post_repost(self, post_id: int, admin_id: int, reason: str) -> bool:
         """Block future bumps/republication for one source post."""

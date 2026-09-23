@@ -60,7 +60,10 @@ async def approve_premium_request(
             logger.error("Repost request #%s is no longer eligible: %s", post_id, exc)
             raise PremiumAdminWorkflowError(str(exc)) from exc
 
-    db.approve_premium_post(post_id, admin_id)
+    if not db.claim_premium_post_for_publication(post_id, admin_id):
+        raise PremiumAdminWorkflowError(
+            f"Заявка #{post_id} уже обрабатывается или была обработана"
+        )
 
     repost_cleanup_plan = build_repost_cleanup_plan(post)
 
@@ -102,16 +105,31 @@ async def approve_premium_request(
                 old_post_id_to_supersede=repost_cleanup_plan.old_post_id_to_supersede,
             )
 
-        await notify_user_approval(
-            bot,
-            user=user,
-            post=post,
-            publish_chat_id=publish_chat_id,
-            topic_id=topic_id,
-            published_message=published_message,
-            is_baraholka_publish=is_baraholka_publish,
-        )
-        await edit_admin_approval(admin_message, post_id=post_id)
+        try:
+            await notify_user_approval(
+                bot,
+                user=user,
+                post=post,
+                publish_chat_id=publish_chat_id,
+                topic_id=topic_id,
+                published_message=published_message,
+                is_baraholka_publish=is_baraholka_publish,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Premium post #%s was published but user notification failed: %s",
+                post_id,
+                exc,
+            )
+
+        try:
+            await edit_admin_approval(admin_message, post_id=post_id)
+        except Exception as exc:
+            logger.warning(
+                "Premium post #%s was published but admin notice update failed: %s",
+                post_id,
+                exc,
+            )
         return "approved"
 
     except Exception as e:
@@ -128,7 +146,14 @@ async def reject_premium_request(
     post_id: int,
     admin_id: int,
 ) -> None:
-    db.reject_premium_post(post_id, admin_id, "Отклонено администратором")
+    if not db.reject_pending_premium_post(
+        post_id,
+        admin_id,
+        "Отклонено администратором",
+    ):
+        raise PremiumAdminWorkflowError(
+            f"Заявка #{post_id} уже обрабатывается или была обработана"
+        )
 
     try:
         await notify_user_rejection(bot, user=user, post=post)

@@ -54,6 +54,7 @@ router = Router()
 from services.catalog_limits import TELEGRAM_MEDIA_CAPTION_LIMIT, TELEGRAM_TEXT_MESSAGE_SAFE_LIMIT
 
 _GS_MEDIA_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
+_GS_PUBLISH_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
 
 
 def _gs_media_lock(message: Message) -> asyncio.Lock:
@@ -62,6 +63,15 @@ def _gs_media_lock(message: Message) -> asyncio.Lock:
     if lock is None:
         lock = asyncio.Lock()
         _GS_MEDIA_LOCKS[key] = lock
+    return lock
+
+
+def _gs_publish_lock(callback: CallbackQuery) -> asyncio.Lock:
+    key = (int(callback.message.chat.id), int(callback.from_user.id))
+    lock = _GS_PUBLISH_LOCKS.get(key)
+    if lock is None:
+        lock = asyncio.Lock()
+        _GS_PUBLISH_LOCKS[key] = lock
     return lock
 
 # ── description prompt overrides ─────────────────────────────────────────────
@@ -958,6 +968,19 @@ async def gs_confirm(callback: CallbackQuery, state: FSMContext):
         await callback.answer()
         return
 
+    lock = _gs_publish_lock(callback)
+    if lock.locked():
+        await callback.answer("Публикация уже выполняется.", show_alert=True)
+        return
+
+    async with lock:
+        if await state.get_state() != GS_CONFIRM:
+            await callback.answer()
+            return
+        await _gs_confirm_locked(callback, state)
+
+
+async def _gs_confirm_locked(callback: CallbackQuery, state: FSMContext):
     slug = callback.data.split(":", 2)[2]
     section_name, state_slug, _, payload, _ = await _get_gs(state)
     if slug != state_slug:
@@ -1218,6 +1241,23 @@ async def gs_media_input(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith("gs:media_submit:"))
 async def gs_media_submit(callback: CallbackQuery, state: FSMContext):
+    if await state.get_state() != GS_MEDIA:
+        await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+        return
+
+    lock = _gs_publish_lock(callback)
+    if lock.locked():
+        await callback.answer("Заявка уже отправляется.", show_alert=True)
+        return
+
+    async with lock:
+        if await state.get_state() != GS_MEDIA:
+            await callback.answer("Сессия устарела. Откройте раздел заново.", show_alert=True)
+            return
+        await _gs_media_submit_locked(callback, state)
+
+
+async def _gs_media_submit_locked(callback: CallbackQuery, state: FSMContext):
     slug = callback.data.split(":", 2)[2]
     section_name, state_slug, _, payload, media = await _get_gs(state)
     if slug != state_slug or await state.get_state() != GS_MEDIA:

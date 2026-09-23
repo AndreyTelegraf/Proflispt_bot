@@ -6,6 +6,7 @@ import sys
 import os
 import signal
 import fcntl
+import html
 from calendar import monthrange
 from aiogram import Bot, Dispatcher, Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -698,18 +699,20 @@ async def cmd_premium_posts(message: Message):
     response = f"📋 Ожидающие подтверждения премиум-посты ({len(pending_posts)}):\n\n"
 
     for i, post in enumerate(pending_posts[:10], 1):
-        user_info = f"{post['telegram_id']} ({post['username'] or 'без username'})"
-        response += f"{i}. **ID:** {post['id']}\n"
-        response += f"   **Пользователь:** {user_info}\n"
-        response += f"   **Тип:** {post['mode']}\n"
-        response += f"   **Медиа:** {post['media_type']}\n"
-        response += f"   **Создан:** {post['created_at']}\n"
-        response += f"   **Стоимость:** €{post['payment_amount']}\n\n"
+        user_info = html.escape(
+            f"{post['telegram_id']} ({post['username'] or 'без username'})"
+        )
+        response += f"{i}. <b>ID:</b> {post['id']}\n"
+        response += f"   <b>Пользователь:</b> {user_info}\n"
+        response += f"   <b>Тип:</b> {html.escape(str(post['mode']))}\n"
+        response += f"   <b>Медиа:</b> {html.escape(str(post['media_type']))}\n"
+        response += f"   <b>Создан:</b> {html.escape(str(post['created_at']))}\n"
+        response += f"   <b>Стоимость:</b> €{post['payment_amount']}\n\n"
 
     if len(pending_posts) > 10:
         response += f"... и еще {len(pending_posts) - 10} постов"
 
-    await message.answer(response, parse_mode="Markdown")
+    await message.answer(response, parse_mode="HTML")
 
 
 @router.message(Command("approve_payment"))
@@ -750,7 +753,7 @@ async def cmd_approve_payment(message: Message):
         else:
             admin_user_id = admin_user["id"]
 
-        success = db.approve_premium_post(post_id, admin_user_id, admin_notes)
+        success = db.approve_premium_post(post_id, admin_user_id)
 
         if success:
             await message.answer(

@@ -6,6 +6,7 @@ import json
 import logging
 
 _hs_media_locks: dict[str, asyncio.Lock] = {}
+_hs_publish_locks: dict[str, asyncio.Lock] = {}
 
 
 def _hs_media_lock(chat_id: int, user_id: int) -> asyncio.Lock:
@@ -13,6 +14,13 @@ def _hs_media_lock(chat_id: int, user_id: int) -> asyncio.Lock:
     if key not in _hs_media_locks:
         _hs_media_locks[key] = asyncio.Lock()
     return _hs_media_locks[key]
+
+
+def _hs_publish_lock(chat_id: int, user_id: int) -> asyncio.Lock:
+    key = f"{chat_id}:{user_id}"
+    if key not in _hs_publish_locks:
+        _hs_publish_locks[key] = asyncio.Lock()
+    return _hs_publish_locks[key]
 
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -1060,23 +1068,32 @@ async def hs_publish_free(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != HS_CONFIRM:
         await callback.answer()
         return
-    slug = callback.data.split(":", 2)[2]
-    _, _, _, _, media = await _get_hs(state)
-    try:
-        await _hs_free_publish(callback, state, slug, media)
-    except Exception as e:
-        logger.exception("Housing free publish failed: %s", e)
-        await state.clear()
+    lock = _hs_publish_lock(callback.message.chat.id, callback.from_user.id)
+    if lock.locked():
+        await callback.answer("Публикация уже выполняется.", show_alert=True)
+        return
 
-        msg = str(e).lower()
-        if "message caption is too long" in msg:
-            await callback.message.edit_text(
-                "Текст объявления слишком длинный для публикации с фото/видео. "
-                "Telegram ограничивает подпись к медиа. "
-                "Сократите текст или отправьте объявление без медиа."
-            )
-        else:
-            await callback.message.edit_text("Не удалось опубликовать объявление. Вернитесь к превью и попробуйте ещё раз.")
+    async with lock:
+        if await state.get_state() != HS_CONFIRM:
+            await callback.answer()
+            return
+        slug = callback.data.split(":", 2)[2]
+        _, _, _, _, media = await _get_hs(state)
+        try:
+            await _hs_free_publish(callback, state, slug, media)
+        except Exception as e:
+            logger.exception("Housing free publish failed: %s", e)
+            await state.clear()
+
+            msg = str(e).lower()
+            if "message caption is too long" in msg:
+                await callback.message.edit_text(
+                    "Текст объявления слишком длинный для публикации с фото/видео. "
+                    "Telegram ограничивает подпись к медиа. "
+                    "Сократите текст или отправьте объявление без медиа."
+                )
+            else:
+                await callback.message.edit_text("Не удалось опубликовать объявление. Вернитесь к превью и попробуйте ещё раз.")
     await callback.answer()
 
 
@@ -1086,6 +1103,19 @@ async def hs_publish_paid(callback: CallbackQuery, state: FSMContext):
         await callback.answer()
         return
 
+    lock = _hs_publish_lock(callback.message.chat.id, callback.from_user.id)
+    if lock.locked():
+        await callback.answer("Заявка уже отправляется.", show_alert=True)
+        return
+
+    async with lock:
+        if await state.get_state() != HS_CONFIRM:
+            await callback.answer()
+            return
+        await _hs_publish_paid_locked(callback, state)
+
+
+async def _hs_publish_paid_locked(callback: CallbackQuery, state: FSMContext):
     slug = callback.data.split(":", 2)[2]
     section_name, _, _, payload, media = await _get_hs(state)
     if not section_name:
@@ -1249,7 +1279,7 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
         return
 
     try:
-        await create_and_notify_baraholka_repost_request(
+        _post_id, created = await create_and_notify_baraholka_repost_request(
             callback.bot,
             db=db,
             source_post_id=source_post_id,
@@ -1263,8 +1293,14 @@ async def hs_upsell_baraholka(callback: CallbackQuery, state: FSMContext):
 
     b = InlineKeyboardBuilder()
     b.add(InlineKeyboardButton(text="В главное меню", callback_data="go:main"))
+    result_text = (
+        "Заявка на перепост в Барахолку отправлена на модерацию. "
+        "Администратор проверит публикацию и свяжется с вами."
+        if created
+        else "Заявка на перепост в Барахолку уже ожидает модерации."
+    )
     await callback.message.edit_text(
-        "Заявка на перепост в Барахолку отправлена на модерацию. Администратор проверит и свяжется с вами.",
+        result_text,
         reply_markup=b.as_markup(),
     )
     await callback.answer()

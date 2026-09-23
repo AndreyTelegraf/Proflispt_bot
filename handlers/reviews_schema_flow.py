@@ -1,6 +1,7 @@
 """Reviews FSM flow — content moderation without payment."""
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
@@ -27,6 +28,17 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 ADMIN_CHAT_ID = 336224597
+
+_RV_SUBMIT_LOCKS: dict[tuple[int, int], asyncio.Lock] = {}
+
+
+def _rv_submit_lock(callback: CallbackQuery) -> asyncio.Lock:
+    key = (int(callback.message.chat.id), int(callback.from_user.id))
+    lock = _RV_SUBMIT_LOCKS.get(key)
+    if lock is None:
+        lock = asyncio.Lock()
+        _RV_SUBMIT_LOCKS[key] = lock
+    return lock
 
 # FSM states
 RV_INPUT      = "rv_input"
@@ -483,8 +495,16 @@ async def rv_submit_no_media(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != RV_CONFIRM:
         await callback.answer()
         return
-    _, payload, _ = await _get_rv(state)
-    await _rv_do_submit(callback, state, payload, [])
+    lock = _rv_submit_lock(callback)
+    if lock.locked():
+        await callback.answer("Отзыв уже отправляется.", show_alert=True)
+        return
+    async with lock:
+        if await state.get_state() != RV_CONFIRM:
+            await callback.answer()
+            return
+        _, payload, _ = await _get_rv(state)
+        await _rv_do_submit(callback, state, payload, [])
 
 
 # ── media start ────────────────────────────────────────────────────────────────
@@ -563,8 +583,16 @@ async def rv_media_submit(callback: CallbackQuery, state: FSMContext):
     if await state.get_state() != RV_MEDIA:
         await callback.answer()
         return
-    _, payload, media = await _get_rv(state)
-    await _rv_do_submit(callback, state, payload, media)
+    lock = _rv_submit_lock(callback)
+    if lock.locked():
+        await callback.answer("Отзыв уже отправляется.", show_alert=True)
+        return
+    async with lock:
+        if await state.get_state() != RV_MEDIA:
+            await callback.answer()
+            return
+        _, payload, media = await _get_rv(state)
+        await _rv_do_submit(callback, state, payload, media)
 
 
 @router.callback_query(F.data == "rv:media_cancel")

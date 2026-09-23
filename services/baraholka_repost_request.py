@@ -75,7 +75,7 @@ async def create_and_notify_baraholka_repost_request(
     source_post_id: int,
     user: dict,
     admin_chat_id: int,
-) -> int:
+) -> tuple[int, bool]:
     source_post = db.get_premium_post(source_post_id)
     if not source_post:
         raise ValueError(f"Source premium post #{source_post_id} not found")
@@ -87,11 +87,15 @@ async def create_and_notify_baraholka_repost_request(
     if not repost_policy.allowed:
         raise ValueError(premium_repost_denied_text(repost_policy))
 
-    repost_id = db.create_baraholka_housing_repost_from_post(source_post_id, user["id"])
-    await notify_baraholka_repost_request(
-        bot,
-        post_id=repost_id,
-        source_post=source_post,
-        admin_chat_id=admin_chat_id,
+    repost_id, created = db.create_baraholka_housing_repost_from_post(
+        source_post_id,
+        user["id"],
     )
-    return repost_id
+    if created:
+        await notify_baraholka_repost_request(
+            bot,
+            post_id=repost_id,
+            source_post=source_post,
+            admin_chat_id=admin_chat_id,
+        )
+    return repost_id, created

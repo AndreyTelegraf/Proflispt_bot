@@ -16,19 +16,19 @@ async def create_and_notify_my_postings_baraholka_repost(
     source_post_id: int,
     user: dict,
     admin_chat_id: int,
-) -> bool:
+) -> tuple[bool, bool]:
     try:
-        await create_and_notify_baraholka_repost_request(
+        _post_id, created = await create_and_notify_baraholka_repost_request(
             bot,
             db=db,
             source_post_id=source_post_id,
             user=user,
             admin_chat_id=admin_chat_id,
         )
-        return True
+        return True, created
     except Exception as e:
         logger.exception("Baraholka my_postings repost failed: %s", e)
-        return False
+        return False, False
 
 async def handle_my_postings_baraholka_request(
     callback,
@@ -38,7 +38,7 @@ async def handle_my_postings_baraholka_request(
     user: dict,
     admin_chat_id: int,
 ) -> None:
-    ok = await create_and_notify_my_postings_baraholka_repost(
+    ok, created = await create_and_notify_my_postings_baraholka_repost(
         callback.bot,
         db=db,
         source_post_id=source_post_id,
@@ -52,8 +52,11 @@ async def handle_my_postings_baraholka_request(
         )
         return
 
-    await callback.message.edit_text(
-        "Заявка на перепост в Барахолку отправлена на модерацию. Администратор проверит и свяжется с вами."
+    text = (
+        "Заявка на перепост в Барахолку отправлена на модерацию. "
+        "Администратор проверит и свяжется с вами."
+        if created
+        else "Заявка на перепост в Барахолку уже ожидает модерации."
     )
+    await callback.message.edit_text(text)
     await callback.answer()
-

@@ -45,8 +45,8 @@ async def admin_approve_premium(callback: CallbackQuery):
             post_id=post_id,
             admin_id=callback.from_user.id,
         )
-    except PremiumAdminWorkflowError:
-        await callback.answer("Не удалось одобрить пост. Проверьте лог и попробуйте ещё раз.", show_alert=True)
+    except PremiumAdminWorkflowError as exc:
+        await callback.answer(str(exc), show_alert=True)
         return
 
     if result == "pin_disabled":
@@ -74,14 +74,18 @@ async def admin_reject_premium(callback: CallbackQuery):
         await callback.answer("🚫 Пользователь не найден.", show_alert=True)
         return
 
-    await reject_premium_request(
-        bot=callback.bot,
-        admin_message=callback.message,
-        post=post,
-        user=user,
-        post_id=post_id,
-        admin_id=callback.from_user.id,
-    )
+    try:
+        await reject_premium_request(
+            bot=callback.bot,
+            admin_message=callback.message,
+            post=post,
+            user=user,
+            post_id=post_id,
+            admin_id=callback.from_user.id,
+        )
+    except PremiumAdminWorkflowError as exc:
+        await callback.answer(str(exc), show_alert=True)
+        return
 
     await callback.answer("🚫 Пост отклонен!")
 
