@@ -726,47 +726,43 @@ async def cmd_approve_payment(message: Message):
 
     args = message.text.split()[1:]
     if len(args) < 1:
-        await message.answer("📝 Использование: /approve_payment <post_id> [заметки]")
+        await message.answer("📝 Использование: /approve_payment <post_id>")
         return
 
     try:
         post_id = int(args[0])
-        admin_notes = " ".join(args[1:]) if len(args) > 1 else None
+        from services.premium_admin_workflow import (
+            PremiumAdminWorkflowError,
+            approve_premium_request,
+            load_premium_post_and_user,
+        )
 
-        post = db.get_premium_post(post_id)
+        post, user = load_premium_post_and_user(post_id)
         if not post:
             await message.answer(f"🚫 Премиум-пост с ID {post_id} не найден.")
             return
-
-        if post["payment_status"] != "pending":
-            await message.answer(f"🚫 Пост {post_id} уже обработан (статус: {post['payment_status']}).")
+        if not user:
+            await message.answer(f"🚫 Пользователь для поста {post_id} не найден.")
             return
 
-        admin_user = db.get_user(message.from_user.id)
-        if not admin_user:
-            admin_user_id = db.create_user(
-                telegram_id=message.from_user.id,
-                username=message.from_user.username,
-                first_name=message.from_user.first_name,
-                last_name=message.from_user.last_name,
+        try:
+            result = await approve_premium_request(
+                bot=message.bot,
+                admin_message=None,
+                post=post,
+                user=user,
+                post_id=post_id,
+                admin_id=message.from_user.id,
             )
-        else:
-            admin_user_id = admin_user["id"]
+        except PremiumAdminWorkflowError as exc:
+            await message.answer(f"🚫 {exc}")
+            return
 
-        success = db.approve_premium_post(post_id, admin_user_id)
+        if result == "pin_disabled":
+            await message.answer(f"🚫 Закрепление #{post_id} отключено.")
+            return
 
-        if success:
-            await message.answer(
-                f"✅ Оплата для поста {post_id} подтверждена!\n\n"
-                f"**Пользователь:** {post['telegram_id']}\n"
-                f"**Тип:** {post['mode']}\n"
-                f"**Медиа:** {post['media_type']}\n"
-                f"**Стоимость:** €{post['payment_amount']}\n\n"
-                "Пост готов к публикации в канале.",
-                parse_mode="Markdown",
-            )
-        else:
-            await message.answer("🚫 Ошибка при подтверждении оплаты.")
+        await message.answer(f"✅ Пост #{post_id} одобрен и опубликован.")
 
     except ValueError:
         await message.answer("🚫 Неверный формат post_id. Используйте число.")

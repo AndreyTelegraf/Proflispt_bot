@@ -47,7 +47,7 @@ def load_premium_post_and_user(post_id: int) -> tuple[dict | None, dict | None]:
 async def approve_premium_request(
     *,
     bot,
-    admin_message,
+    admin_message=None,
     post: dict,
     user: dict,
     post_id: int,
@@ -122,14 +122,15 @@ async def approve_premium_request(
                 exc,
             )
 
-        try:
-            await edit_admin_approval(admin_message, post_id=post_id)
-        except Exception as exc:
-            logger.warning(
-                "Premium post #%s was published but admin notice update failed: %s",
-                post_id,
-                exc,
-            )
+        if admin_message is not None:
+            try:
+                await edit_admin_approval(admin_message, post_id=post_id)
+            except Exception as exc:
+                logger.warning(
+                    "Premium post #%s was published but admin notice update failed: %s",
+                    post_id,
+                    exc,
+                )
         return "approved"
 
     except Exception as e:
